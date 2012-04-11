@@ -26,7 +26,7 @@ default["glance"]["db_ipaddress"] = node["controller_ipaddress"]
 default["glance"]["api_ipaddress"] = node["controller_ipaddress"]
 default["glance"]["api_port"] = "9292"
 default["glance"]["registry_port"] = "9191"
-default["glance"]["images"] = [ "tty", "natty" ]
+default["glance"]["images"] = [ "tty" ]
 
 default["rabbit"]["rabbit_ipaddress"] = node["controller_ipaddress"]
 
