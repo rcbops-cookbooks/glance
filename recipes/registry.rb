@@ -77,6 +77,12 @@ service glance_registry_service do
   action :enable
 end
 
+execute "glance-manage db_sync" do
+        command "sudo -u glance glance-manage db_sync"
+        action :nothing
+        notifies :restart, resources(:service => glance_registry_service), :immediately
+end
+
 # Having to manually version the database because of Ubuntu bug
 # https://bugs.launchpad.net/ubuntu/+source/glance/+bug/981111
 execute "glance-manage version_control" do
@@ -84,12 +90,6 @@ execute "glance-manage version_control" do
   action :nothing
   not_if "sudo -u glance glance-manage db_version"
   notifies :run, resources(:execute => "glance-manage db_sync"), :immediately
-end
-
-execute "glance-manage db_sync" do
-        command "sudo -u glance glance-manage db_sync"
-        action :nothing
-        notifies :restart, resources(:service => glance_registry_service), :immediately
 end
 
 file "/var/lib/glance/glance.sqlite" do
