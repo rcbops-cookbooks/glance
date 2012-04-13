@@ -77,6 +77,15 @@ service glance_registry_service do
   action :enable
 end
 
+# Having to manually version the database because of Ubuntu bug
+# https://bugs.launchpad.net/ubuntu/+source/glance/+bug/981111
+execute "glance-manage version_control" do
+  command "sudo -u glance glance-manage version_control"
+  action :nothing
+  not_if "sudo -u glance glance-manage db_version"
+  notifies :run, resources(:execute => "glance-manage db_sync"), :immediately
+end
+
 execute "glance-manage db_sync" do
         command "sudo -u glance glance-manage db_sync"
         action :nothing
@@ -157,7 +166,7 @@ template "/etc/glance/glance-registry.conf" do
     :service_user => node["glance"]["service_user"],
     :service_pass => node["glance"]["service_pass"]
   )
-  notifies :run, resources(:execute => "glance-manage db_sync"), :immediately
+  notifies :run, resources(:execute => "glance-manage version_control"), :immediately
 end
 
 template "/etc/glance/glance-registry-paste.ini" do
