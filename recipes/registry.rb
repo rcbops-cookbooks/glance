@@ -85,8 +85,9 @@ end
 
 # Having to manually version the database because of Ubuntu bug
 # https://bugs.launchpad.net/ubuntu/+source/glance/+bug/981111
+# ******** THIS IS A VERY BAD IDEA.. ONLY USEFUL FOR OUR ALLINONE TEST CASE **********
 execute "glance-manage version_control" do
-  command "sudo -u glance glance-manage version_control"
+  command "sudo -u glance glance-manage version_control 0"
   action :nothing
   not_if "sudo -u glance glance-manage db_version"
   notifies :run, resources(:execute => "glance-manage db_sync"), :immediately
