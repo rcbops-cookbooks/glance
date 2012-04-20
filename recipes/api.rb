@@ -69,7 +69,47 @@ template "/etc/glance/policy.json" do
     File.exists?("/etc/glance/policy.json")
   end
 end
- 
+
+if Chef::Config[:solo]
+  Chef::Log.warn("This recipe uses search. Chef Solo does not support search.")
+else 
+  # Lookup mysql ip address
+  mysql_server, something, result_count = Chef::Search::Query.new.search(:node, "roles:mysql-master AND chef_environment:#{node.chef_environment}")
+  if result_count > 0
+    Chef::Log.info("mysql: using search")
+    db_ip_address = mysql_server[0]['mysql']['bind_address']
+  else
+    Chef::Log.info("mysql: NOT using search")
+    db_ip_address = node['mysql']['bind_address']
+  end
+
+  # Lookup rabbit ip address
+  rabbit, something, result_count = Chef::Search::Query.new.search(:node, "roles:rabbitmq-server AND chef_environment:#{node.chef_environment}")
+  if result_count > 0
+    Chef::Log.info("rabbitmq: using search")
+    rabbit_ip_address = rabbit[0]['ipaddress']
+  else
+    Chef::Log.info("rabbitmq: NOT using search")
+    rabbit_ip_address = node['ipaddress']
+  end
+
+  # Lookup keystone api ip address
+  keystone, something, result_count = Chef::Search::Query.new.search(:node, "roles:keystone AND chef_environment:#{node.chef_environment}")
+  if result_count > 0
+    Chef::Log.info("keystone: using search")
+    keystone_api_ip = keystone[0]['keystone']['api_ipaddress']
+    keystone_service_port = keystone[0]['keystone']['service_port']
+    keystone_admin_port = keystone[0]['keystone']['admin_port']
+    keystone_admin_token = keystone[0]['keystone']['admin_token']
+  else
+    Chef::Log.info("keystone: NOT using search")
+    keystone_api_ip = node['keystone']['api_ipaddress']
+    keystone_service_port = node['keystone']['service_port']
+    keystone_admin_port = node['keystone']['admin_port']
+    keystone_admin_token = node['keystone']['admin_token']
+  end
+end
+
 template "/etc/glance/glance-api.conf" do
   source "glance-api.conf.erb"
   owner "root"
@@ -77,13 +117,13 @@ template "/etc/glance/glance-api.conf" do
   mode "0644"
   variables(
     "api_port" => node["glance"]["api_port"],
-    "keystone_api_ipaddress" => node["keystone"]["api_ipaddress"],
     "registry_port" => node["glance"]["registry_port"],
     "ip_address" => node["controller_ipaddress"],
-    "rabbit_ipaddress" => node["rabbit"]["rabbit_ipaddress"],
-    "service_port" => node["keystone"]["service_port"],
-    "admin_port" => node["keystone"]["admin_port"],
-    "admin_token" => node["keystone"]["admin_token"]
+    "rabbit_ipaddress" => rabbit_ip_address,
+    "keystone_api_ipaddress" => keystone_api_ip,
+    "service_port" => keystone_service_port,
+    "admin_port" => keystone_admin_port,
+    "admin_token" => keystone_admin_token
   )
   notifies :restart, resources(:service => glance_api_service), :immediately
 end
@@ -95,10 +135,10 @@ template "/etc/glance/glance-api-paste.ini" do
   mode "0644"
   variables(
     "ip_address" => node["controller_ipaddress"],
-    "keystone_api_ipaddress" => node["keystone"]["api_ipaddress"],
-    "service_port" => node["keystone"]["service_port"],
-    "admin_port" => node["keystone"]["admin_port"],
-    "admin_token" => node["keystone"]["admin_token"],
+    "keystone_api_ipaddress" => keystone_api_ip,
+    "service_port" => keystone_service_port,
+    "admin_port" => keystone_admin_port,
+    "admin_token" => keystone_admin_token,
     "service_tenant_name" => node["glance"]["service_tenant_name"],
     "service_user" => node["glance"]["service_user"],
     "service_pass" => node["glance"]["service_pass"]
@@ -114,20 +154,20 @@ template "/etc/glance/glance-scrubber.conf" do
   variables(
     "user" => node["glance"]["db_user"],
     "passwd" => node["glance"]["db_passwd"],
-    "keystone_api_ipaddress" => node["keystone"]["api_ipaddress"],
+    "keystone_api_ipaddress" => keystone_api_ip,
     "ip_address" => node["controller_ipaddress"],
     "db_name" => node["glance"]["db"],
-    "db_ipaddress" => node["glance"]["db_ipaddress"]
+    "db_ipaddress" => db_ip_address
   )
 end
 
 # Register Image Service
 keystone_register "Register Image Service" do
-  auth_host node["keystone"]["api_ipaddress"]
-  auth_port node["keystone"]["admin_port"]
+  auth_host keystone_api_ip
+  auth_port keystone_admin_port
   auth_protocol "http"
   api_ver "/v2.0"
-  auth_token node["keystone"]["admin_token"]
+  auth_token keystone_admin_token
   service_name "glance"
   service_type "image"
   service_description "Glance Image Service"
@@ -140,11 +180,11 @@ node["glance"]["publicURL"] = node["glance"]["adminURL"]
 
 # Register Image Endpoint
 keystone_register "Register Image Endpoint" do
-  auth_host node["keystone"]["api_ipaddress"]
-  auth_port node["keystone"]["admin_port"]
+  auth_host keystone_api_ip
+  auth_port keystone_admin_port
   auth_protocol "http"
   api_ver "/v2.0"
-  auth_token node["keystone"]["admin_token"]
+  auth_token keystone_admin_token
   service_type "image"
   endpoint_region "RegionOne"
   endpoint_adminurl node["glance"]["adminURL"]
@@ -154,7 +194,7 @@ keystone_register "Register Image Endpoint" do
 end
 
 # This is a dirty hack for now.. NEED TO BE FIXED
-keystone_auth_url = "http://#{node["keystone"]["api_ipaddress"]}:#{node["keystone"]["admin_port"]}/v2.0"
+keystone_auth_url = "http://#{keystone_api_ip}:#{keystone_admin_port}/v2.0"
 #extra_opts = "--username=admin --password=secrete --tenant=openstack --auth_url=#{keystone_auth_url}"
 # new format for renamed command lines
 extra_opts = "--os_username=admin --os_password=secrete --os_tenant=openstack --os_auth_url=#{keystone_auth_url}"
