@@ -32,6 +32,7 @@ default["glance"]["service_user"] = "glance"
 default["glance"]["service_pass"] = "vARxre7K"
 default["glance"]["service_role"] = "admin"
 
+default["glance"]["image_upload"] = false
 default["glance"]["image"]["oneiric"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.10-server-uec-amd64-multinic.tar.gz"
 default["glance"]["image"]["natty"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
 default["glance"]["image"]["maverick"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-10.10-server-uec-amd64-multinic.tar.gz"
