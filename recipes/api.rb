@@ -112,7 +112,7 @@ else
   end
 
   # Lookup glance::registry ip address
-  registry, start, arbitrary_value = search(:node, "roles:glance-registry AND chef_environment:#{node.chef_environment}")
+  registry = search(:node, "roles:glance-registry AND chef_environment:#{node.chef_environment}")
   if registry.length > 0
     Chef::Log.info("glance::api/registry: using search")
     registry_ip_address = registry[0]["glance"]["registry"]["ip_address"]

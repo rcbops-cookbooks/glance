@@ -189,7 +189,7 @@ template "/etc/glance/glance-registry.conf" do
     "db_ip_address" => db_ip_address,
     "db_user" => node["glance"]["db"]["user"],
     "db_password" => node["glance"]["db"]["password"],
-    "db_name" => node["glance"]["db"]["name"],
+    "db_name" => node["glance"]["db"]["name"]
   )
   notifies :run, resources(:execute => "glance-manage version_control"), :immediately
 end
