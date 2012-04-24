@@ -60,19 +60,24 @@ None
 Attributes 
 ==========
 
-* `glance["db"]` - name of glance database
-* `glance["db_user"]` - username for glance database access
-* `glance["db_passwd"]` - password for glance database access
-* `glance["api_ipaddress"]` - ip address for the glance api to bind to
-* `glance["api_port"]` - port for the glance api to bind to
-* `glance["registry_port"]` - ip address for the glance registry to bind to
-* `glance["images"]` - default list of images to upload to the glance repository as part of the install
-
+* `glance["db"]["name"]` - name of glance database
+* `glance["db"]["user"]` - username for glance database access
+* `glance["db"]["password"]` - password for glance database access
+* `glance["api"]["ip_address"]` - ip address to use for communicating with the glance api
+* `glance["api"]["bind_address"]` - ip address for the glance api to bind to
+* `glance["api"]["port"]` - port for the glance api to bind to
+* `glance["api"]["adminURL"]` - used when registering image endpoint with keystone
+* `glance["api"]["internalURL"]` - used when registering image endpoint with keystone
+* `glance["api"]["publicURL"]` - used when registering image endpoint with keystone
+* `glance["registry"]["ip_address"]` - ip address to use for communicating with the glance registry
+* `glance["registry"]["bind_address"]` - ip address for the glance registry to bind to
+* `glance["registry"]["port"]` - ip address for the glance port to bind to
 * `glance["service_tenant_name"]` - tenant name used by glance when interacting with keystone - used in the api and registry paste.ini files
 * `glance["service_user"]` - user name used by glance when interacting with keystone -  used in the api and registry paste.ini files
 * `glance["service_pass"]` - user password used by glance when interacting with keystone - used in the api and registry paste.ini files
 * `glance["service_role"]` - user role used by glance when interacting with keystone - used in the api and registry paste.ini files
-
+* `glance["image_upload"]` - toggles whether to automatically upload images in the `glance["images"]` array
+* `glance["images"]` - default list of images to upload to the glance repository as part of the install
 * `glance["image]["<imagename>"]` - url location of the <imagename> image. There can be multiple instances of this line to define multiple imagess (eg natty, maverick, fedora17 etc)
 --- example `glance["image]["natty"]` - "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
 
