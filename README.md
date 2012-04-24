@@ -80,24 +80,24 @@ Attributes
 Templates
 =========
 
-* glance-api-paste.ini.erb - paste config for glance-api middleware
-* glance-api.conf.erb - config file for glance-api server
-* glance-registry-paste.ini.erb - paste config for glance-registry middleware
-* glance-registry.conf.erb - config file for glance-registry server
-* glance-scrubber.conf.erb - config file for glance image scrubber service
-* policy.json.erb - for configuration of acls for glance api server
+* `glance-api-paste.ini.erb` - paste config for glance-api middleware
+* `glance-api.conf.erb` - config file for glance-api server
+* `glance-registry-paste.ini.erb` - paste config for glance-registry middleware
+* `glance-registry.conf.erb` - config file for glance-registry server
+* `glance-scrubber.conf.erb` - config file for glance image scrubber service
+* `policy.json.erb` - for configuration of acls for glance api server
 
 
 License and Author
 ==================
 
-Author:: Justin Shepherd (<justin.shepherd@rackspace.com>)
-Author:: Jason Cannavale (<jason.cannavale@rackspace.com>)
-Author:: Ron Pedde (<ron.pedde@rackspace.com>)
-Author:: Joseph Breu (<joseph.breu@rackspace.com>)
-Author:: William Kelly (<william.kelly@RACKSPACE.COM>)
-Author:: Darren Birkett (<Darren.Birkett@rackspace.co.uk>)
-Author:: Evan Callicoat (<evan.callicoat@RACKSPACE.COM>)
+Author:: Justin Shepherd (<justin.shepherd@rackspace.com>)  
+Author:: Jason Cannavale (<jason.cannavale@rackspace.com>)  
+Author:: Ron Pedde (<ron.pedde@rackspace.com>)  
+Author:: Joseph Breu (<joseph.breu@rackspace.com>)  
+Author:: William Kelly (<william.kelly@rackspace.com>)  
+Author:: Darren Birkett (<darren.birkett@rackspace.co.uk>)  
+Author:: Evan Callicoat (<evan.callicoat@rackspace.com>)  
 
 Copyright 2012, Rackspace, Inc.
 
