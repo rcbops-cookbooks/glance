@@ -196,13 +196,14 @@ end
 if node["glance"]["image_upload"]
   keystone_auth_url = "http://#{keystone_api_ip}:#{keystone_admin_port}/v2.0"
 
+  # TODO(breu): the environment needs to be derived from a search
   node["glance"]["images"].each do |img|
     bash "default image setup for #{img.to_s}" do
       cwd "/tmp"
       user "root"
       environment ({"OS_USERNAME" => "admin",
                     "OS_PASSWORD" => "secrete",
-                    "OS_TENANT_NAME" => "openstack",
+                    "OS_TENANT_NAME" => "admin",
                     "OS_AUTH_URL" => keystone_auth_url})
       code <<-EOH
         set -e
