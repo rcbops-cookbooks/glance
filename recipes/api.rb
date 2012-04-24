@@ -76,33 +76,33 @@ else
   # Lookup mysql ip address
   mysql_server, start, arbitary_value = Chef::Search::Query.new.search(:node, "roles:mysql-master AND chef_environment:#{node.chef_environment}")
   if mysql_server.length > 0
-    Chef::Log.info("mysql: using search")
+    Chef::Log.info("api/mysql: using search")
     db_ip_address = mysql_server[0]['mysql']['bind_address']
   else
-    Chef::Log.info("mysql: NOT using search")
+    Chef::Log.info("api/mysql: NOT using search")
     db_ip_address = node['mysql']['bind_address']
   end
 
   # Lookup rabbit ip address
   rabbit, start, arbitary_value = Chef::Search::Query.new.search(:node, "roles:rabbitmq-server AND chef_environment:#{node.chef_environment}")
   if rabbit.length > 0
-    Chef::Log.info("rabbitmq: using search")
+    Chef::Log.info("api/rabbitmq: using search")
     rabbit_ip_address = rabbit[0]['ipaddress']
   else
-    Chef::Log.info("rabbitmq: NOT using search")
+    Chef::Log.info("api/rabbitmq: NOT using search")
     rabbit_ip_address = node['ipaddress']
   end
 
   # Lookup keystone api ip address
   keystone, start, arbitary_value = Chef::Search::Query.new.search(:node, "roles:keystone AND chef_environment:#{node.chef_environment}")
   if keystone.length > 0
-    Chef::Log.info("keystone: using search")
+    Chef::Log.info("api/keystone: using search")
     keystone_api_ip = keystone[0]['keystone']['api_ipaddress']
     keystone_service_port = keystone[0]['keystone']['service_port']
     keystone_admin_port = keystone[0]['keystone']['admin_port']
     keystone_admin_token = keystone[0]['keystone']['admin_token']
   else
-    Chef::Log.info("keystone: NOT using search")
+    Chef::Log.info("api/keystone: NOT using search")
     keystone_api_ip = node['keystone']['api_ipaddress']
     keystone_service_port = node['keystone']['service_port']
     keystone_admin_port = node['keystone']['admin_port']
