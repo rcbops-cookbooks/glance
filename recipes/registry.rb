@@ -79,13 +79,13 @@ end
 
 mysql_database_user node["glance"]["db"]["username"] do
   connection connection_info
-  password node["glance"]["db]["password"]
+  password node["glance"]["db"]["password"]
   action :create
 end
 
-mysql_database_user node["glance"]["db]["username"] do
+mysql_database_user node["glance"]["db"]["username"] do
   connection connection_info
-  password node["glance"]["db]["password"]
+  password node["glance"]["db"]["password"]
   database_name node["glance"]["db"]["name"]
   host '%'
   privileges [:all]
