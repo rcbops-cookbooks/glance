@@ -19,20 +19,29 @@
 
 default["controller_ipaddress"] = node["ipaddress"]
 
-default["glance"]["db"] = "glance"
-default["glance"]["db_user"] = "glance"
-default["glance"]["db_passwd"] = "glance"
-default["glance"]["api_ipaddress"] = node["controller_ipaddress"]
-default["glance"]["api_port"] = "9292"
-default["glance"]["registry_port"] = "9191"
-default["glance"]["images"] = [ "tty" ]
+default["glance"]["api"]["bind_address"] = "0.0.0.0"
+default["glance"]["api"]["port"] = "9292"
+default["glance"]["api"]["ip_address"] = node["ipaddress"]
+default["glance"]["api"]["adminURL"] = "http://#{node["glance"]["api"]["ip_address"]}:#{node["glance"]["api"]["port"]}/v1"
+default["glance"]["api"]["internalURL"] = node["glance"]["api"]["adminURL"]
+default["glance"]["api"]["publicURL"] = node["glance"]["api"]["adminURL"]
 
+default["glance"]["registry"]["bind_address"] = "0.0.0.0"
+default["glance"]["registry"]["port"] = "9191"
+default["glance"]["registry"]["ip_address"] = node["ipaddress"]
+
+default["glance"]["db"]["name"] = "glance"
+default["glance"]["db"]["username"] = "glance"
+default["glance"]["db"]["password"] = "glance"
+
+# TODO: These may need to be glance-registry specific.. and looked up by glance-api
 default["glance"]["service_tenant_name"] = "service"
 default["glance"]["service_user"] = "glance"
 default["glance"]["service_pass"] = "vARxre7K"
 default["glance"]["service_role"] = "admin"
 
 default["glance"]["image_upload"] = false
+default["glance"]["images"] = [ "tty" ]
 default["glance"]["image"]["oneiric"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.10-server-uec-amd64-multinic.tar.gz"
 default["glance"]["image"]["natty"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
 default["glance"]["image"]["maverick"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-10.10-server-uec-amd64-multinic.tar.gz"

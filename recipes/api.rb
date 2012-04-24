@@ -74,7 +74,7 @@ if Chef::Config[:solo]
   Chef::Log.warn("This recipe uses search. Chef Solo does not support search.")
 else 
   # Lookup mysql ip address
-  mysql_server, start, arbitary_value = Chef::Search::Query.new.search(:node, "roles:mysql-master AND chef_environment:#{node.chef_environment}")
+  mysql_server, start, arbitrary_value = Chef::Search::Query.new.search(:node, "roles:mysql-master AND chef_environment:#{node.chef_environment}")
   if mysql_server.length > 0
     Chef::Log.info("mysql: using search")
     db_ip_address = mysql_server[0]['mysql']['bind_address']
@@ -84,7 +84,7 @@ else
   end
 
   # Lookup rabbit ip address
-  rabbit, start, arbitary_value = Chef::Search::Query.new.search(:node, "roles:rabbitmq-server AND chef_environment:#{node.chef_environment}")
+  rabbit, start, arbitrary_value = Chef::Search::Query.new.search(:node, "roles:rabbitmq-server AND chef_environment:#{node.chef_environment}")
   if rabbit.length > 0
     Chef::Log.info("rabbitmq: using search")
     rabbit_ip_address = rabbit[0]['ipaddress']
@@ -94,19 +94,33 @@ else
   end
 
   # Lookup keystone api ip address
-  keystone, start, arbitary_value = Chef::Search::Query.new.search(:node, "roles:keystone AND chef_environment:#{node.chef_environment}")
+  keystone, start, arbitrary_value = Chef::Search::Query.new.search(:node, "roles:keystone AND chef_environment:#{node.chef_environment}")
   if keystone.length > 0
     Chef::Log.info("keystone: using search")
     keystone_api_ip = keystone[0]['keystone']['api_ipaddress']
     keystone_service_port = keystone[0]['keystone']['service_port']
     keystone_admin_port = keystone[0]['keystone']['admin_port']
+    # TODO: keystone_admin_token should be deleted from this file
     keystone_admin_token = keystone[0]['keystone']['admin_token']
   else
     Chef::Log.info("keystone: NOT using search")
     keystone_api_ip = node['keystone']['api_ipaddress']
     keystone_service_port = node['keystone']['service_port']
     keystone_admin_port = node['keystone']['admin_port']
+    # TODO: keystone_admin_token should be deleted from this file
     keystone_admin_token = node['keystone']['admin_token']
+  end
+
+  # Lookup glance::registry ip address
+  registry, start, arbitrary_value = search(:node, "roles:glance-registry AND chef_environment:#{node.chef_environment}")
+  if registry.length > 0
+    Chef::Log.info("glance::api/registry: using search")
+    registry_ip_address = registry[0]["glance"]["registry"]["ip_address"]
+    registry_port = registry[0]["glance"]["registry"]["port"]
+  else
+    Chef::Log.info("glance::api/registry: NOT using search")
+    registry_ip_address = node["glance"]["registry"]["ip_address"]
+    registry_port = node["glance"]["registry"]["port"]
   end
 end
 
@@ -116,14 +130,11 @@ template "/etc/glance/glance-api.conf" do
   group "root"
   mode "0644"
   variables(
-    "api_port" => node["glance"]["api_port"],
-    "registry_port" => node["glance"]["registry_port"],
-    "ip_address" => node["controller_ipaddress"],
-    "rabbit_ipaddress" => rabbit_ip_address,
-    "keystone_api_ipaddress" => keystone_api_ip,
-    "service_port" => keystone_service_port,
-    "admin_port" => keystone_admin_port,
-    "admin_token" => keystone_admin_token
+    "api_bind_address" => node["glance"]["api"]["bind_address"],
+    "api_bind_port" => node["glance"]["api"]["port"],
+    "registry_ip_address" => registry_ip_address,
+    "registry_port" => registry_port,
+    "rabbit_ipaddress" => rabbit_ip_address
   )
   notifies :restart, resources(:service => glance_api_service), :immediately
 end
@@ -134,11 +145,10 @@ template "/etc/glance/glance-api-paste.ini" do
   group "root"
   mode "0644"
   variables(
-    "ip_address" => node["controller_ipaddress"],
     "keystone_api_ipaddress" => keystone_api_ip,
-    "service_port" => keystone_service_port,
-    "admin_port" => keystone_admin_port,
-    "admin_token" => keystone_admin_token,
+    "keystone_service_port" => keystone_service_port,
+    "keystone_admin_port" => keystone_admin_port,
+    "keystone_admin_token" => keystone_admin_token,
     "service_tenant_name" => node["glance"]["service_tenant_name"],
     "service_user" => node["glance"]["service_user"],
     "service_pass" => node["glance"]["service_pass"]
@@ -152,13 +162,16 @@ template "/etc/glance/glance-scrubber.conf" do
   group "root"
   mode "0644"
   variables(
-    "user" => node["glance"]["db_user"],
-    "passwd" => node["glance"]["db_passwd"],
-    "keystone_api_ipaddress" => keystone_api_ip,
-    "ip_address" => node["controller_ipaddress"],
-    "db_name" => node["glance"]["db"],
-    "db_ipaddress" => db_ip_address
+    "registry_ip_address" => registry_ip_address,
+    "registry_port" => registry_port
   )
+end
+
+template "/etc/glance/glance-scrubber-paste.ini" do
+  source "glance-scrubber-paste.ini.erb"
+  owner "root"
+  group "root"
+  mode "0644"
 end
 
 # Register Image Service
@@ -174,10 +187,6 @@ keystone_register "Register Image Service" do
   action :create_service
 end
 
-node["glance"]["adminURL"] = "http://#{node["glance"]["api_ipaddress"]}:#{node["glance"]["api_port"]}/v1"
-node["glance"]["internalURL"] = node["glance"]["adminURL"]
-node["glance"]["publicURL"] = node["glance"]["adminURL"]
-
 # Register Image Endpoint
 keystone_register "Register Image Endpoint" do
   auth_host keystone_api_ip
@@ -187,9 +196,9 @@ keystone_register "Register Image Endpoint" do
   auth_token keystone_admin_token
   service_type "image"
   endpoint_region "RegionOne"
-  endpoint_adminurl node["glance"]["adminURL"]
-  endpoint_internalurl node["glance"]["internalURL"]
-  endpoint_publicurl node["glance"]["publicURL"]
+  endpoint_adminurl node["glance"]["api"]["adminURL"]
+  endpoint_internalurl node["glance"]["api"]["internalURL"]
+  endpoint_publicurl node["glance"]["api"]["publicURL"]
   action :create_endpoint
 end
 
