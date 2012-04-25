@@ -73,20 +73,20 @@ end
 connection_info = {:host => db_ip_address, :username => "root", :password => db_root_password}
 mysql_database "create glance database" do
   connection connection_info
-  database_name node["glance"]["db"]
+  database_name node["glance"]["db"]["name"]
   action :create
 end
 
-mysql_database_user node["glance"]["db_user"] do
+mysql_database_user node["glance"]["db"]["username"] do
   connection connection_info
-  password node["glance"]["db_passwd"]
+  password node["glance"]["db"]["password"]
   action :create
 end
 
-mysql_database_user node["glance"]["db_user"] do
+mysql_database_user node["glance"]["db"]["username"] do
   connection connection_info
-  password node["glance"]["db_passwd"]
-  database_name node["glance"]["db"]
+  password node["glance"]["db"]["password"]
+  database_name node["glance"]["db"]["name"]
   host '%'
   privileges [:all]
   action :grant 
@@ -111,14 +111,12 @@ end
 
 execute "glance-manage db_sync" do
         command "sudo -u glance glance-manage db_sync"
-#        environment 'AUTO_REGISTER_DB_MODELS' => "true"
         action :nothing
         notifies :restart, resources(:service => glance_registry_service), :immediately
 end
 
 # Having to manually version the database because of Ubuntu bug
 # https://bugs.launchpad.net/ubuntu/+source/glance/+bug/981111
-# ******** THIS IS A VERY BAD IDEA.. ONLY USEFUL FOR OUR ALLINONE TEST CASE **********
 execute "glance-manage version_control" do
   command "sudo -u glance glance-manage version_control 0"
   action :nothing
@@ -186,22 +184,14 @@ template "/etc/glance/glance-registry.conf" do
   group "root"
   mode "0644"
   variables(
-    :registry_port => node["glance"]["registry_port"],
-    :user => node["glance"]["db_user"],
-    :passwd => node["glance"]["db_passwd"],
-    :ip_address => node["controller_ipaddress"],
-    :db_name => node["glance"]["db"],
-    :db_ipaddress => db_ip_address,
-    :keystone_api_ipaddress => keystone_api_ip,
-    :service_port => keystone_service_port,
-    :admin_port => keystone_admin_port,
-    :admin_token => keystone_admin_token,
-    :service_tenant_name => node["glance"]["service_tenant_name"],
-    :service_user => node["glance"]["service_user"],
-    :service_pass => node["glance"]["service_pass"]
+    "registry_bind_address" => node["glance"]["registry"]["bind_address"],
+    "registry_port" => node["glance"]["registry"]["port"],
+    "db_ip_address" => db_ip_address,
+    "db_user" => node["glance"]["db"]["user"],
+    "db_password" => node["glance"]["db"]["password"],
+    "db_name" => node["glance"]["db"]["name"]
   )
   notifies :run, resources(:execute => "glance-manage version_control"), :immediately
-  # notifies :run, resources(:execute => "glance-manage db_sync"), :immediately
 end
 
 template "/etc/glance/glance-registry-paste.ini" do
@@ -210,14 +200,12 @@ template "/etc/glance/glance-registry-paste.ini" do
   group "root"
   mode "0644"
   variables(
-    :ip_address => node["controller_ipaddress"],
-    :keystone_api_ipaddress => keystone_api_ip,
-    :service_port => keystone_service_port,
-    :admin_port => keystone_admin_port,
-    :admin_token => keystone_admin_token,
-    :service_tenant_name => node["glance"]["service_tenant_name"],
-    :service_user => node["glance"]["service_user"],
-    :service_pass => node["glance"]["service_pass"]
+    "keystone_api_ipaddress" => keystone_api_ip,
+    "keystone_service_port" => keystone_service_port,
+    "keystone_admin_port" => keystone_admin_port,
+    "service_tenant_name" => node["glance"]["service_tenant_name"],
+    "service_user" => node["glance"]["service_user"],
+    "service_pass" => node["glance"]["service_pass"]
   )
   notifies :restart, resources(:service => glance_registry_service), :immediately
 end

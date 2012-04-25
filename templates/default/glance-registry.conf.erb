@@ -6,7 +6,7 @@ verbose = True
 debug = False
 
 # Address to bind the registry server
-bind_host = 0.0.0.0
+bind_host = <%= @registry_bind_address %>
 
 # Port the bind the registry server to
 bind_port = <%= @registry_port %>
@@ -21,7 +21,7 @@ backlog = 4096
 # SQLAlchemy connection string for the reference implementation
 # registry server. Any valid SQLAlchemy connection string is fine.
 # See: http://www.sqlalchemy.org/docs/05/reference/sqlalchemy/connections.html#sqlalchemy.create_engine
-sql_connection = mysql://<%= @user %>:<%= @passwd %>@<%= @db_ipaddress %>/<%= @db_name %>
+sql_connection = mysql://<%= @db_user %>:<%= @db_password %>@<%= @db_ip_address %>/<%= @db_name %>
 
 # Period in seconds after which SQLAlchemy should reestablish its connection
 # to the database.
