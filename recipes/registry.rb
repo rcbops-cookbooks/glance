@@ -187,7 +187,7 @@ template "/etc/glance/glance-registry.conf" do
     "registry_bind_address" => node["glance"]["registry"]["bind_address"],
     "registry_port" => node["glance"]["registry"]["port"],
     "db_ip_address" => db_ip_address,
-    "db_user" => node["glance"]["db"]["user"],
+    "db_user" => node["glance"]["db"]["username"],
     "db_password" => node["glance"]["db"]["password"],
     "db_name" => node["glance"]["db"]["name"]
   )
