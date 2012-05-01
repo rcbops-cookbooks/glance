@@ -17,12 +17,12 @@
 # limitations under the License.
 #
 
-default["controller_ipaddress"] = node["ipaddress"]
-
 default["glance"]["api"]["bind_address"] = "0.0.0.0"
 default["glance"]["api"]["port"] = "9292"
 default["glance"]["api"]["ip_address"] = node["ipaddress"]
-default["glance"]["api"]["adminURL"] = "http://#{node["glance"]["api"]["ip_address"]}:#{node["glance"]["api"]["port"]}/v1"
+default["glance"]["api"]["protocol"] = "http"
+default["glance"]["api"]["version"] = "v1"
+default["glance"]["api"]["adminURL"] = "#{node["glance"]["api"]["protocol"]}://#{node["glance"]["api"]["ip_address"]}:#{node["glance"]["api"]["port"]}/#{node["glance"]["api"]["version"]}"
 default["glance"]["api"]["internalURL"] = node["glance"]["api"]["adminURL"]
 default["glance"]["api"]["publicURL"] = node["glance"]["api"]["adminURL"]
 
