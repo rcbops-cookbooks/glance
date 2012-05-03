@@ -207,6 +207,7 @@ if node["glance"]["image_upload"]
 
   # TODO(breu): the environment needs to be derived from a search
   node["glance"]["images"].each do |img|
+    Chef::Log.info("Checking to see if #{img.to_s}-image should be uploaded.")
     bash "default image setup for #{img.to_s}" do
       cwd "/tmp"
       user "root"
@@ -240,7 +241,7 @@ if node["glance"]["image_upload"]
         rid=$(glance --silent-upload add name="${image_name}-initrd" disk_format=ari container_format=ari < ${ramdisk} | cut -d: -f2 | sed 's/ //')
         glance --silent-upload add name="#{img.to_s}-image" disk_format=ami container_format=ami kernel_id=$kid ramdisk_id=$rid < ${kernel}
       EOH
-      not_if "glance index | grep #{img.to_s}-image"
+      not_if "glance -f index | grep #{img.to_s}-image"
     end
   end
 end
