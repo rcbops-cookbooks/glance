@@ -100,15 +100,17 @@ else
     keystone_api_ip = keystone[0]['keystone']['api_ipaddress']
     keystone_service_port = keystone[0]['keystone']['service_port']
     keystone_admin_port = keystone[0]['keystone']['admin_port']
-    # TODO: keystone_admin_token should be deleted from this file
     keystone_admin_token = keystone[0]['keystone']['admin_token']
+    admin_password = keystone[0]['keystone']['users']['admin']['password']
+    admin_tenant_name = keystone[0]['keystone']['users']['admin']['default_tenant']
   else
     Chef::Log.info("api/keystone: NOT using search")
     keystone_api_ip = node['keystone']['api_ipaddress']
     keystone_service_port = node['keystone']['service_port']
     keystone_admin_port = node['keystone']['admin_port']
-    # TODO: keystone_admin_token should be deleted from this file
     keystone_admin_token = node['keystone']['admin_token']
+    admin_password = node['keystone']['users']['admin']['password']
+    admin_tenant_name = node['keystone']['users']['admin']['default_tenant']
   end
 
   # Lookup glance::registry ip address
@@ -206,14 +208,15 @@ if node["glance"]["image_upload"]
   keystone_auth_url = "http://#{keystone_api_ip}:#{keystone_admin_port}/v2.0"
 
   # TODO(breu): the environment needs to be derived from a search
+  # TODO(shep): this whole bit is super dirty.. and needs some love.
   node["glance"]["images"].each do |img|
     Chef::Log.info("Checking to see if #{img.to_s}-image should be uploaded.")
     bash "default image setup for #{img.to_s}" do
       cwd "/tmp"
       user "root"
       environment ({"OS_USERNAME" => "admin",
-                    "OS_PASSWORD" => "secrete",
-                    "OS_TENANT_NAME" => "admin",
+                    "OS_PASSWORD" => admin_password,
+                    "OS_TENANT_NAME" => admin_tenant_name,
                     "OS_AUTH_URL" => keystone_auth_url})
       code <<-EOH
         set -e
@@ -241,7 +244,7 @@ if node["glance"]["image_upload"]
         rid=$(glance --silent-upload add name="${image_name}-initrd" disk_format=ari container_format=ari < ${ramdisk} | cut -d: -f2 | sed 's/ //')
         glance --silent-upload add name="#{img.to_s}-image" disk_format=ami container_format=ami kernel_id=$kid ramdisk_id=$rid < ${kernel}
       EOH
-      not_if "glance -f index | grep #{img.to_s}-image"
+      not_if "glance -f -I admin -K #{admin_password} -T #{admin_tenant_name} -N #{keystone_auth_url} index | grep #{img.to_s}-image"
     end
   end
 end
