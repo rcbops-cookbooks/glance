@@ -44,11 +44,11 @@ else
   # Lookup mysql ip address
   mysql_server, start, arbitary_value = Chef::Search::Query.new.search(:node, "roles:mysql-master AND chef_environment:#{node.chef_environment}")
   if mysql_server.length > 0
-    Chef::Log.info("registry/mysql: using search")
+    Chef::Log.info("glance::registry/mysql: using search")
     db_ip_address = mysql_server[0]['mysql']['bind_address']
     db_root_password = mysql_server[0]['mysql']['server_root_password']
   else
-    Chef::Log.info("registry/mysql: NOT using search")
+    Chef::Log.info("glance::registry/mysql: NOT using search")
     db_ip_address = node['mysql']['bind_address']
     db_root_password = node['mysql']['server_root_password']
   end
@@ -56,13 +56,13 @@ else
   # Lookup keystone api ip address
   keystone, start, arbitary_value = Chef::Search::Query.new.search(:node, "roles:keystone AND chef_environment:#{node.chef_environment}")
   if keystone.length > 0
-    Chef::Log.info("registry/keystone: using search")
+    Chef::Log.info("glance::registry/keystone: using search")
     keystone_api_ip = keystone[0]['keystone']['api_ipaddress']
     keystone_service_port = keystone[0]['keystone']['service_port']
     keystone_admin_port = keystone[0]['keystone']['admin_port']
     keystone_admin_token = keystone[0]['keystone']['admin_token']
   else
-    Chef::Log.info("registry/keystone: NOT using search")
+    Chef::Log.info("glance::registry/keystone: NOT using search")
     keystone_api_ip = node['keystone']['api_ipaddress']
     keystone_service_port = node['keystone']['service_port']
     keystone_admin_port = node['keystone']['admin_port']
