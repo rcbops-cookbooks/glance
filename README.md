@@ -1,14 +1,14 @@
 Description
 ===========
 
-Installs the OpenStack Image Repository/Server (codename: glance) from packages. Optionally populates the repository with some default images 
+Installs the OpenStack Image Repository/Server (codename: glance) from packages. Optionally populates the repository with some default images.
 
 http://glance.openstack.org/
 
 Requirements
 ============
 
-Chef 0.10.0 or higher required (for Chef environment use).
+Chef 0.10.0 or higher required (for Chef environment use)
 
 Platform
 --------
@@ -37,18 +37,16 @@ Recipes
 
 default
 -------
-
-The default recipe includes the api and registry recipes.
+-Includes recipes `api`, `registry`  
 
 api
 ------
-
-The api recipe will install the glance-api server
+-Installs the glance-api server  
 
 registry
 --------
-
-The registry recipe will install the glance-registry server
+-Includes recipe `mysql:client`  
+-Installs the glance-registry server  
 
 
 Data Bags
@@ -60,37 +58,37 @@ None
 Attributes 
 ==========
 
-* `glance["db"]["name"]` - name of glance database
-* `glance["db"]["user"]` - username for glance database access
-* `glance["db"]["password"]` - password for glance database access
-* `glance["api"]["ip_address"]` - ip address to use for communicating with the glance api
-* `glance["api"]["bind_address"]` - ip address for the glance api to bind to
-* `glance["api"]["port"]` - port for the glance api to bind to
-* `glance["api"]["adminURL"]` - used when registering image endpoint with keystone
-* `glance["api"]["internalURL"]` - used when registering image endpoint with keystone
-* `glance["api"]["publicURL"]` - used when registering image endpoint with keystone
-* `glance["registry"]["ip_address"]` - ip address to use for communicating with the glance registry
-* `glance["registry"]["bind_address"]` - ip address for the glance registry to bind to
-* `glance["registry"]["port"]` - ip address for the glance port to bind to
-* `glance["service_tenant_name"]` - tenant name used by glance when interacting with keystone - used in the api and registry paste.ini files
-* `glance["service_user"]` - user name used by glance when interacting with keystone -  used in the api and registry paste.ini files
-* `glance["service_pass"]` - user password used by glance when interacting with keystone - used in the api and registry paste.ini files
-* `glance["service_role"]` - user role used by glance when interacting with keystone - used in the api and registry paste.ini files
-* `glance["image_upload"]` - toggles whether to automatically upload images in the `glance["images"]` array
-* `glance["images"]` - default list of images to upload to the glance repository as part of the install
-* `glance["image]["<imagename>"]` - url location of the <imagename> image. There can be multiple instances of this line to define multiple imagess (eg natty, maverick, fedora17 etc)
+* `glance["db"]["name"]` - Name of glance database
+* `glance["db"]["user"]` - Username for glance database access
+* `glance["db"]["password"]` - Password for glance database access
+* `glance["api"]["ip_address"]` - IP address to use for communicating with the glance API
+* `glance["api"]["bind_address"]` - IP address for the glance API to bind to
+* `glance["api"]["port"]` - Port for the glance API to bind to
+* `glance["api"]["adminURL"]` - Used when registering image endpoint with keystone
+* `glance["api"]["internalURL"]` - Used when registering image endpoint with keystone
+* `glance["api"]["publicURL"]` - Used when registering image endpoint with keystone
+* `glance["registry"]["ip_address"]` - IP address to use for communicating with the glance registry
+* `glance["registry"]["bind_address"]` - IP address for the glance registry to bind to
+* `glance["registry"]["port"]` - IP address for the glance port to bind to
+* `glance["service_tenant_name"]` - Tenant name used by glance when interacting with keystone - used in the API and registry paste.ini files
+* `glance["service_user"]` - User name used by glance when interacting with keystone - used in the API and registry paste.ini files
+* `glance["service_pass"]` - User password used by glance when interacting with keystone - used in the API and registry paste.ini files
+* `glance["service_role"]` - User role used by glance when interacting with keystone - used in the API and registry paste.ini files
+* `glance["image_upload"]` - Toggles whether to automatically upload images in the `glance["images"]` array
+* `glance["images"]` - Default list of images to upload to the glance repository as part of the install
+* `glance["image]["<imagename>"]` - URL location of the <imagename> image. There can be multiple instances of this line to define multiple imagess (eg natty, maverick, fedora17 etc)
 --- example `glance["image]["natty"]` - "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
 
 
 Templates
 =========
 
-* `glance-api-paste.ini.erb` - paste config for glance-api middleware
-* `glance-api.conf.erb` - config file for glance-api server
-* `glance-registry-paste.ini.erb` - paste config for glance-registry middleware
-* `glance-registry.conf.erb` - config file for glance-registry server
-* `glance-scrubber.conf.erb` - config file for glance image scrubber service
-* `policy.json.erb` - for configuration of acls for glance api server
+* `glance-api-paste.ini.erb` - Paste config for glance-api middleware
+* `glance-api.conf.erb` - Config file for glance-api server
+* `glance-registry-paste.ini.erb` - Paste config for glance-registry middleware
+* `glance-registry.conf.erb` - Config file for glance-registry server
+* `glance-scrubber.conf.erb` - Config file for glance image scrubber service
+* `policy.json.erb` - Configuration of ACLs for glance API server
 
 
 License and Author
