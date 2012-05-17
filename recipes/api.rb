@@ -216,7 +216,7 @@ if node["glance"]["image_upload"]
     bash "default image setup for #{img.to_s}" do
       cwd "/tmp"
       user "root"
-      environment ({"OS_USERNAME" => "admin",
+      environment ({"OS_USERNAME" => keystone_admin_user,
                     "OS_PASSWORD" => admin_password,
                     "OS_TENANT_NAME" => admin_tenant_name,
                     "OS_AUTH_URL" => keystone_auth_url})
