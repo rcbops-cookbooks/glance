@@ -97,20 +97,22 @@ else
   keystone, start, arbitrary_value = Chef::Search::Query.new.search(:node, "roles:keystone AND chef_environment:#{node.chef_environment}")
   if keystone.length > 0
     Chef::Log.info("glance::api/keystone: using search")
+    keystone_admin_user = keystone[0]['keystone']['admin_user']
     keystone_api_ip = keystone[0]['keystone']['api_ipaddress']
     keystone_service_port = keystone[0]['keystone']['service_port']
     keystone_admin_port = keystone[0]['keystone']['admin_port']
     keystone_admin_token = keystone[0]['keystone']['admin_token']
-    admin_password = keystone[0]['keystone']['users']['admin']['password']
-    admin_tenant_name = keystone[0]['keystone']['users']['admin']['default_tenant']
+    admin_password = keystone[0]['keystone']['users'][keystone_admin_user]['password']
+    admin_tenant_name = keystone[0]['keystone']['users'][keystone_admin_user]['default_tenant']
   else
     Chef::Log.info("glance::api/keystone: NOT using search")
+    keystone_admin_user = node['keystone']['admin_user']
     keystone_api_ip = node['keystone']['api_ipaddress']
     keystone_service_port = node['keystone']['service_port']
     keystone_admin_port = node['keystone']['admin_port']
     keystone_admin_token = node['keystone']['admin_token']
-    admin_password = node['keystone']['users']['admin']['password']
-    admin_tenant_name = node['keystone']['users']['admin']['default_tenant']
+    admin_password = node['keystone']['users'][keystone_admin_user]['password']
+    admin_tenant_name = node['keystone']['users'][keystone_admin_user]['default_tenant']
   end
 
   # Lookup glance::registry ip address
@@ -214,7 +216,7 @@ if node["glance"]["image_upload"]
     bash "default image setup for #{img.to_s}" do
       cwd "/tmp"
       user "root"
-      environment ({"OS_USERNAME" => "admin",
+      environment ({"OS_USERNAME" => keystone_admin_user,
                     "OS_PASSWORD" => admin_password,
                     "OS_TENANT_NAME" => admin_tenant_name,
                     "OS_AUTH_URL" => keystone_auth_url})
