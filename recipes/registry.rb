@@ -17,7 +17,18 @@
 # limitations under the License.
 #
 
+::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 include_recipe "mysql::client"
+
+# Allow for using a well known db password
+if node["developer_mode"]
+  node.set_unless['glance']['db']['password'] = "glance"
+else
+  node.set_unless['glance']['db']['password'] = secure_password
+end
+
+# Set a secure keystone service password
+node.set_unless['glance']['service_pass'] = secure_password
 
 # Distribution specific settings go here
 if platform?(%w{fedora})
