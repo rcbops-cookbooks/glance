@@ -32,12 +32,14 @@ default["glance"]["registry"]["ip_address"] = node["ipaddress"]
 
 default["glance"]["db"]["name"] = "glance"
 default["glance"]["db"]["username"] = "glance"
-default["glance"]["db"]["password"] = "glance"
+# Replacing with OpenSSL::Password in recipes/registry.rb
+# default["glance"]["db"]["password"] = "glance"
 
 # TODO: These may need to be glance-registry specific.. and looked up by glance-api
 default["glance"]["service_tenant_name"] = "service"
 default["glance"]["service_user"] = "glance"
-default["glance"]["service_pass"] = "vARxre7K"
+# Replacing with OpenSSL::Password in recipes/registry.rb
+# default["glance"]["service_pass"] = "vARxre7K"
 default["glance"]["service_role"] = "admin"
 
 default["glance"]["image_upload"] = false
