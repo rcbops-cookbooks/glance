@@ -242,9 +242,9 @@ if node["glance"]["image_upload"]
 
         kernel=$(ls images/*.img | head -n1)
 
-        kid=$(glance --silent-upload add name="${image_name}-kernel" disk_format=aki container_format=aki < ${kernel_file} | cut -d: -f2 | sed 's/ //')
-        rid=$(glance --silent-upload add name="${image_name}-initrd" disk_format=ari container_format=ari < ${ramdisk} | cut -d: -f2 | sed 's/ //')
-        glance --silent-upload add name="#{img.to_s}-image" disk_format=ami container_format=ami kernel_id=$kid ramdisk_id=$rid < ${kernel}
+        kid=$(glance --silent-upload add name="${image_name}-kernel" is_public=true disk_format=aki container_format=aki < ${kernel_file} | cut -d: -f2 | sed 's/ //')
+        rid=$(glance --silent-upload add name="${image_name}-initrd" is_public=true disk_format=ari container_format=ari < ${ramdisk} | cut -d: -f2 | sed 's/ //')
+        glance --silent-upload add name="#{img.to_s}-image" is_public=true disk_format=ami container_format=ami kernel_id=$kid ramdisk_id=$rid < ${kernel}
       EOH
       not_if "glance -f -I admin -K #{admin_password} -T #{admin_tenant_name} -N #{keystone_auth_url} index | grep #{img.to_s}-image"
     end
