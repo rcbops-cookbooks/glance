@@ -17,20 +17,7 @@
 # limitations under the License.
 #
 
-# Distribution specific settings go here
-if platform?(%w{fedora})
-  # Fedora
-  mysql_python_package = "MySQL-python"
-  glance_package = "openstack-glance"
-  glance_api_service = "openstack-glance-api"
-  glance_package_options = ""
-else
-  # All Others (right now Debian and Ubuntu)
-  mysql_python_package="python-mysqldb"
-  glance_package = "glance"
-  glance_api_service = "glance-api"
-  glance_package_options = "-o Dpkg::Options::='--force-confold' --force-yes"
-end
+platform_options = node["glance"]["platform"]
 
 package "curl" do
   action :upgrade
@@ -40,11 +27,14 @@ package "python-keystone" do
     action :install
 end
 
-package glance_package do
-  action :upgrade
+platform_options["glance_packages"].each do |pkg|
+  package pkg do
+    action :upgrade
+  end
 end
 
-service glance_api_service do
+service "glance-api" do
+  service_name platform_options["glance_api_service"]
   supports :status => true, :restart => true
   action :enable
 end
@@ -54,79 +44,28 @@ directory "/etc/glance" do
   group "glance"
   owner "glance"
   mode "0700"
-  not_if do
-    File.exists?("/etc/glance")
-  end
 end
 
+# FIXME: seems like misfeature
 template "/etc/glance/policy.json" do
   source "policy.json.erb"
   owner "root"
   group "root"
   mode "0644"
-  notifies :restart, resources(:service => glance_api_service), :immediately
+  notifies :restart, resources(:service => "glance-api"), :immediately
   not_if do
     File.exists?("/etc/glance/policy.json")
   end
 end
 
-if Chef::Config[:solo]
-  Chef::Log.warn("This recipe uses search. Chef Solo does not support search.")
-else 
-  # Lookup mysql ip address
-  mysql_server, start, arbitrary_value = Chef::Search::Query.new.search(:node, "roles:mysql-master AND chef_environment:#{node.chef_environment}")
-  if mysql_server.length > 0
-    Chef::Log.info("glance::api/mysql: using search")
-    db_ip_address = mysql_server[0]['mysql']['bind_address']
-  else
-    Chef::Log.info("glance::api/mysql: NOT using search")
-    db_ip_address = node['mysql']['bind_address']
-  end
+rabbit_info = get_settings_by_role("rabbitmq-server", "rabbitmq") # FIXME: access
 
-  # Lookup rabbit ip address
-  rabbit, start, arbitrary_value = Chef::Search::Query.new.search(:node, "roles:rabbitmq-server AND chef_environment:#{node.chef_environment}")
-  if rabbit.length > 0
-    Chef::Log.info("glance::api/rabbitmq: using search")
-    rabbit_ip_address = rabbit[0]['ipaddress']
-  else
-    Chef::Log.info("glance::api/rabbitmq: NOT using search")
-    rabbit_ip_address = node['ipaddress']
-  end
+ks_admin_endpoint = get_access_endpoint("keystone", "keystone", "admin-api")
+ks_service_endpoint = get_access_endpoint("keystone", "keystone","service-api")
+keystone = get_settings_by_role("keystone", "keystone")
 
-  # Lookup keystone api ip address
-  keystone, start, arbitrary_value = Chef::Search::Query.new.search(:node, "roles:keystone AND chef_environment:#{node.chef_environment}")
-  if keystone.length > 0
-    Chef::Log.info("glance::api/keystone: using search")
-    keystone_admin_user = keystone[0]['keystone']['admin_user']
-    keystone_api_ip = keystone[0]['keystone']['api_ipaddress']
-    keystone_service_port = keystone[0]['keystone']['service_port']
-    keystone_admin_port = keystone[0]['keystone']['admin_port']
-    keystone_admin_token = keystone[0]['keystone']['admin_token']
-    admin_password = keystone[0]['keystone']['users'][keystone_admin_user]['password']
-    admin_tenant_name = keystone[0]['keystone']['users'][keystone_admin_user]['default_tenant']
-  else
-    Chef::Log.info("glance::api/keystone: NOT using search")
-    keystone_admin_user = node['keystone']['admin_user']
-    keystone_api_ip = node['keystone']['api_ipaddress']
-    keystone_service_port = node['keystone']['service_port']
-    keystone_admin_port = node['keystone']['admin_port']
-    keystone_admin_token = node['keystone']['admin_token']
-    admin_password = node['keystone']['users'][keystone_admin_user]['password']
-    admin_tenant_name = node['keystone']['users'][keystone_admin_user]['default_tenant']
-  end
-
-  # Lookup glance::registry ip address
-  registry = search(:node, "roles:glance-registry AND chef_environment:#{node.chef_environment}")
-  if registry.length > 0
-    Chef::Log.info("glance::api/registry: using search")
-    registry_ip_address = registry[0]["glance"]["registry"]["ip_address"]
-    registry_port = registry[0]["glance"]["registry"]["port"]
-  else
-    Chef::Log.info("glance::api/registry: NOT using search")
-    registry_ip_address = node["glance"]["registry"]["ip_address"]
-    registry_port = node["glance"]["registry"]["port"]
-  end
-end
+registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
+api_endpoint = get_bind_endpoint("glance", "api")
 
 template "/etc/glance/glance-api.conf" do
   source "glance-api.conf.erb"
@@ -134,13 +73,13 @@ template "/etc/glance/glance-api.conf" do
   group "root"
   mode "0644"
   variables(
-    "api_bind_address" => node["glance"]["api"]["bind_address"],
-    "api_bind_port" => node["glance"]["api"]["port"],
-    "registry_ip_address" => registry_ip_address,
-    "registry_port" => registry_port,
-    "rabbit_ipaddress" => rabbit_ip_address
+    "api_bind_address" => api_endpoint["host"],
+    "api_bind_port" => api_endpoint["port"],
+    "registry_ip_address" => registry_endpoint["host"],
+    "registry_port" => registry_endpoint["port"],
+    "rabbit_ipaddress" => rabbit_info["ipaddress"]    #FIXME!
   )
-  notifies :restart, resources(:service => glance_api_service), :immediately
+  notifies :restart, resources(:service => "glance-api"), :immediately
 end
 
 template "/etc/glance/glance-api-paste.ini" do
@@ -149,15 +88,15 @@ template "/etc/glance/glance-api-paste.ini" do
   group "root"
   mode "0644"
   variables(
-    "keystone_api_ipaddress" => keystone_api_ip,
-    "keystone_service_port" => keystone_service_port,
-    "keystone_admin_port" => keystone_admin_port,
-    "keystone_admin_token" => keystone_admin_token,
+    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
+    "keystone_service_port" => ks_service_endpoint["port"],
+    "keystone_admin_port" => ks_admin_endpoint["port"],
+    "keystone_admin_token" => keystone["admin_token"],
     "service_tenant_name" => node["glance"]["service_tenant_name"],
     "service_user" => node["glance"]["service_user"],
     "service_pass" => node["glance"]["service_pass"]
   )
-  notifies :restart, resources(:service => glance_api_service), :immediately
+  notifies :restart, resources(:service => "glance-api"), :immediately
 end
 
 template "/etc/glance/glance-scrubber.conf" do
@@ -166,8 +105,8 @@ template "/etc/glance/glance-scrubber.conf" do
   group "root"
   mode "0644"
   variables(
-    "registry_ip_address" => registry_ip_address,
-    "registry_port" => registry_port
+    "registry_ip_address" => registry_endpoint["host"],
+    "registry_port" => registry_endpoint["port"]
   )
 end
 
@@ -180,11 +119,11 @@ end
 
 # Register Image Service
 keystone_register "Register Image Service" do
-  auth_host keystone_api_ip
-  auth_port keystone_admin_port
-  auth_protocol "http"
-  api_ver "/v2.0"
-  auth_token keystone_admin_token
+  auth_host ks_admin_endpoint["host"]
+  auth_port ks_admin_endpoint["port"]
+  auth_protocol ks_admin_endpoint["scheme"]
+  api_ver ks_admin_endpoint["path"]
+  auth_token keystone["admin_token"]
   service_name "glance"
   service_type "image"
   service_description "Glance Image Service"
@@ -193,22 +132,20 @@ end
 
 # Register Image Endpoint
 keystone_register "Register Image Endpoint" do
-  auth_host keystone_api_ip
-  auth_port keystone_admin_port
-  auth_protocol "http"
-  api_ver "/v2.0"
-  auth_token keystone_admin_token
+  auth_host ks_admin_endpoint["host"]
+  auth_port ks_admin_endpoint["port"]
+  auth_protocol ks_admin_endpoint["scheme"]
+  api_ver ks_admin_endpoint["path"]
+  auth_token keystone["admin_token"]
   service_type "image"
   endpoint_region "RegionOne"
-  endpoint_adminurl node["glance"]["api"]["adminURL"]
-  endpoint_internalurl node["glance"]["api"]["internalURL"]
-  endpoint_publicurl node["glance"]["api"]["publicURL"]
+  endpoint_adminurl api_endpoint["uri"]
+  endpoint_internalurl api_endpoint["uri"]
+  endpoint_publicurl api_endpoint["uri"]
   action :create_endpoint
 end
 
 if node["glance"]["image_upload"]
-  keystone_auth_url = "http://#{keystone_api_ip}:#{keystone_admin_port}/v2.0"
-
   # TODO(breu): the environment needs to be derived from a search
   # TODO(shep): this whole bit is super dirty.. and needs some love.
   node["glance"]["images"].each do |img|
@@ -216,10 +153,10 @@ if node["glance"]["image_upload"]
     bash "default image setup for #{img.to_s}" do
       cwd "/tmp"
       user "root"
-      environment ({"OS_USERNAME" => keystone_admin_user,
+      environment ({"OS_USERNAME" => keystone["admin_user"],
                     "OS_PASSWORD" => admin_password,
                     "OS_TENANT_NAME" => admin_tenant_name,
-                    "OS_AUTH_URL" => keystone_auth_url})
+                    "OS_AUTH_URL" => ks_admin_endpoint["uri"]})
       code <<-EOH
         set -e
         set -x
@@ -246,7 +183,7 @@ if node["glance"]["image_upload"]
         rid=$(glance --silent-upload add name="${image_name}-initrd" is_public=true disk_format=ari container_format=ari < ${ramdisk} | cut -d: -f2 | sed 's/ //')
         glance --silent-upload add name="#{img.to_s}-image" is_public=true disk_format=ami container_format=ami kernel_id=$kid ramdisk_id=$rid < ${kernel}
       EOH
-      not_if "glance -f -I admin -K #{admin_password} -T #{admin_tenant_name} -N #{keystone_auth_url} index | grep #{img.to_s}-image"
+      not_if "glance -f -I admin -K #{admin_password} -T #{admin_tenant_name} -N #{ks_admin_endpoint["uri"]} index | grep #{img.to_s}-image"
     end
   end
 end
