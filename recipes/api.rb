@@ -151,7 +151,7 @@ template "/etc/glance/glance-api.conf" do
     "api_bind_port" => node["glance"]["api"]["port"],
     "registry_ip_address" => registry_ip_address,
     "registry_port" => registry_port,
-    "rabbit_ipaddress" => rabbit_ip_address
+    "rabbit_ipaddress" => rabbit_ip_address,
     "keystone_api_ipaddress" => keystone_api_ip,
     "keystone_service_port" => keystone_service_port,
     "service_user" => node["glance"]["service_user"],
