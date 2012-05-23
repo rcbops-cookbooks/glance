@@ -78,6 +78,10 @@ Attributes
 * `glance["images"]` - Default list of images to upload to the glance repository as part of the install
 * `glance["image]["<imagename>"]` - URL location of the <imagename> image. There can be multiple instances of this line to define multiple imagess (eg natty, maverick, fedora17 etc)
 --- example `glance["image]["natty"]` - "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
+* `glance["api"]["default_store"]` - Toggles the backend storage type.  Currently supported is "file" and "swift"
+* `glance["api"]["swift"]["store_container"] - Set the container used by glance to store images and snapshots.  Defaults to "glance"
+* `glance["api"]["swift"]["store_large_object_size"] - Set the size at which glance starts to chunnk files.  Defaults to "200" MB
+* `glance["api"]["swift"]["store_large_object_chunk_size"] - Set the chunk size for glance.  Defaults to "200" MB
 
 
 Templates
