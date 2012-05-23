@@ -25,6 +25,10 @@ default["glance"]["api"]["version"] = "v1"
 default["glance"]["api"]["adminURL"] = "#{node["glance"]["api"]["protocol"]}://#{node["glance"]["api"]["ip_address"]}:#{node["glance"]["api"]["port"]}/#{node["glance"]["api"]["version"]}"
 default["glance"]["api"]["internalURL"] = node["glance"]["api"]["adminURL"]
 default["glance"]["api"]["publicURL"] = node["glance"]["api"]["adminURL"]
+default["glance"]["api"]["default_store"] = "file"
+default["glance"]["api"]["swift"]["store_container"] = "glance"
+default["glance"]["api"]["swift"]["store_large_object_size"] = "200"
+default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"
 
 default["glance"]["registry"]["bind_address"] = "0.0.0.0"
 default["glance"]["registry"]["port"] = "9191"

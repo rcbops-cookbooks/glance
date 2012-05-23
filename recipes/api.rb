@@ -36,6 +36,10 @@ package "curl" do
   action :upgrade
 end
 
+package "python-swift" do
+    action :install
+end
+
 package "python-keystone" do
     action :install
 end
@@ -47,6 +51,15 @@ end
 service glance_api_service do
   supports :status => true, :restart => true
   action :enable
+end
+
+template "/usr/share/pyshared/glance/store/swift.py" do
+  source "swift.py"
+  group "root"
+  owner "root"
+  mode "0644"
+  only_if do platform?(%w{debian ubuntu}) end
+  notifies :restart, resources(:service => glance_api_service), :immediately
 end
 
 directory "/etc/glance" do
@@ -139,6 +152,15 @@ template "/etc/glance/glance-api.conf" do
     "registry_ip_address" => registry_ip_address,
     "registry_port" => registry_port,
     "rabbit_ipaddress" => rabbit_ip_address
+    "keystone_api_ipaddress" => keystone_api_ip,
+    "keystone_service_port" => keystone_service_port,
+    "service_user" => node["glance"]["service_user"],
+    "service_pass" => node["glance"]["service_pass"],
+    "service_tenant_name" => node["glance"]["service_tenant_name"],
+    "default_store" => node["glance"]["api"]["default_store"],
+    "swift_large_object_size" => node["glance"]["api"]["swift"]["store_large_object_size"],
+    "swift_large_object_chunk_size" => node["glance"]["api"]["swift"]["store_large_object_chunk_size"],
+    "swift_store_container" => node["glance"]["api"]["swift"]["store_container"]
   )
   notifies :restart, resources(:service => glance_api_service), :immediately
 end
