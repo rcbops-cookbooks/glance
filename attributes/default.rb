@@ -17,22 +17,15 @@
 # limitations under the License.
 #
 
-default["glance"]["api"]["bind_address"] = "0.0.0.0"
-default["glance"]["api"]["port"] = "9292"
-default["glance"]["api"]["ip_address"] = node["ipaddress"]
-default["glance"]["api"]["protocol"] = "http"
-default["glance"]["api"]["version"] = "v1"
-default["glance"]["api"]["adminURL"] = "#{node["glance"]["api"]["protocol"]}://#{node["glance"]["api"]["ip_address"]}:#{node["glance"]["api"]["port"]}/#{node["glance"]["api"]["version"]}"
-default["glance"]["api"]["internalURL"] = node["glance"]["api"]["adminURL"]
-default["glance"]["api"]["publicURL"] = node["glance"]["api"]["adminURL"]
-default["glance"]["api"]["default_store"] = "file"
-default["glance"]["api"]["swift"]["store_container"] = "glance"
-default["glance"]["api"]["swift"]["store_large_object_size"] = "200"
-default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"
+default["glance"]["services"]["api"]["scheme"] = "http"
+default["glance"]["services"]["api"]["network"] = "public"
+default["glance"]["services"]["api"]["port"] = 9292
+default["glance"]["services"]["api"]["path"] = "/v1"
 
-default["glance"]["registry"]["bind_address"] = "0.0.0.0"
-default["glance"]["registry"]["port"] = "9191"
-default["glance"]["registry"]["ip_address"] = node["ipaddress"]
+default["glance"]["services"]["registry"]["scheme"] = "http"
+default["glance"]["services"]["registry"]["network"] = "public"
+default["glance"]["services"]["registry"]["port"] = 9191
+default["glance"]["services"]["registry"]["path"] = "/v1"
 
 default["glance"]["db"]["name"] = "glance"
 default["glance"]["db"]["username"] = "glance"
@@ -45,6 +38,10 @@ default["glance"]["service_user"] = "glance"
 # Replacing with OpenSSL::Password in recipes/registry.rb
 # default["glance"]["service_pass"] = "vARxre7K"
 default["glance"]["service_role"] = "admin"
+default["glance"]["api"]["default_store"] = "file"
+default["glance"]["api"]["swift"]["store_container"] = "glance"
+default["glance"]["api"]["swift"]["store_large_object_size"] = "200"
+default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"
 
 default["glance"]["image_upload"] = false
 default["glance"]["images"] = [ "tty" ]
@@ -53,3 +50,23 @@ default["glance"]["image"]["natty"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu
 default["glance"]["image"]["maverick"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-10.10-server-uec-amd64-multinic.tar.gz"
 #default["glance"]["image"]["tty"] = "http://smoser.brickies.net/ubuntu/ttylinux-uec/ttylinux-uec-amd64-12.1_2.6.35-22_1.tar.gz"
 default["glance"]["image"]["tty"] = "http://c250663.r63.cf1.rackcdn.com/ttylinux.tgz"
+
+# platform-specific settings
+case platform
+when "fedora"
+  default["glance"]["platform"] = {
+    "mysql_python_packages" => [ "MySQL-python" ],
+    "glance_packages" => [ "openstack-glance" ],
+    "glance_api_service" => "openstack-glance-api",
+    "glance_registry_service" => "openstack-glance-registry",
+    "package_overrides" => ""
+  }
+when "ubuntu"
+  default["glance"]["platform"] = {
+    "mysql_python_packages" => [ "python-mysqldb" ],
+    "glance_packages" => [ "glance" ],
+    "glance_api_service" => "glance-api",
+    "glance_registry_service" => "glance-registry",
+    "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'"
+  }
+end

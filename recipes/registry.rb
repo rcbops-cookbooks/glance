@@ -20,6 +20,8 @@
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 include_recipe "mysql::client"
 
+platform_options = node["glance"]["platform"]
+
 # Allow for using a well known db password
 if node["developer_mode"]
   node.set_unless['glance']['db']['password'] = "glance"
@@ -30,58 +32,23 @@ end
 # Set a secure keystone service password
 node.set_unless['glance']['service_pass'] = secure_password
 
-# Distribution specific settings go here
-if platform?(%w{fedora})
-  # Fedora
-  mysql_python_package = "MySQL-python"
-  glance_package = "openstack-glance"
-  glance_registry_service = "openstack-glance-registry"
-  glance_package_options = ""
-else
-  # All Others (right now Debian and Ubuntu)
-  mysql_python_package="python-mysqldb"
-  glance_package = "glance"
-  glance_registry_service = "glance-registry"
-  glance_package_options = "-o Dpkg::Options::='--force-confold' --force-yes"
-end
-
 package "python-keystone" do
     action :install
 end
 
-if Chef::Config[:solo]
-  Chef::Log.warn("This recipe uses search. Chef Solo does not support search.")
-else
-  # Lookup mysql ip address
-  mysql_server, start, arbitary_value = Chef::Search::Query.new.search(:node, "roles:mysql-master AND chef_environment:#{node.chef_environment}")
-  if mysql_server.length > 0
-    Chef::Log.info("glance::registry/mysql: using search")
-    db_ip_address = mysql_server[0]['mysql']['bind_address']
-    db_root_password = mysql_server[0]['mysql']['server_root_password']
-  else
-    Chef::Log.info("glance::registry/mysql: NOT using search")
-    db_ip_address = node['mysql']['bind_address']
-    db_root_password = node['mysql']['server_root_password']
-  end
+mysql_info = get_settings_by_role("mysql-master", "mysql")
 
-  # Lookup keystone api ip address
-  keystone, start, arbitary_value = Chef::Search::Query.new.search(:node, "roles:keystone AND chef_environment:#{node.chef_environment}")
-  if keystone.length > 0
-    Chef::Log.info("glance::registry/keystone: using search")
-    keystone_api_ip = keystone[0]['keystone']['api_ipaddress']
-    keystone_service_port = keystone[0]['keystone']['service_port']
-    keystone_admin_port = keystone[0]['keystone']['admin_port']
-    keystone_admin_token = keystone[0]['keystone']['admin_token']
-  else
-    Chef::Log.info("glance::registry/keystone: NOT using search")
-    keystone_api_ip = node['keystone']['api_ipaddress']
-    keystone_service_port = node['keystone']['service_port']
-    keystone_admin_port = node['keystone']['admin_port']
-    keystone_admin_token = node['keystone']['admin_token']
-  end
-end
+ks_admin_endpoint = get_access_endpoint("keystone", "keystone", "admin-api")
+ks_service_endpoint = get_access_endpoint("keystone", "keystone", "service-api")
+keystone = get_settings_by_role("keystone", "keystone")
 
-connection_info = {:host => db_ip_address, :username => "root", :password => db_root_password}
+registry_endpoint = get_bind_endpoint("glance", "registry")
+
+connection_info = {
+  :host => mysql_info["bind_address"],
+  :username => "root",
+  :password => mysql_info["server_root_password"] }
+
 mysql_database "create glance database" do
   connection connection_info
   database_name node["glance"]["db"]["name"]
@@ -100,22 +67,27 @@ mysql_database_user node["glance"]["db"]["username"] do
   database_name node["glance"]["db"]["name"]
   host '%'
   privileges [:all]
-  action :grant 
+  action :grant
 end
 
 package "curl" do
   action :install
 end
 
-package mysql_python_package do
-  action :install
+platform_options["mysql_python_packages"].each do |pkg|
+  package pkg do
+    action :install
+  end
 end
 
-package glance_package do
-  action :upgrade
+platform_options["glance_packages"].each do |pkg|
+  package pkg do
+    action :upgrade
+  end
 end
 
-service glance_registry_service do
+service "glance-registry" do
+  service_name platform_options["glance_registry_service"]
   supports :status => true, :restart => true
   action :enable
 end
@@ -123,7 +95,7 @@ end
 execute "glance-manage db_sync" do
         command "sudo -u glance glance-manage db_sync"
         action :nothing
-        notifies :restart, resources(:service => glance_registry_service), :immediately
+        notifies :restart, resources(:service => "glance-registry"), :immediately
 end
 
 # Having to manually version the database because of Ubuntu bug
@@ -141,11 +113,11 @@ end
 
 # Register Service Tenant
 keystone_register "Register Service Tenant" do
-  auth_host keystone_api_ip
-  auth_port keystone_admin_port
-  auth_protocol "http"
-  api_ver "/v2.0"
-  auth_token keystone_admin_token
+  auth_host ks_admin_endpoint["host"]
+  auth_port ks_admin_endpoint["port"]
+  auth_protocol ks_admin_endpoint["scheme"]
+  api_ver ks_admin_endpoint["path"]
+  auth_token keystone["admin_token"]
   tenant_name node["glance"]["service_tenant_name"]
   tenant_description "Service Tenant"
   tenant_enabled "true" # Not required as this is the default
@@ -154,11 +126,11 @@ end
 
 # Register Service User
 keystone_register "Register Service User" do
-  auth_host keystone_api_ip
-  auth_port keystone_admin_port
-  auth_protocol "http"
-  api_ver "/v2.0"
-  auth_token keystone_admin_token
+  auth_host ks_admin_endpoint["host"]
+  auth_port ks_admin_endpoint["port"]
+  auth_protocol ks_admin_endpoint["scheme"]
+  api_ver ks_admin_endpoint["path"]
+  auth_token keystone["admin_token"]
   tenant_name node["glance"]["service_tenant_name"]
   user_name node["glance"]["service_user"]
   user_pass node["glance"]["service_pass"]
@@ -168,11 +140,11 @@ end
 
 ## Grant Admin role to Service User for Service Tenant ##
 keystone_register "Grant 'admin' Role to Service User for Service Tenant" do
-  auth_host keystone_api_ip
-  auth_port keystone_admin_port
-  auth_protocol "http"
-  api_ver "/v2.0"
-  auth_token keystone_admin_token
+  auth_host ks_admin_endpoint["host"]
+  auth_port ks_admin_endpoint["port"]
+  auth_protocol ks_admin_endpoint["scheme"]
+  api_ver ks_admin_endpoint["path"]
+  auth_token keystone["admin_token"]
   tenant_name node["glance"]["service_tenant_name"]
   user_name node["glance"]["service_user"]
   role_name node["glance"]["service_role"]
@@ -184,10 +156,7 @@ directory "/etc/glance" do
   group "glance"
   owner "glance"
   mode "0700"
-  not_if do
-    File.exists?("/etc/glance")
-  end
-end  
+end
 
 template "/etc/glance/glance-registry.conf" do
   source "glance-registry.conf.erb"
@@ -195,9 +164,9 @@ template "/etc/glance/glance-registry.conf" do
   group "root"
   mode "0644"
   variables(
-    "registry_bind_address" => node["glance"]["registry"]["bind_address"],
-    "registry_port" => node["glance"]["registry"]["port"],
-    "db_ip_address" => db_ip_address,
+    "registry_bind_address" => registry_endpoint["host"],
+    "registry_port" => registry_endpoint["port"],
+    "db_ip_address" => mysql_info["bind_address"],
     "db_user" => node["glance"]["db"]["username"],
     "db_password" => node["glance"]["db"]["password"],
     "db_name" => node["glance"]["db"]["name"]
@@ -211,12 +180,12 @@ template "/etc/glance/glance-registry-paste.ini" do
   group "root"
   mode "0644"
   variables(
-    "keystone_api_ipaddress" => keystone_api_ip,
-    "keystone_service_port" => keystone_service_port,
-    "keystone_admin_port" => keystone_admin_port,
+    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
+    "keystone_service_port" => ks_service_endpoint["port"],
+    "keystone_admin_port" => ks_admin_endpoint["port"],
     "service_tenant_name" => node["glance"]["service_tenant_name"],
     "service_user" => node["glance"]["service_user"],
     "service_pass" => node["glance"]["service_pass"]
   )
-  notifies :restart, resources(:service => glance_registry_service), :immediately
+  notifies :restart, resources(:service => "glance-registry"), :immediately
 end
