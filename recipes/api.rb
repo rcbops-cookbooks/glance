@@ -190,8 +190,8 @@ if node["glance"]["image_upload"]
       code <<-EOH
         set -e
         set -x
-        mkdir -p images/#{image.to_s}
-        cd images/#{image.to_s}
+        mkdir -p images/#{img.to_s}
+        cd images/#{img.to_s}
 
         curl #{node["glance"]["image"][img.to_sym]} | tar -zx 
         image_name=$(basename #{node["glance"]["image"][img]} .tar.gz)
