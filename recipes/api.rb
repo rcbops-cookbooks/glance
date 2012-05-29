@@ -150,12 +150,18 @@ if node["glance"]["image_upload"]
   # TODO(shep): this whole bit is super dirty.. and needs some love.
   node["glance"]["images"].each do |img|
     Chef::Log.info("Checking to see if #{img.to_s}-image should be uploaded.")
+
+    keystone_admin_user = keystone["admin_user"]
+    keystone_admin_password = keystone["users"][keystone_admin_user]["password"]
+    keystone_tenant = keystone["users"][keystone_admin_user]["default_tenant"]
+
+
     bash "default image setup for #{img.to_s}" do
       cwd "/tmp"
       user "root"
-      environment ({"OS_USERNAME" => keystone["admin_user"],
-                    "OS_PASSWORD" => admin_password,
-                    "OS_TENANT_NAME" => admin_tenant_name,
+      environment ({"OS_USERNAME" => keystone_admin_user,
+                    "OS_PASSWORD" => keystone_admin_password,
+                    "OS_TENANT_NAME" => keystone_tenant,
                     "OS_AUTH_URL" => ks_admin_endpoint["uri"]})
       code <<-EOH
         set -e
@@ -183,7 +189,7 @@ if node["glance"]["image_upload"]
         rid=$(glance --silent-upload add name="${image_name}-initrd" is_public=true disk_format=ari container_format=ari < ${ramdisk} | cut -d: -f2 | sed 's/ //')
         glance --silent-upload add name="#{img.to_s}-image" is_public=true disk_format=ami container_format=ami kernel_id=$kid ramdisk_id=$rid < ${kernel}
       EOH
-      not_if "glance -f -I admin -K #{admin_password} -T #{admin_tenant_name} -N #{ks_admin_endpoint["uri"]} index | grep #{img.to_s}-image"
+      not_if "glance -f -I #{keystone_admin_user} -K #{keystone_admin_password} -T #{keystone_tenant} -N #{ks_admin_endpoint["uri"]} index | grep #{img.to_s}-image"
     end
   end
 end
