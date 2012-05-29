@@ -190,24 +190,25 @@ if node["glance"]["image_upload"]
       code <<-EOH
         set -e
         set -x
-        mkdir -p images
+        mkdir -p images/#{img.to_s}
+        cd images/#{img.to_s}
 
-        curl #{node["glance"]["image"][img.to_sym]} | tar -zx -C images/
+        curl #{node["glance"]["image"][img.to_sym]} | tar -zx 
         image_name=$(basename #{node["glance"]["image"][img]} .tar.gz)
 
         image_name=${image_name%-multinic}
 
-        kernel_file=$(ls images/*vmlinuz-virtual | head -n1)
+        kernel_file=$(ls *vmlinuz-virtual | head -n1)
         if [ ${#kernel_file} -eq 0 ]; then
-           kernel_file=$(ls images/*vmlinuz | head -n1)
+           kernel_file=$(ls *vmlinuz | head -n1)
         fi
 
-        ramdisk=$(ls images/*-initrd | head -n1)
+        ramdisk=$(ls *-initrd | head -n1)
         if [ ${#ramdisk} -eq 0 ]; then
-            ramdisk=$(ls images/*-loader | head -n1)
+            ramdisk=$(ls *-loader | head -n1)
         fi
 
-        kernel=$(ls images/*.img | head -n1)
+        kernel=$(ls *.img | head -n1)
 
         kid=$(glance --silent-upload add name="${image_name}-kernel" is_public=true disk_format=aki container_format=aki < ${kernel_file} | cut -d: -f2 | sed 's/ //')
         rid=$(glance --silent-upload add name="${image_name}-initrd" is_public=true disk_format=ari container_format=ari < ${ramdisk} | cut -d: -f2 | sed 's/ //')

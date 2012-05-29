@@ -10,6 +10,6 @@ recipe            "glance::registry", "Installs packages required for a glance r
   supports os
 end
 
-%w{ database keystone mysql }.each do |dep|
+%w{ database keystone mysql osops-utils }.each do |dep|
   depends dep
 end
