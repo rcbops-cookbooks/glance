@@ -43,13 +43,14 @@ service "glance-api" do
   action :enable
 end
 
+# FIXME: this is broken.  Joe, Wilk, fix this.
 template "/usr/share/pyshared/glance/store/swift.py" do
   source "swift.py"
   group "root"
   owner "root"
   mode "0644"
   only_if do platform?(%w{debian ubuntu}) end
-  notifies :restart, resources(:service => glance_api_service), :immediately
+  notifies :restart, resources(:service => "glance-api"), :immediately
 end
 
 directory "/etc/glance" do
@@ -91,9 +92,9 @@ template "/etc/glance/glance-api.conf" do
     "api_bind_port" => api_endpoint["port"],
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
-    "rabbit_ipaddress" => rabbit_info["ipaddress"]    #FIXME!
+    "rabbit_ipaddress" => rabbit_info["ipaddress"],    #FIXME!
     "keystone_api_ipaddress" => ks_admin_endpoint["host"],
-    "keystone_service_port" => ks_service_endpoint["port",
+    "keystone_service_port" => ks_service_endpoint["port"],
     "service_user" => glance["service_user"],
     "service_pass" => glance["service_pass"],
     "service_tenant_name" => glance["service_tenant_name"],
