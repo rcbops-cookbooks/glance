@@ -38,6 +38,10 @@ default["glance"]["service_user"] = "glance"
 # Replacing with OpenSSL::Password in recipes/registry.rb
 # default["glance"]["service_pass"] = "vARxre7K"
 default["glance"]["service_role"] = "admin"
+default["glance"]["api"]["default_store"] = "file"
+default["glance"]["api"]["swift"]["store_container"] = "glance"
+default["glance"]["api"]["swift"]["store_large_object_size"] = "200"
+default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"
 
 default["glance"]["image_upload"] = false
 default["glance"]["images"] = [ "tty" ]

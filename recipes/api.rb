@@ -23,6 +23,10 @@ package "curl" do
   action :upgrade
 end
 
+package "python-swift" do
+    action :install
+end
+
 package "python-keystone" do
     action :install
 end
@@ -37,6 +41,15 @@ service "glance-api" do
   service_name platform_options["glance_api_service"]
   supports :status => true, :restart => true
   action :enable
+end
+
+template "/usr/share/pyshared/glance/store/swift.py" do
+  source "swift.py"
+  group "root"
+  owner "root"
+  mode "0644"
+  only_if do platform?(%w{debian ubuntu}) end
+  notifies :restart, resources(:service => glance_api_service), :immediately
 end
 
 directory "/etc/glance" do
@@ -63,6 +76,7 @@ rabbit_info = get_settings_by_role("rabbitmq-server", "rabbitmq") # FIXME: acces
 ks_admin_endpoint = get_access_endpoint("keystone", "keystone", "admin-api")
 ks_service_endpoint = get_access_endpoint("keystone", "keystone","service-api")
 keystone = get_settings_by_role("keystone", "keystone")
+glance = get_settings_by_role("glance-api", "glance")
 
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 api_endpoint = get_bind_endpoint("glance", "api")
@@ -78,6 +92,15 @@ template "/etc/glance/glance-api.conf" do
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
     "rabbit_ipaddress" => rabbit_info["ipaddress"]    #FIXME!
+    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
+    "keystone_service_port" => ks_service_endpoint["port",
+    "service_user" => glance["service_user"],
+    "service_pass" => glance["service_pass"],
+    "service_tenant_name" => glance["service_tenant_name"],
+    "default_store" => glance["api"]["default_store"],
+    "swift_large_object_size" => glance["api"]["swift"]["store_large_object_size"],
+    "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
+    "swift_store_container" => glance["api"]["swift"]["store_container"]
   )
   notifies :restart, resources(:service => "glance-api"), :immediately
 end
