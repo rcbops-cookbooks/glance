@@ -50,7 +50,7 @@ default["glance"]["image"]["natty"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu
 default["glance"]["image"]["maverick"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-10.10-server-uec-amd64-multinic.tar.gz"
 #default["glance"]["image"]["tty"] = "http://smoser.brickies.net/ubuntu/ttylinux-uec/ttylinux-uec-amd64-12.1_2.6.35-22_1.tar.gz"
 default["glance"]["image"]["tty"] = "http://c250663.r63.cf1.rackcdn.com/ttylinux.tgz"
-default["glance"]["image"]["cirros"] = "http://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-uec.tar.gz"
+default["glance"]["image"]["cirros"] = "https://launchpadlibrarian.net/83305869/cirros-0.3.0-x86_64-uec.tar.gz"
 
 # platform-specific settings
 case platform
