@@ -169,6 +169,13 @@ keystone_register "Register Image Endpoint" do
   action :create_endpoint
 end
 
+include_recipe "monit::server"
+monit_procmon "glance-api" do
+  process_name "glance-api"
+  start_cmd platform_options["monit_commands"]["glance-api"]["start"]
+  stop_cmd platform_options["monit_commands"]["glance-api"]["stop"]
+end
+
 if node["glance"]["image_upload"]
   # TODO(breu): the environment needs to be derived from a search
   # TODO(shep): this whole bit is super dirty.. and needs some love.
