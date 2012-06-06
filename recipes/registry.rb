@@ -190,9 +190,5 @@ template "/etc/glance/glance-registry-paste.ini" do
   notifies :restart, resources(:service => "glance-registry"), :immediately
 end
 
-include_recipe "monit::server"
-monit_procmon "glance-registry" do
-  process_name "glance-registry"
-  start_cmd platform_options["monit_commands"]["glance-registry"]["start"]
-  stop_cmd platform_options["monit_commands"]["glance-registry"]["stop"]
-end
+# Include recipe(glance::registry-monitoring)
+include_recipe "glance::registry-monitoring"
