@@ -50,6 +50,7 @@ end
 
 include_recipe "monit::server"
 
+platform_options = node["glance"]["platform"]
 monit_procmon "glance-api" do
   process_name "glance-api"
   start_cmd platform_options["monit_commands"]["glance-api"]["start"]

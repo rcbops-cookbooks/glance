@@ -23,6 +23,7 @@
 
 include_recipe "monit::server"
 
+platform_options = node["glance"]["platform"]
 monit_procmon "glance-registry" do
   process_name "glance-registry"
   start_cmd platform_options["monit_commands"]["glance-registry"]["start"]
