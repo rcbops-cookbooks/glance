@@ -21,20 +21,33 @@ def get_stats(user, passwd, tenant, url, host=None):
         msg = "Client credentials appear to be invalid"
         raise exception.ClientConnectionError(msg)
     else:
-        data = {}
+        data = dict()
         data["count"] = int(len(image_list))
         data["bytes"] = 0
-        data["tenant"] = {}
+        data["snapshot.count"] = 0
+        data["snapshot.bytes"] = 0
+        data["tenant"] = dict()
         for image in image_list:
             data["bytes"] += int(image["size"])
+            if "image_type" in image["properties"] and image["properties"]["image_type"] == "snapshot":
+                data["snapshot.count"] += 1
+                data["snapshot.bytes"] += int(image["size"])
             uuid = str(image["owner"])
             if uuid in data["tenant"]:
                 data["tenant"][uuid]["count"] += 1
-                data["tenant"][uuid]["bytes"] += image["size"]
+                data["tenant"][uuid]["bytes"] += int(image["size"])
+                if "image_type" in image["properties"] and image["properties"]["image_type"] == "snapshot":
+                    data["tenant"][uuid]["snapshot.count"] += 1
+                    data["tenant"][uuid]["snapshot.bytes"] += int(image["size"])
             else:
                 data["tenant"][uuid] = dict()
                 data["tenant"][uuid]["count"] = 1
-                data["tenant"][uuid]["bytes"] = image["size"]
+                data["tenant"][uuid]["bytes"] = int(image["size"])
+                data["tenant"][uuid]["snapshot.count"] = 0
+                data["tenant"][uuid]["snapshot.bytes"] = 0
+                if "image_type" in image["properties"] and image["properties"]["image_type"] == "snapshot":
+                    data["tenant"][uuid]["snapshot.count"] += 1
+                    data["tenant"][uuid]["snapshot.bytes"] += int(image["size"])
         # debug
         #for key in data.keys():
         #    if key == "tenant":
