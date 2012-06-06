@@ -21,7 +21,7 @@
 # BEGIN COLLECTD SECTION
 # TODO(shep): This needs to be encased in an if block for the collectd_enabled environment toggle
 
-include_recipe "collectd::client"
+include_recipe "collectd-graphite::collectd-client"
 
 cookbook_file File.join(node['collectd']['plugin_dir'], "glance_plugin.py") do
   source "glance_plugin.py"
