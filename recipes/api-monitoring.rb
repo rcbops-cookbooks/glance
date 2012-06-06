@@ -38,7 +38,7 @@ collectd_python_plugin "glance_plugin" do
     "Username"=>glance["service_user"],
     "Password"=>glance["service_pass"],
     "TenantName"=>glance["service_tenant_name"],
-    "AuthURL"=>ks_service_endpoint["url"]
+    "AuthURL"=>ks_service_endpoint["uri"]
   )
 end
 ########################################
