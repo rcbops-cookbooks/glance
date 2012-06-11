@@ -19,14 +19,15 @@
 
 ########################################
 # BEGIN MONIT SECTION
-# TODO(shep): This needs to be encased in an if block for the monit_enabled environment toggle
+# Allow for enable/disable of monit
+if node["enable_monit"]
+  include_recipe "monit::server"
 
-include_recipe "monit::server"
-
-platform_options = node["glance"]["platform"]
-monit_procmon "glance-registry" do
-  process_name "glance-registry"
-  start_cmd platform_options["monit_commands"]["glance-registry"]["start"]
-  stop_cmd platform_options["monit_commands"]["glance-registry"]["stop"]
+  platform_options = node["glance"]["platform"]
+  monit_procmon "glance-registry" do
+    process_name "glance-registry"
+    start_cmd platform_options["monit_commands"]["glance-registry"]["start"]
+    stop_cmd platform_options["monit_commands"]["glance-registry"]["stop"]
+  end
 end
 ########################################

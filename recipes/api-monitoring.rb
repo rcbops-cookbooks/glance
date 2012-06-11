@@ -19,41 +19,43 @@
 
 ########################################
 # BEGIN COLLECTD SECTION
-# TODO(shep): This needs to be encased in an if block for the collectd_enabled environment toggle
+# Allow for enable/disable of collectd
+if node["enable_collectd"]
+  include_recipe "collectd-graphite::collectd-client"
 
-include_recipe "collectd-graphite::collectd-client"
+  ks_service_endpoint = get_access_endpoint("keystone", "keystone","service-api")
+  glance = get_settings_by_role("glance-api", "glance")
 
-cookbook_file File.join(node['collectd']['plugin_dir'], "glance_plugin.py") do
-  source "glance_plugin.py"
-  owner "root"
-  group "root"
-  mode "0644"
-end
+  cookbook_file File.join(node['collectd']['plugin_dir'], "glance_plugin.py") do
+    source "glance_plugin.py"
+    owner "root"
+    group "root"
+    mode "0644"
+  end
 
-ks_service_endpoint = get_access_endpoint("keystone", "keystone","service-api")
-glance = get_settings_by_role("glance-api", "glance")
-
-collectd_python_plugin "glance_plugin" do
-  options(
-    "Username"=>glance["service_user"],
-    "Password"=>glance["service_pass"],
-    "TenantName"=>glance["service_tenant_name"],
-    "AuthURL"=>ks_service_endpoint["uri"]
-  )
+  collectd_python_plugin "glance_plugin" do
+    options(
+      "Username"=>glance["service_user"],
+      "Password"=>glance["service_pass"],
+      "TenantName"=>glance["service_tenant_name"],
+      "AuthURL"=>ks_service_endpoint["uri"]
+    )
+  end
 end
 ########################################
 
 
 ########################################
 # BEGIN MONIT SECTION
-# TODO(shep): This needs to be encased in an if block for the monit_enabled environment toggle
+# Allow for enable/disable of monit
+if node["enable_monit"]
+  include_recipe "monit::server"
 
-include_recipe "monit::server"
-
-platform_options = node["glance"]["platform"]
-monit_procmon "glance-api" do
-  process_name "glance-api"
-  start_cmd platform_options["monit_commands"]["glance-api"]["start"]
-  stop_cmd platform_options["monit_commands"]["glance-api"]["stop"]
+  platform_options = node["glance"]["platform"]
+  monit_procmon "glance-api" do
+    process_name "glance-api"
+    start_cmd platform_options["monit_commands"]["glance-api"]["start"]
+    stop_cmd platform_options["monit_commands"]["glance-api"]["stop"]
+  end
 end
 ########################################

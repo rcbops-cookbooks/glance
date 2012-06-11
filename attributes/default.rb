@@ -17,6 +17,13 @@
 # limitations under the License.
 #
 
+########################################################################
+# Toggles - These can be overridden at the environment level
+default["enable_monit"] = True  # OS provides packages
+default["enable_collectd"] = False  # OS does not provide packages
+default["developer_mode"] = False  # we want secure passwords by default
+########################################################################
+
 default["glance"]["services"]["api"]["scheme"] = "http"
 default["glance"]["services"]["api"]["network"] = "public"
 default["glance"]["services"]["api"]["port"] = 9292
@@ -29,14 +36,10 @@ default["glance"]["services"]["registry"]["path"] = "/v1"
 
 default["glance"]["db"]["name"] = "glance"
 default["glance"]["db"]["username"] = "glance"
-# Replacing with OpenSSL::Password in recipes/registry.rb
-# default["glance"]["db"]["password"] = "glance"
 
 # TODO: These may need to be glance-registry specific.. and looked up by glance-api
 default["glance"]["service_tenant_name"] = "service"
 default["glance"]["service_user"] = "glance"
-# Replacing with OpenSSL::Password in recipes/registry.rb
-# default["glance"]["service_pass"] = "vARxre7K"
 default["glance"]["service_role"] = "admin"
 default["glance"]["api"]["default_store"] = "file"
 default["glance"]["api"]["swift"]["store_container"] = "glance"
