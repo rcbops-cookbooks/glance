@@ -91,14 +91,14 @@ def read_callback():
                     logger('verb', 'Dispatching glance.images.tenant.%s.%s : %i' % (uuid, field, int(info[key][uuid][field])))
                     path = 'glance.images.%s.%s' % (uuid, field)
                     val = collectd.Values(plugin=path)
-                    val.type = 'absolute'
+                    val.type = 'gauge'
                     val.values = [int(info[key][uuid][field])]
                     val.dispatch()
         else:
             logger('verb', 'Dispatching %s : %i' % (key, int(info[key])))
             path = 'glance.images.%s' % (key)
             val = collectd.Values(plugin=path)
-            val.type = 'absolute'
+            val.type = 'gauge'
             val.values = [int(info[key])]
             val.dispatch()
 
