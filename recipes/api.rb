@@ -23,10 +23,6 @@ package "curl" do
   action :upgrade
 end
 
-package "python-swift" do
-    action :install
-end
-
 package "python-keystone" do
     action :install
 end

@@ -60,7 +60,7 @@ case platform
 when "fedora"
   default["glance"]["platform"] = {
     "mysql_python_packages" => [ "MySQL-python" ],
-    "glance_packages" => [ "openstack-glance" ],
+    "glance_packages" => [ "openstack-glance", "openstack-swift" ],
     "glance_api_service" => "openstack-glance-api",
     "glance_registry_service" => "openstack-glance-registry",
     "package_overrides" => "",
@@ -76,7 +76,7 @@ when "fedora"
 when "ubuntu"
   default["glance"]["platform"] = {
     "mysql_python_packages" => [ "python-mysqldb" ],
-    "glance_packages" => [ "glance" ],
+    "glance_packages" => [ "glance", "python-swift" ],
     "glance_api_service" => "glance-api",
     "glance_registry_service" => "glance-registry",
     "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'",
