@@ -36,39 +36,19 @@ package "python-keystone" do
     action :install
 end
 
-mysql_info = get_settings_by_role("mysql-master", "mysql")
-
 ks_admin_endpoint = get_access_endpoint("keystone", "keystone", "admin-api")
 ks_service_endpoint = get_access_endpoint("keystone", "keystone", "service-api")
 keystone = get_settings_by_role("keystone", "keystone")
 
 registry_endpoint = get_bind_endpoint("glance", "registry")
 
-connection_info = {
-  :host => mysql_info["bind_address"],
-  :username => "root",
-  :password => mysql_info["server_root_password"] }
-
-mysql_database "create glance database" do
-  connection connection_info
-  database_name node["glance"]["db"]["name"]
-  action :create
-end
-
-mysql_database_user node["glance"]["db"]["username"] do
-  connection connection_info
-  password node["glance"]["db"]["password"]
-  action :create
-end
-
-mysql_database_user node["glance"]["db"]["username"] do
-  connection connection_info
-  password node["glance"]["db"]["password"]
-  database_name node["glance"]["db"]["name"]
-  host '%'
-  privileges [:all]
-  action :grant
-end
+#creates db and user
+#returns connection info
+#defined in osops-utils/libraries
+mysql_info = create_db_and_user("mysql",
+                                node["glance"]["db"]["name"],
+                                node["glance"]["db"]["username"],
+                                node["glance"]["db"]["password"])
 
 package "curl" do
   action :install
