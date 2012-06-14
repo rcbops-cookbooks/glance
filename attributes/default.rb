@@ -63,15 +63,7 @@ when "fedora"
     "glance_packages" => [ "openstack-glance", "openstack-swift" ],
     "glance_api_service" => "openstack-glance-api",
     "glance_registry_service" => "openstack-glance-registry",
-    "package_overrides" => "",
-    "monit_commands" => {
-      "glance-api" => {
-        "start" => "service openstack-glance-api start", "stop" => "service openstack-glance-api stop"
-      },
-      "glance-registry" => {
-        "start" => "service openstack-glance-registry start", "stop" => "service openstack-glance-registry stop"
-      }
-    }
+    "package_overrides" => ""
   }
 when "ubuntu"
   default["glance"]["platform"] = {
@@ -79,14 +71,6 @@ when "ubuntu"
     "glance_packages" => [ "glance", "python-swift" ],
     "glance_api_service" => "glance-api",
     "glance_registry_service" => "glance-registry",
-    "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'",
-    "monit_commands" => {
-      "glance-api" => {
-        "start" => "/usr/sbin/service glance-api start", "stop" => "/usr/sbin/service glance-api stop"
-      },
-      "glance-registry" => {
-        "start" => "/usr/sbin/service glance-registry start", "stop" => "/usr/sbin/service glance-registry stop"
-      }
-    }
+    "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'"
   }
 end
