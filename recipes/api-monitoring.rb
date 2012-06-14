@@ -54,8 +54,8 @@ if node["enable_monit"]
   platform_options = node["glance"]["platform"]
   monit_procmon "glance-api" do
     process_name "glance-api"
-    start_cmd platform_options["monit_commands"]["glance-api"]["start"]
-    stop_cmd platform_options["monit_commands"]["glance-api"]["stop"]
+    start_cmd "/usr/sbin/service " + platform_options["glance_api_service"] + " start"
+    stop_cmd "/usr/sbin/service " + platform_options["glance_api_service"] + " stop"
   end
 end
 ########################################
