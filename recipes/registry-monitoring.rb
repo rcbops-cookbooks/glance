@@ -26,8 +26,8 @@ if node["enable_monit"]
   platform_options = node["glance"]["platform"]
   monit_procmon "glance-registry" do
     process_name "glance-registry"
-    start_cmd "service " + platform_options['glance_registry_service'] + " start"
-    stop_cmd "service " + platform_options['glance_registry_service'] + " stop"
+    start_cmd "/usr/sbin/service " + platform_options['glance_registry_service'] + " start"
+    stop_cmd "/usr/sbin/service " + platform_options['glance_registry_service'] + " stop"
   end
 end
 ########################################
