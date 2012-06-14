@@ -46,7 +46,6 @@ registry_endpoint = get_bind_endpoint("glance", "registry")
 #returns connection info
 #defined in osops-utils/libraries
 mysql_info = create_db_and_user("mysql",
-                                "glance",
                                 node["glance"]["db"]["name"],
                                 node["glance"]["db"]["username"],
                                 node["glance"]["db"]["password"])
