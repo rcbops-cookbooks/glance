@@ -21,6 +21,7 @@ def get_stats(user, passwd, tenant, url, host=None):
         msg = "Client credentials appear to be invalid"
         raise exception.ClientConnectionError(msg)
     else:
+        # TODO(shep): this needs to be rewritten more inline with the keystone|nova plugins
         data = dict()
         data["count"] = int(len(image_list))
         data["bytes"] = 0

@@ -19,8 +19,7 @@
 
 ########################################################################
 # Toggles - These can be overridden at the environment level
-default["enable_monit"] = true  # OS provides packages
-default["enable_collectd"] = false  # OS does not provide packages
+default["enable_monit"] = false  # OS provides packages
 default["developer_mode"] = true  # we want secure passwords by default
 ########################################################################
 
