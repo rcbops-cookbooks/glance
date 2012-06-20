@@ -19,3 +19,10 @@
 
 include_recipe "glance::registry"
 include_recipe "glance::api"
+
+template "/etc/rsyslog.d/22-glance.conf" do
+    source "22-glance.conf.erb"
+    owner "root"
+    group "root"
+    mode "0644"
+end
