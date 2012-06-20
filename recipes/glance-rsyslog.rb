@@ -22,4 +22,8 @@ template "/etc/rsyslog.d/22-glance.conf" do
     owner "root"
     group "root"
     mode "0644"
+    variables(
+        "use_syslog" => node["glance"]["syslog"]["use"],
+        "log_facility" => node["glance"]["syslog"]["facility"]
+    )
 end
