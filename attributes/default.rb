@@ -54,6 +54,10 @@ default["glance"]["image"]["maverick"] = "http://c250663.r63.cf1.rackcdn.com/ubu
 default["glance"]["image"]["tty"] = "http://c250663.r63.cf1.rackcdn.com/ttylinux.tgz"
 default["glance"]["image"]["cirros"] = "https://launchpadlibrarian.net/83305869/cirros-0.3.0-x86_64-uec.tar.gz"
 
+# logging attribute
+default["glance"]["syslog"]["use"] = True
+default["glance"]["syslog"]["facility"] = "LOG_LOCAL2"
+
 # platform-specific settings
 case platform
 when "fedora"
