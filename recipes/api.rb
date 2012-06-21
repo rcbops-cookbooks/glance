@@ -89,6 +89,8 @@ template "/etc/glance/glance-api.conf" do
     "api_bind_port" => api_endpoint["port"],
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
+    "use_syslog" => node["glance"]["syslog"]["use"],
+    "log_facility" => node["glance"]["syslog"]["facility"],
     "rabbit_ipaddress" => rabbit_info["ipaddress"],    #FIXME!
     "keystone_api_ipaddress" => ks_admin_endpoint["host"],
     "keystone_service_port" => ks_service_endpoint["port"],

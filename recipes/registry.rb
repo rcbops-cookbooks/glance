@@ -150,7 +150,9 @@ template "/etc/glance/glance-registry.conf" do
     "db_ip_address" => mysql_info["bind_address"],
     "db_user" => node["glance"]["db"]["username"],
     "db_password" => node["glance"]["db"]["password"],
-    "db_name" => node["glance"]["db"]["name"]
+    "db_name" => node["glance"]["db"]["name"],
+    "use_syslog" => node["glance"]["syslog"]["use"],
+    "log_facility" => node["glance"]["syslog"]["facility"]
   )
   notifies :run, resources(:execute => "glance-manage version_control"), :immediately
 end
