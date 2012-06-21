@@ -36,7 +36,7 @@ workers = 0
 # by `log_file`
 use_syslog = <%= @use_syslog %>
 
-<% if @use_syslog == True %>
+<% if @use_syslog == true %>
 # Facility to use. If unset defaults to LOG_USER.
 syslog_log_facility = <%= @log_facility %>
 <% else %>
