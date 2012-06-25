@@ -20,6 +20,7 @@
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 include_recipe "mysql::client"
 include_recipe "glance::glance-rsyslog"
+include_recipe "monitoring"
 
 platform_options = node["glance"]["platform"]
 
@@ -71,6 +72,14 @@ service "glance-registry" do
   service_name platform_options["glance_registry_service"]
   supports :status => true, :restart => true
   action :enable
+end
+
+monitoring_procmon "glance-registry" do
+  procname = platform_options["glance_registry_service"]
+
+  process_name procname
+  start_cmd "/usr/sbin/service #{procname} start"
+  stop_cmd "/usr/sbin/service #{procname} stop"
 end
 
 execute "glance-manage db_sync" do
@@ -172,6 +181,3 @@ template "/etc/glance/glance-registry-paste.ini" do
   )
   notifies :restart, resources(:service => "glance-registry"), :immediately
 end
-
-# Include recipe(glance::registry-monitoring)
-include_recipe "glance::registry-monitoring"

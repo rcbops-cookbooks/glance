@@ -19,7 +19,6 @@
 
 ########################################################################
 # Toggles - These can be overridden at the environment level
-default["enable_monit"] = false  # OS provides packages
 default["developer_mode"] = true  # we want secure passwords by default
 ########################################################################
 
