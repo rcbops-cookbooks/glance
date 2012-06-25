@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 include_recipe "glance::glance-rsyslog"
+include_recipe "monitoring"
 
 platform_options = node["glance"]["platform"]
 
@@ -38,6 +39,14 @@ service "glance-api" do
   service_name platform_options["glance_api_service"]
   supports :status => true, :restart => true
   action :enable
+end
+
+monitoring_procmon "glance-api" do
+  procname = platform_options["glance_api_service"]
+
+  process_name procname
+  start_cmd "/usr/sbin/service #{procname} start"
+  stop_cmd "/usr/sbin/service #{procname} stop"
 end
 
 # FIXME: this is broken.  Joe, Wilk, fix this.
@@ -192,7 +201,7 @@ if node["glance"]["image_upload"]
         mkdir -p images/#{img.to_s}
         cd images/#{img.to_s}
 
-        curl #{node["glance"]["image"][img.to_sym]} | tar -zx 
+        curl #{node["glance"]["image"][img.to_sym]} | tar -zx
         image_name=$(basename #{node["glance"]["image"][img]} .tar.gz)
 
         image_name=${image_name%-multinic}
@@ -218,5 +227,12 @@ if node["glance"]["image_upload"]
   end
 end
 
-# Include recipe(api-monitoring)
-include_recipe "glance::api-monitoring"
+# set up glance api monitoring (bytes/objects per tentant, etc)
+monitoring_metric "glance-api" do
+  type "pyscript"
+  script "glance_plugin.py"
+  options("Username" => node["glance"]["service_user"],
+          "Password" => node["glance"]["service_pass"],
+          "TenantName" => node["glance"]["service_tenant_name"],
+          "AuthURL" => ks_service_endpoint["uri"] )
+end
