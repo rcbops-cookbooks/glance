@@ -27,4 +27,5 @@ template "/etc/rsyslog.d/22-glance.conf" do
         "log_facility" => node["glance"]["syslog"]["config_facility"]
     )
     only_if { node["glance"]["syslog"]["use"]  }
+    notifies :restart, "service[rsyslog]", :immediately
 end
