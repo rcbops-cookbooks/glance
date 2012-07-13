@@ -56,6 +56,7 @@ default["glance"]["image"]["cirros"] = "https://launchpadlibrarian.net/83305869/
 # logging attribute
 default["glance"]["syslog"]["use"] = true
 default["glance"]["syslog"]["facility"] = "LOG_LOCAL2"
+default["glance"]["syslog"]["config_facility"] = "local2"
 
 # platform-specific settings
 case platform

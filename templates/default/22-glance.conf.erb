@@ -10,4 +10,4 @@ $FileGroup adm
 
 $template GlanceLog, "/var/log/glance/glance.log"
 
-local2.* 		-?GlanceLog
+<%= @log_facility %>.* 		-?GlanceLog
