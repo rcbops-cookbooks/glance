@@ -82,6 +82,14 @@ monitoring_procmon "glance-registry" do
   stop_cmd "/usr/sbin/service #{procname} stop"
 end
 
+monitoring_metric "glance-registry-proc" do
+  type "proc"
+  proc_name "glance-registry"
+  proc_regex platform_options["glance_registry_service"]
+
+  alarms(:failure_min => 2.0)
+end
+
 execute "glance-manage db_sync" do
         command "sudo -u glance glance-manage db_sync"
         action :nothing

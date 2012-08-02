@@ -49,6 +49,14 @@ monitoring_procmon "glance-api" do
   stop_cmd "/usr/sbin/service #{procname} stop"
 end
 
+monitoring_metric "glance-api-proc" do
+  type "proc"
+  proc_name "glance-api"
+  proc_regex platform_options["glance_api_service"]
+
+  alarms(:failure_min => 2.0)
+end
+
 # FIXME: this is broken.  Joe, Wilk, fix this.
 template "/usr/share/pyshared/glance/store/swift.py" do
   source "swift.py"
