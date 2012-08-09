@@ -57,16 +57,6 @@ monitoring_metric "glance-api-proc" do
   alarms(:failure_min => 2.0)
 end
 
-# FIXME: this is broken.  Joe, Wilk, fix this.
-template "/usr/share/pyshared/glance/store/swift.py" do
-  source "swift.py"
-  group "root"
-  owner "root"
-  mode "0644"
-  only_if do platform?(%w{debian ubuntu}) end
-  notifies :restart, resources(:service => "glance-api"), :immediately
-end
-
 directory "/etc/glance" do
   action :create
   group "glance"
