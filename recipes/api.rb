@@ -86,6 +86,17 @@ glance = get_settings_by_role("glance-api", "glance")
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 api_endpoint = get_bind_endpoint("glance", "api")
 
+# Possible combinations of options here
+# - default_store=file
+#     * no other options required
+# - default_store=swift
+#     * if swift_store_auth_address is not defined
+#         - default to local swift
+#     * else if swift_store_auth_address is defined
+#         - get swift_store_auth_address, swift_store_user, swift_store_key, and
+#           swift_store_auth_version from the node attributes and use them to connect
+#           to the swift compatible API service running elsewhere - possibly
+#           Rackspace Cloud Files.
 if glance["api"]["swift_store_auth_address"].nil?
     swift_store_auth_address="http://#{ks_admin_endpoint["host"]}:#{ks_service_endpoint["port"]}/v2.0"
     swift_store_user="#{glance["service_tenant_name"]}:#{glance["service_user"]}"
