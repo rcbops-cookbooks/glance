@@ -39,19 +39,27 @@ default["glance"]["db"]["username"] = "glance"
 default["glance"]["service_tenant_name"] = "service"
 default["glance"]["service_user"] = "glance"
 default["glance"]["service_role"] = "admin"
+# supported options for default_store are 'file','swift', and 'cloudfiles'
 default["glance"]["api"]["default_store"] = "file"
+# set swift_store_auth_address in your environmnet to https://auth.api.rackspacecloud.com/v1.0/ for cloudfiles
+default["glance"]["api"]["swift"]["swift_store_auth_address"]="undefined"
+# set swift_store_auth_version in your environment to 1 for cloudfiles
+default["glance"]["api"]["swift"]["swift_store_auth_version"] = "2"
+default["glance"]["api"]["swift"]["swift_store_user"] = "undefined"
+default["glance"]["api"]["swift"]["swift_store_key"] = "undefined"
 default["glance"]["api"]["swift"]["store_container"] = "glance"
 default["glance"]["api"]["swift"]["store_large_object_size"] = "200"
 default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"
+default["glance"]["api"]["cache"]["image_cache_max_size"] = "10737418240"
 
+
+# Default Image Locations
 default["glance"]["image_upload"] = false
-default["glance"]["images"] = [ "tty" ]
-default["glance"]["image"]["oneiric"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.10-server-uec-amd64-multinic.tar.gz"
-default["glance"]["image"]["natty"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
-default["glance"]["image"]["maverick"] = "http://c250663.r63.cf1.rackcdn.com/ubuntu-10.10-server-uec-amd64-multinic.tar.gz"
-#default["glance"]["image"]["tty"] = "http://smoser.brickies.net/ubuntu/ttylinux-uec/ttylinux-uec-amd64-12.1_2.6.35-22_1.tar.gz"
-default["glance"]["image"]["tty"] = "http://c250663.r63.cf1.rackcdn.com/ttylinux.tgz"
-default["glance"]["image"]["cirros"] = "https://launchpadlibrarian.net/83305869/cirros-0.3.0-x86_64-uec.tar.gz"
+default["glance"]["images"] = [ "cirros" ]
+default["glance"]["image"]["precise"] = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img"
+default["glance"]["image"]["oneiric"] = "http://cloud-images.ubuntu.com/oneiric/current/oneiric-server-cloudimg-amd64-disk1.img"
+default["glance"]["image"]["natty"] = "http://cloud-images.ubuntu.com/natty/current/natty-server-cloudimg-amd64-disk1.img"
+default["glance"]["image"]["cirros"] = "https://launchpadlibrarian.net/83305348/cirros-0.3.0-x86_64-disk.img"
 
 # logging attribute
 default["glance"]["syslog"]["use"] = true

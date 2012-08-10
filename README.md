@@ -5,6 +5,56 @@ Installs the OpenStack Image Repository/Server (codename: glance) from packages.
 
 http://glance.openstack.org/
 
+Usage
+====
+
+The Glance cookbook currently supports file, swift, and Rackspace Cloud Files backing stores.  NOTE: changing the storage location from cloudfiles to swift (and vice versa) requires that you manually export and import your stored images.
+
+To enable these features set the following in the default attributes section in your environment:
+
+Files
+-----
+    "glance": {
+      "api": {
+        "default_store": "file"
+      },
+      "images": [
+        "tty"
+      ],
+      "image_upload": true
+    }
+
+
+Swift
+-----
+    "glance": {
+      "api": {
+        "default_store": "swift"
+      },
+      "images": [
+        "tty"
+      ],
+      "image_upload": true
+    }
+
+
+Cloud Files
+-----------
+    "glance": {
+      "api": {
+        "default_store": "cloudfiles",
+        "swift_store_user": "<Rackspace Cloud Files Username>",
+        "swift_store_key": "<Rackspace CLoud Files API Key>",
+        "swift_store_auth_version": "1",
+        "swift_store_auth_address": "https://auth.api.rackspacecloud.com/v1.0/"
+      },
+      "images": [
+        "tty"
+      ],
+      "image_upload": true
+    }
+
+
 Requirements
 ============
 
