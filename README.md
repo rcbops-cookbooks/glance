@@ -19,7 +19,7 @@ Files
         "default_store": "file"
       },
       "images": [
-        "tty"
+        "cirros"
       ],
       "image_upload": true
     }
@@ -32,7 +32,7 @@ Swift
         "default_store": "swift"
       },
       "images": [
-        "tty"
+        "cirros"
       ],
       "image_upload": true
     }
@@ -49,7 +49,7 @@ Cloud Files
         "swift_store_auth_address": "https://auth.api.rackspacecloud.com/v1.0/"
       },
       "images": [
-        "tty"
+        "cirros"
       ],
       "image_upload": true
     }
