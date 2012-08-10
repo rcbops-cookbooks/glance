@@ -86,17 +86,23 @@ glance = get_settings_by_role("glance-api", "glance")
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 api_endpoint = get_bind_endpoint("glance", "api")
 
-case glance["api"]["default_store"]
-  when "swift"
+if glance["api"]["swift_store_auth_address"].nil?
     swift_store_auth_address="http://#{ks_admin_endpoint["host"]}:#{ks_service_endpoint["port"]}/v2.0"
     swift_store_user="#{glance["service_tenant_name"]}:#{glance["service_user"]}"
     swift_store_key=glance["service_pass"]
     swift_store_auth_version=2
-  else
+else
     swift_store_auth_address=glance["api"]["swift_store_auth_address"]
     swift_store_user=glance["api"]["swift_store_user"]
     swift_store_key=glance["api"]["swift_store_key"]
     swift_store_auth_version=glance["api"]["swift_store_auth_version"]
+end
+
+# Only use the glance image cacher if we aren't using file for our backing store.
+if glance["api"]["default_store"]=="file"
+  glance_flavor="keystone"
+else
+  glance_flavor="keystone+cachemanagement"
 end
 
 template "/etc/glance/glance-api.conf" do
@@ -113,6 +119,7 @@ template "/etc/glance/glance-api.conf" do
     "log_facility" => node["glance"]["syslog"]["facility"],
     "rabbit_ipaddress" => rabbit_info["ipaddress"],    #FIXME!
     "default_store" => glance["api"]["default_store"],
+    "glance_flavor" => glance_flavor,
     "swift_store_key" => swift_store_key,
     "swift_store_user" => swift_store_user,
     "swift_store_auth_address" => swift_store_auth_address,

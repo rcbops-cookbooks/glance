@@ -39,14 +39,7 @@ default["glance"]["db"]["username"] = "glance"
 default["glance"]["service_tenant_name"] = "service"
 default["glance"]["service_user"] = "glance"
 default["glance"]["service_role"] = "admin"
-# supported options for default_store are 'file','swift', and 'cloudfiles'
 default["glance"]["api"]["default_store"] = "file"
-# set swift_store_auth_address in your environmnet to https://auth.api.rackspacecloud.com/v1.0/ for cloudfiles
-default["glance"]["api"]["swift"]["swift_store_auth_address"]="undefined"
-# set swift_store_auth_version in your environment to 1 for cloudfiles
-default["glance"]["api"]["swift"]["swift_store_auth_version"] = "2"
-default["glance"]["api"]["swift"]["swift_store_user"] = "undefined"
-default["glance"]["api"]["swift"]["swift_store_key"] = "undefined"
 default["glance"]["api"]["swift"]["store_container"] = "glance"
 default["glance"]["api"]["swift"]["store_large_object_size"] = "200"
 default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"

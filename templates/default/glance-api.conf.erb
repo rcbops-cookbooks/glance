@@ -14,12 +14,7 @@ debug = False
 # Which backend store should Glance use by default is not specified
 # in a request to add a new image to Glance? Default: 'file'
 # Available choices are 'file', 'swift', and 's3'
-<% case @default_store -%>
-<% when "swift", "cloudfiles" -%>
-default_store = swift
-<% when "file" -%>
-default_store = file
-<% end -%>
+default_store = <%= @default_store %>
 
 # Address to bind the API server
 bind_host = <%= @api_bind_address %>
@@ -257,9 +252,4 @@ scrubber_datadir = /var/lib/glance/scrubber
 image_cache_dir = /var/lib/glance/image-cache/
 
 [paste_deploy]
-<% case @default_store -%>
-<% when "swift", "cloudfiles" -%>
-flavor = keystone+cachemanagement
-<% when "file" -%>
-flavor = keystone
-<% end -%>
+flavor = <%= @glance_flavor %>
