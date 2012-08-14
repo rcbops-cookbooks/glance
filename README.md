@@ -43,16 +43,19 @@ Cloud Files
     "glance": {
       "api": {
         "default_store": "swift",
-        "swift_store_user": "<Rackspace Cloud Files Username>",
-        "swift_store_key": "<Rackspace CLoud Files API Key>",
-        "swift_store_auth_version": "1",
-        "swift_store_auth_address": "https://auth.api.rackspacecloud.com/v1.0/"
+        "swift_store_user": "<Cloud Files Tenant ID>:<Rackspace Cloud Files Username>",
+        "swift_store_key": "<Rackspace Cloud Password>",
+        "swift_store_auth_version": "2",
+        "swift_store_auth_address": "https://identity.api.rackspacecloud.com/v2.0"
       },
       "images": [
         "cirros"
       ],
       "image_upload": true
     }
+
+To obtain your Cloud Files Tenant ID use the following:
+curl -s -X POST https://identity.api.rackspacecloud.com/v2.0/tokens -d '{"auth": {"passwordCredentials": {"username": "<Rackspace Cloud User Name>", "password": "<Rackspace Cloud Password"}}}' -H "Content-type: application/json" | python -mjson.tool | grep "tenantId.*Mosso" | head -1
 
 
 Requirements
