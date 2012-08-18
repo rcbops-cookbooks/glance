@@ -61,7 +61,7 @@ default["glance"]["syslog"]["config_facility"] = "local2"
 
 # platform-specific settings
 case platform
-when "fedora", "redhat"
+when "fedora", "redhat", "centos"
   default["glance"]["platform"] = {
     "mysql_python_packages" => [ "MySQL-python" ],
     "glance_packages" => [ "openstack-glance", "openstack-swift" ],
