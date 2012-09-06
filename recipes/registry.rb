@@ -103,6 +103,7 @@ execute "glance-manage version_control" do
   action :nothing
   not_if "sudo -u glance glance-manage db_version"
   notifies :run, resources(:execute => "glance-manage db_sync"), :immediately
+  only_if { platform?(%w{ubuntu debian}) }
 end
 
 file "/var/lib/glance/glance.sqlite" do
