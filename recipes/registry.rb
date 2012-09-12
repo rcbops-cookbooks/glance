@@ -19,6 +19,7 @@
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 include_recipe "mysql::client"
+include_recipe "mysql::ruby"
 include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
