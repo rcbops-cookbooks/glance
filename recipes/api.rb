@@ -43,10 +43,8 @@ end
 
 monitoring_procmon "glance-api" do
   procname = platform_options["glance_api_service"]
-
   process_name procname
-  start_cmd "/usr/sbin/service #{procname} start"
-  stop_cmd "/usr/sbin/service #{procname} stop"
+  script_name procname
 end
 
 monitoring_metric "glance-api-proc" do

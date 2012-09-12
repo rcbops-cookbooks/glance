@@ -77,10 +77,8 @@ end
 
 monitoring_procmon "glance-registry" do
   procname = platform_options["glance_registry_service"]
-
   process_name procname
-  start_cmd "/usr/sbin/service #{procname} start"
-  stop_cmd "/usr/sbin/service #{procname} stop"
+  script_name procname
 end
 
 monitoring_metric "glance-registry-proc" do
