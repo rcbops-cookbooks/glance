@@ -42,9 +42,10 @@ service "glance-api" do
 end
 
 monitoring_procmon "glance-api" do
-  procname = platform_options["glance_api_service"]
-  process_name procname
-  script_name procname
+  sname = platform_options["glance_api_service"]
+  pname = platform_options["glance_api_process_name"]
+  process_name pname
+  script_name sname
 end
 
 monitoring_metric "glance-api-proc" do
