@@ -76,9 +76,10 @@ service "glance-registry" do
 end
 
 monitoring_procmon "glance-registry" do
-  procname = platform_options["glance_registry_service"]
-  process_name procname
-  script_name procname
+  sname = platform_options["glance_registry_service"]
+  pname = platform_options["glance_registry_process_name"]
+  process_name pname
+  script_name sname
 end
 
 monitoring_metric "glance-registry-proc" do

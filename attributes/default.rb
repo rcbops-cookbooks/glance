@@ -67,6 +67,7 @@ when "fedora", "redhat", "centos"
     "glance_packages" => [ "openstack-glance", "openstack-swift" ],
     "glance_api_service" => "openstack-glance-api",
     "glance_registry_service" => "openstack-glance-registry",
+    "glance_api_process_name" => "glance-api",
     "package_overrides" => ""
   }
 when "ubuntu"
@@ -75,6 +76,7 @@ when "ubuntu"
     "glance_packages" => [ "glance", "python-swift" ],
     "glance_api_service" => "glance-api",
     "glance_registry_service" => "glance-registry",
+    "glance_registry_process_name" => "glance-registry",
     "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'"
   }
 end
