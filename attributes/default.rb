@@ -64,7 +64,7 @@ case platform
 when "fedora", "redhat", "centos"
   default["glance"]["platform"] = {
     "mysql_python_packages" => [ "MySQL-python" ],                  # node_attribute
-    "glance_packages" => [ "openstack-glance", "openstack-swift" ], # node_attribute
+    "glance_packages" => [ "openstack-glance", "openstack-swift", "cronie" ], # node_attribute
     "glance_api_service" => "openstack-glance-api",                 # node_attribute
     "glance_registry_service" => "openstack-glance-registry",       # node_attribute
     "glance_api_process_name" => "glance-api",                      # node_attribute
