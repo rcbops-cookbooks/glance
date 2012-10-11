@@ -75,7 +75,7 @@ template "/etc/glance/policy.json" do
   end
 end
 
-rabbit_info = get_settings_by_role("rabbitmq-server", "rabbitmq") # FIXME: access
+rabbit_info = get_access_endpoint("rabbitmq-server", "rabbitmq", "queue")
 
 ks_admin_endpoint = get_access_endpoint("keystone", "keystone", "admin-api")
 ks_service_endpoint = get_access_endpoint("keystone", "keystone","service-api")
@@ -127,7 +127,8 @@ template "/etc/glance/glance-api.conf" do
     "registry_port" => registry_endpoint["port"],
     "use_syslog" => node["glance"]["syslog"]["use"],
     "log_facility" => node["glance"]["syslog"]["facility"],
-    "rabbit_ipaddress" => rabbit_info["ipaddress"],    #FIXME!
+    "rabbit_ipaddress" => rabbit_info["host"],
+    "rabbit_port" => rabbit_info["port"],
     "default_store" => glance["api"]["default_store"],
     "glance_flavor" => glance_flavor,
     "swift_store_key" => swift_store_key,
