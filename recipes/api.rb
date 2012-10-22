@@ -76,6 +76,7 @@ template "/etc/glance/policy.json" do
 end
 
 rabbit_info = get_access_endpoint("rabbitmq-server", "rabbitmq", "queue")
+mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
 
 ks_admin_endpoint = get_access_endpoint("keystone", "keystone", "admin-api")
 ks_service_endpoint = get_access_endpoint("keystone", "keystone","service-api")
@@ -84,6 +85,9 @@ glance = get_settings_by_role("glance-api", "glance")
 
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 api_endpoint = get_bind_endpoint("glance", "api")
+
+# strip package_component to base release (eg essex-final >> essex)
+release = node['package_component'].split("-")[0]
 
 # Possible combinations of options here
 # - default_store=file
@@ -116,7 +120,7 @@ else
 end
 
 template "/etc/glance/glance-api.conf" do
-  source "glance-api.conf.erb"
+  source "#{release}/glance-api.conf.erb"
   owner "root"
   group "root"
   mode "0644"
@@ -137,13 +141,17 @@ template "/etc/glance/glance-api.conf" do
     "swift_store_auth_version" => swift_store_auth_version,
     "swift_large_object_size" => glance["api"]["swift"]["store_large_object_size"],
     "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
-    "swift_store_container" => glance["api"]["swift"]["store_container"]
+    "swift_store_container" => glance["api"]["swift"]["store_container"],
+    "db_ip_address" => mysql_info["host"],
+    "db_user" => node["glance"]["db"]["username"],
+    "db_password" => node["glance"]["db"]["password"],
+    "db_name" => node["glance"]["db"]["name"]
   )
   notifies :restart, resources(:service => "glance-api"), :immediately
 end
 
 template "/etc/glance/glance-api-paste.ini" do
-  source "glance-api-paste.ini.erb"
+  source "#{release}/glance-api-paste.ini.erb"
   owner "root"
   group "root"
   mode "0644"
@@ -253,9 +261,9 @@ if node["glance"]["image_upload"]
         cwd "/tmp"
         user "root"
         environment ({"OS_USERNAME" => keystone_admin_user,
-	  	      "OS_PASSWORD" => keystone_admin_password,
-		      "OS_TENANT_NAME" => keystone_tenant,
-		      "OS_AUTH_URL" => ks_admin_endpoint["uri"]})
+          "OS_PASSWORD" => keystone_admin_password,
+          "OS_TENANT_NAME" => keystone_tenant,
+          "OS_AUTH_URL" => ks_admin_endpoint["uri"]})
         case File.extname(node["glance"]["image"][img.to_sym])
         when ".gz", ".tgz"
             code <<-EOH
@@ -281,13 +289,13 @@ if node["glance"]["image_upload"]
 
                 kernel=$(ls *.img | head -n1)
 
-                kid=$(glance --silent-upload add name="${image_name}-kernel" is_public=true disk_format=aki container_format=aki < ${kernel_file} | cut -d: -f2 | sed 's/ //')
-                rid=$(glance --silent-upload add name="${image_name}-initrd" is_public=true disk_format=ari container_format=ari < ${ramdisk} | cut -d: -f2 | sed 's/ //')
-                glance --silent-upload add name="#{img.to_s}-image" is_public=true disk_format=ami container_format=ami kernel_id=$kid ramdisk_id=$rid < ${kernel}
+                kid=$(glance add name="${image_name}-kernel" is_public=true disk_format=aki container_format=aki < ${kernel_file} | cut -d: -f2 | sed 's/ //')
+                rid=$(glance add name="${image_name}-initrd" is_public=true disk_format=ari container_format=ari < ${ramdisk} | cut -d: -f2 | sed 's/ //')
+                glance add name="#{img.to_s}-image" is_public=true disk_format=ami container_format=ami kernel_id=$kid ramdisk_id=$rid < ${kernel}
             EOH
         when ".img", ".qcow2"
             code <<-EOH
-	        glance --silent-upload add name="#{img.to_s}-image" is_public=true container_format=bare disk_format=qcow2 location="#{node["glance"]["image"][img]}"
+            glance add name="#{img.to_s}-image" is_public=true container_format=bare disk_format=qcow2 location="#{node["glance"]["image"][img]}"
             EOH
         end
         not_if "glance -f -I #{keystone_admin_user} -K #{keystone_admin_password} -T #{keystone_tenant} -N #{ks_admin_endpoint["uri"]} index | grep #{img.to_s}-image"
