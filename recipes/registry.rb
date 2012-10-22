@@ -45,6 +45,9 @@ keystone = get_settings_by_role("keystone", "keystone")
 
 registry_endpoint = get_bind_endpoint("glance", "registry")
 
+# strip package component to base release (eg essex-final >> essex)
+release = node['package_component'].split("-")[0]
+
 #creates db and user
 #returns connection info
 #defined in osops-utils/libraries
@@ -158,7 +161,7 @@ directory "/etc/glance" do
 end
 
 template "/etc/glance/glance-registry.conf" do
-  source "glance-registry.conf.erb"
+  source "glance-registry.conf-#{release}.erb"
   owner "root"
   group "root"
   mode "0644"
@@ -176,7 +179,7 @@ template "/etc/glance/glance-registry.conf" do
 end
 
 template "/etc/glance/glance-registry-paste.ini" do
-  source "glance-registry-paste.ini.erb"
+  source "glance-registry-paste.ini-#{release}.erb"
   owner "root"
   group "root"
   mode "0644"
