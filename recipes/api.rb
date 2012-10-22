@@ -86,8 +86,11 @@ glance = get_settings_by_role("glance-api", "glance")
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 api_endpoint = get_bind_endpoint("glance", "api")
 
-# strip package_component to base release (eg essex-final >> essex)
-release = node['package_component'].split("-")[0]
+if not node['package_component'].nil?
+    release = node['package_component']
+else
+    release = "essex-final"
+end
 
 # Possible combinations of options here
 # - default_store=file

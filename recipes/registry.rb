@@ -45,8 +45,11 @@ keystone = get_settings_by_role("keystone", "keystone")
 
 registry_endpoint = get_bind_endpoint("glance", "registry")
 
-# strip package component to base release (eg essex-final >> essex)
-release = node['package_component'].split("-")[0]
+if not node['package_component'].nil?
+    release = node['package_component']
+else
+    release = "essex-final"
+end
 
 #creates db and user
 #returns connection info
