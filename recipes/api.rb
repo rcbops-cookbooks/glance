@@ -120,7 +120,7 @@ else
 end
 
 template "/etc/glance/glance-api.conf" do
-  source "glance-api.conf-#{release}.erb"
+  source "#{release}/glance-api.conf.erb"
   owner "root"
   group "root"
   mode "0644"
@@ -151,7 +151,7 @@ template "/etc/glance/glance-api.conf" do
 end
 
 template "/etc/glance/glance-api-paste.ini" do
-  source "glance-api-paste.ini-#{release}.erb"
+  source "#{release}/glance-api-paste.ini.erb"
   owner "root"
   group "root"
   mode "0644"

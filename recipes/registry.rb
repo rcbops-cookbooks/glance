@@ -161,7 +161,7 @@ directory "/etc/glance" do
 end
 
 template "/etc/glance/glance-registry.conf" do
-  source "glance-registry.conf-#{release}.erb"
+  source "#{release}/glance-registry.conf.erb"
   owner "root"
   group "root"
   mode "0644"
@@ -179,7 +179,7 @@ template "/etc/glance/glance-registry.conf" do
 end
 
 template "/etc/glance/glance-registry-paste.ini" do
-  source "glance-registry-paste.ini-#{release}.erb"
+  source "#{release}/glance-registry-paste.ini.erb"
   owner "root"
   group "root"
   mode "0644"
