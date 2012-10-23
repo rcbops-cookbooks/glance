@@ -63,16 +63,15 @@ package "curl" do
   action :install
 end
 
-service "glance-registry" do
-  service_name platform_options["glance_registry_service"]
-  supports :status => true, :restart => true
-  action :nothing
+platform_options["mysql_python_packages"].each do |pkg|
+  package pkg do
+    action :install
+  end
 end
 
 execute "glance-manage db_sync" do
-        command "sudo -u glance glance-manage db_sync"
-        action :nothing
-        notifies :restart, resources(:service => "glance-registry"), :immediately
+  command "sudo -u glance glance-manage db_sync"
+  action :nothing
 end
 
 # Having to manually version the database because of Ubuntu bug
@@ -92,18 +91,18 @@ execute "glance rhel db sync" do
   only_if { platform?(%w{redhat centos fedora scientific}) }
 end
 
-platform_options["mysql_python_packages"].each do |pkg|
-  package pkg do
-    action :install
-  end
-end
-
 platform_options["glance_packages"].each do |pkg|
   package pkg do
     action :upgrade
     notifies :run, resources(:execute => "glance rhel db sync"), :delayed
     notifies :run, resources(:execute => "glance debian db sync"), :delayed
   end
+end
+
+service "glance-registry" do
+  service_name platform_options["glance_registry_service"]
+  supports :status => true, :restart => true
+  action :nothing
 end
 
 monitoring_procmon "glance-registry" do
