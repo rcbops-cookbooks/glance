@@ -69,33 +69,9 @@ platform_options["mysql_python_packages"].each do |pkg|
   end
 end
 
-execute "glance-manage db_sync" do
-  command "sudo -u glance glance-manage db_sync"
-  action :nothing
-end
-
-# Having to manually version the database because of Ubuntu bug
-# https://bugs.launchpad.net/ubuntu/+source/glance/+bug/981111
-execute "glance debian db sync" do
-  command "sudo -u glance glance-manage version_control 0"
-  action :nothing
-  not_if "sudo -u glance glance-manage db_version"
-  notifies :run, resources(:execute => "glance-manage db_sync"), :immediately
-  only_if { platform?(%w{ubuntu debian}) }
-end
-
-execute "glance rhel db sync" do
-  command "sudo -u glance glance-manage db_sync"
-  action :nothing
-  not_if "sudo -u glance glance-manage db_version"
-  only_if { platform?(%w{redhat centos fedora scientific}) }
-end
-
 platform_options["glance_packages"].each do |pkg|
   package pkg do
     action :upgrade
-    notifies :run, resources(:execute => "glance rhel db sync"), :delayed
-    notifies :run, resources(:execute => "glance debian db sync"), :delayed
   end
 end
 
@@ -186,8 +162,17 @@ template "/etc/glance/glance-registry.conf" do
     "use_syslog" => node["glance"]["syslog"]["use"],
     "log_facility" => node["glance"]["syslog"]["facility"]
   )
-  notifies :run, resources(:execute => "glance rhel db sync"), :immediately
-  notifies :run, resources(:execute => "glance debian db sync"), :immediately
+end
+
+execute "glance-manage db_sync" do
+  if platform?(%w{ubuntu debian})
+    command "sudo -u glance glance-manage version_control 0 && sudo -u glance glance-manage db_sync"
+  end
+  if platform?(%w{redhat centos fedora scientific})
+    command "sudo -u glance glance-manage db_sync"
+  end
+  not_if "sudo -u glance glance-manage db_version"
+  action :run
 end
 
 template "/etc/glance/glance-registry-paste.ini" do
