@@ -19,7 +19,13 @@
 include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
-platform_options = node["glance"]["platform"]
+if not node['package_component'].nil?
+    release = node['package_component']
+else
+    release = "essex-final"
+end
+
+platform_options = node["glance"]["platform"][release]
 
 package "curl" do
   action :upgrade
@@ -85,12 +91,6 @@ glance = get_settings_by_role("glance-api", "glance")
 
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 api_endpoint = get_bind_endpoint("glance", "api")
-
-if not node['package_component'].nil?
-    release = node['package_component']
-else
-    release = "essex-final"
-end
 
 # Possible combinations of options here
 # - default_store=file

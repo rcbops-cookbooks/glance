@@ -62,7 +62,7 @@ default["glance"]["syslog"]["config_facility"] = "local2"   # node_attribute
 # platform-specific settings
 case platform
 when "fedora", "redhat", "centos"
-  default["glance"]["platform"] = {
+  default["glance"]["platform"]["essex-final"] = {
     "mysql_python_packages" => [ "MySQL-python" ],                  # node_attribute
     "glance_packages" => [ "openstack-glance", "openstack-swift", "cronie" ], # node_attribute
     "glance_api_service" => "openstack-glance-api",                 # node_attribute
@@ -70,8 +70,16 @@ when "fedora", "redhat", "centos"
     "glance_api_process_name" => "glance-api",                      # node_attribute
     "package_overrides" => ""                                       # node_attribute
   }
+  default["glance"]["platform"]["folsom"] = {
+    "mysql_python_packages" => [ "MySQL-python" ],                  # node_attribute
+    "glance_packages" => [ "openstack-glance", "python-swiftclient", "cronie", "python-prettytable" ], # node_attribute
+    "glance_api_service" => "openstack-glance-api",                 # node_attribute
+    "glance_registry_service" => "openstack-glance-registry",       # node_attribute
+    "glance_api_process_name" => "glance-api",                      # node_attribute
+    "package_overrides" => ""                                       # node_attribute
+  }
 when "ubuntu"
-  default["glance"]["platform"] = {
+  default["glance"]["platform"]["essex-final"] = {
     "mysql_python_packages" => [ "python-mysqldb" ],                # node_attribute
     "glance_packages" => [ "glance", "python-swift" ],              # node_attribute
     "glance_api_service" => "glance-api",                           # node_attribute
@@ -79,4 +87,5 @@ when "ubuntu"
     "glance_registry_process_name" => "glance-registry",            # node_attribute
     "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'" # node_attribute
   }
+  default["glance"]["platform"]["folsom"] = default["glance"]["platform"]["essex-final"]
 end
