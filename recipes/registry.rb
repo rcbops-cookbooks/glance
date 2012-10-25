@@ -23,7 +23,13 @@ include_recipe "mysql::ruby"
 include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
-platform_options = node["glance"]["platform"]
+if not node['package_component'].nil?
+    release = node['package_component']
+else
+    release = "essex-final"
+end
+
+platform_options = node["glance"]["platform"][release]
 
 # Allow for using a well known db password
 if node["developer_mode"]
@@ -44,12 +50,6 @@ ks_service_endpoint = get_access_endpoint("keystone", "keystone", "service-api")
 keystone = get_settings_by_role("keystone", "keystone")
 
 registry_endpoint = get_bind_endpoint("glance", "registry")
-
-if not node['package_component'].nil?
-    release = node['package_component']
-else
-    release = "essex-final"
-end
 
 #creates db and user
 #returns connection info
