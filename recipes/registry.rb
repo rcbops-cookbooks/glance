@@ -72,6 +72,7 @@ end
 platform_options["glance_packages"].each do |pkg|
   package pkg do
     action :upgrade
+    options platform_options["package_overrides"]
   end
 end
 
