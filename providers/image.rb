@@ -73,7 +73,12 @@ end
 
 private
 def _upload_ami(name, url)
-  if node["package_component"] < "folsom"
+  if not node['package_component'].nil?
+    release = node['package_component']
+  else
+    release = "essex-final"
+  end 
+  if release < "folsom"
     glance_cmd = "glance --silent-upload -I #{@user} -K #{@pass} -T #{@tenant} -N #{@ks_uri}"
   else
     glance_cmd = "glance -I #{@user} -K #{@pass} -T #{@tenant} -N #{@ks_uri}"

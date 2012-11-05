@@ -89,7 +89,7 @@ when "ubuntu"
   }
   default["glance"]["platform"]["folsom"] = {
     "mysql_python_packages" => [ "python-mysqldb" ],                # node_attribute
-    "glance_packages" => [ "glance", "python-swift" ],              # node_attribute
+    "glance_packages" => [ "glance", "python-swift", "python-prettytable" ],              # node_attribute
     "glance_api_service" => "glance-api",                           # node_attribute
     "glance_registry_service" => "glance-registry",                 # node_attribute
     "glance_registry_process_name" => "glance-registry",            # node_attribute
