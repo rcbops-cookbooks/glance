@@ -61,7 +61,7 @@ def _upload_qcow(name, url)
   c_fmt = "container_format=bare"
   d_fmt = "disk_format=qcow2"
 
-  bash "Uploading QCOW2 image" do
+  bash "Uploading QCOW2 image #{name}" do
     cwd "/tmp"
     user "root"
     code <<-EOH
@@ -88,7 +88,7 @@ def _upload_ami(name, url)
   ari_fmt = "container_format=ari disk_format=ari"
   ami_fmt = "container_format=ami disk_format=ami"
 
-  bash "Uploading AMI image" do
+  bash "Uploading AMI image #{name}" do
     cwd "/tmp"
     user "root"
     code <<-EOH
