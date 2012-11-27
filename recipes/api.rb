@@ -226,7 +226,7 @@ template "/etc/glance/glance-scrubber-paste.ini" do
 end
 
 # Register Image Service
-keystone_register "Register Image Service" do
+keystone_service "Register Image Service" do
   auth_host ks_admin_endpoint["host"]
   auth_port ks_admin_endpoint["port"]
   auth_protocol ks_admin_endpoint["scheme"]
@@ -235,11 +235,11 @@ keystone_register "Register Image Service" do
   service_name "glance"
   service_type "image"
   service_description "Glance Image Service"
-  action :create_service
+  action :create
 end
 
 # Register Image Endpoint
-keystone_register "Register Image Endpoint" do
+keystone_endpoint "Register Image Endpoint" do
   auth_host ks_admin_endpoint["host"]
   auth_port ks_admin_endpoint["port"]
   auth_protocol ks_admin_endpoint["scheme"]
@@ -250,7 +250,7 @@ keystone_register "Register Image Endpoint" do
   endpoint_adminurl api_endpoint["uri"]
   endpoint_internalurl api_endpoint["uri"]
   endpoint_publicurl api_endpoint["uri"]
-  action :create_endpoint
+  action :create
 end
 
 if node["glance"]["image_upload"]
