@@ -89,6 +89,7 @@ ks_admin_endpoint = get_access_endpoint("keystone", "keystone", "admin-api")
 ks_service_endpoint = get_access_endpoint("keystone", "keystone","service-api")
 keystone = get_settings_by_role("keystone", "keystone")
 glance = get_settings_by_role("glance-api", "glance")
+registry = get_settings_by_role("glance-registry", "glance")
 
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 api_endpoint = get_bind_endpoint("glance", "api")
@@ -147,9 +148,9 @@ template "/etc/glance/glance-api.conf" do
     "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
     "swift_store_container" => glance["api"]["swift"]["store_container"],
     "db_ip_address" => mysql_info["host"],
-    "db_user" => node["glance"]["db"]["username"],
-    "db_password" => node["glance"]["db"]["password"],
-    "db_name" => node["glance"]["db"]["name"]
+    "db_user" => registry["db"]["username"],
+    "db_password" => registry["db"]["password"],
+    "db_name" => registry["db"]["name"]
   )
   notifies :restart, resources(:service => "glance-api"), :immediately
 end
@@ -164,9 +165,9 @@ template "/etc/glance/glance-api-paste.ini" do
     "keystone_service_port" => ks_service_endpoint["port"],
     "keystone_admin_port" => ks_admin_endpoint["port"],
     "keystone_admin_token" => keystone["admin_token"],
-    "service_tenant_name" => node["glance"]["service_tenant_name"],
-    "service_user" => node["glance"]["service_user"],
-    "service_pass" => node["glance"]["service_pass"]
+    "service_tenant_name" => registry["service_tenant_name"],
+    "service_user" => registry["service_user"],
+    "service_pass" => registry["service_pass"]
   )
   notifies :restart, resources(:service => "glance-api"), :immediately
 end
