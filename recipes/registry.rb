@@ -129,7 +129,7 @@ keystone_user "Register Service User" do
 end
 
 ## Grant Admin role to Service User for Service Tenant ##
-keystone_register "Grant 'admin' Role to Service User for Service Tenant" do
+keystone_role "Grant 'admin' Role to Service User for Service Tenant" do
   auth_host ks_admin_endpoint["host"]
   auth_port ks_admin_endpoint["port"]
   auth_protocol ks_admin_endpoint["scheme"]
@@ -138,7 +138,7 @@ keystone_register "Grant 'admin' Role to Service User for Service Tenant" do
   tenant_name node["glance"]["service_tenant_name"]
   user_name node["glance"]["service_user"]
   role_name node["glance"]["service_role"]
-  action :grant_role
+  action :grant
 end
 
 directory "/etc/glance" do
