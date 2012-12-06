@@ -108,13 +108,13 @@ api_endpoint = get_bind_endpoint("glance", "api")
 if glance["api"]["swift_store_auth_address"].nil?
     swift_store_auth_address="http://#{ks_admin_endpoint["host"]}:#{ks_service_endpoint["port"]}/v2.0"
     swift_store_user="#{glance["service_tenant_name"]}:#{glance["service_user"]}"
-    swift_store_key=glance["service_pass"]
+    swift_store_key=registry["service_pass"]
     swift_store_auth_version=2
 else
-    swift_store_auth_address=glance["api"]["swift_store_auth_address"]
-    swift_store_user=glance["api"]["swift_store_user"]
-    swift_store_key=glance["api"]["swift_store_key"]
-    swift_store_auth_version=glance["api"]["swift_store_auth_version"]
+    swift_store_auth_address=registry["api"]["swift_store_auth_address"]
+    swift_store_user=registry["api"]["swift_store_user"]
+    swift_store_key=registry["api"]["swift_store_key"]
+    swift_store_auth_version=registry["api"]["swift_store_auth_version"]
 end
 
 # Only use the glance image cacher if we aren't using file for our backing store.
