@@ -28,7 +28,7 @@ end
 platform_options = node["glance"]["platform"][release]
 
 package "curl" do
-  action :upgrade
+  action :install
 end
 
 package "python-keystone" do
@@ -37,7 +37,7 @@ end
 
 platform_options["glance_packages"].each do |pkg|
   package pkg do
-    action :upgrade
+    action :install
     options platform_options["package_overrides"]
   end
 end
