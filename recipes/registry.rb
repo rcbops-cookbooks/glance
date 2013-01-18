@@ -24,16 +24,16 @@ include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
 if not node["package_component"].nil?
-    release = node["package_component"]
+  release = node["package_component"]
 else
-    release = "essex-final"
+  release = "essex-final"
 end
 
 platform_options = node["glance"]["platform"][release]
 
 # are there any other glance-registry out there? if so grab the passwords off them
 if other_registry = get_settings_by_role("glance-registry", "glance", false)
-  if  node["glance"]["api"]["default_store"] == "file"
+  if node["glance"]["api"]["default_store"] == "file"
     Chef::Application.fatal! "Local file store not supported with multiple glance-registry nodes. 
     Change file store to 'swift' or 'cloudfiles' or remove additional glance-registry nodes"
   else
@@ -61,9 +61,7 @@ keystone = get_settings_by_role("keystone", "keystone")
 
 registry_endpoint = get_bind_endpoint("glance", "registry")
 
-#creates db and user
-#returns connection info
-#defined in osops-utils/libraries
+# creates db and user and returns connection info
 mysql_info = create_db_and_user("mysql",
                                 node["glance"]["db"]["name"],
                                 node["glance"]["db"]["username"],
