@@ -16,6 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# die early if we are trying HA with local file store
+if other_api = get_settings_by_role("glance-api", "api", false)
+  if node["glance"]["api"]["default_store"] == "file"
+    Chef::Application.fatal! "Local file store not supported with multiple glance-api nodes>
+    Change file store to 'swift' or 'cloudfiles' or remove additional glance-api nodes"
+  end
+end
+
 include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
