@@ -23,23 +23,33 @@ include_recipe "mysql::ruby"
 include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
-if not node['package_component'].nil?
-    release = node['package_component']
+if not node["package_component"].nil?
+    release = node["package_component"]
 else
     release = "essex-final"
 end
 
 platform_options = node["glance"]["platform"][release]
 
-# Allow for using a well known db password
-if node["developer_mode"]
-  node.set_unless['glance']['db']['password'] = "glance"
+# are there any other glance-registry out there? if so grab the passwords off them
+if other_registry = get_settings_by_role("glance-registry", "glance", false)
+  if  node["glance"]["api"]["default_store"] == "file"
+    Chef::Application.fatal! "Local file store not supported with multiple glance-registry nodes. 
+    Change file store to 'swift' or 'cloudfiles' or remove additional glance-registry nodes"
+  else
+    Chef::Log.info("There is at least one other glance-registry node - syncing glance passwords with it/them")
+    node.set["glance"]["db"]["password"] = other_registry["db"]["password"]
+    node.set["glance"]["service_pass"] = other_registry["service_pass"]
+  end
 else
-  node.set_unless['glance']['db']['password'] = secure_password
+  Chef::Log.info("I am currently the only glance-registry node - setting passwords myself")
+  if node["developer_mode"]
+    node.set_unless["glance"]["db"]["password"] = "glance"
+  else
+    node.set_unless["glance"]["db"]["password"] = secure_password
+  end
+  node.set_unless["glance"]["service_pass"] = secure_password
 end
-
-# Set a secure keystone service password
-node.set_unless['glance']['service_pass'] = secure_password
 
 package "python-keystone" do
     action :install
