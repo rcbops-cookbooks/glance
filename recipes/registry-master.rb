@@ -31,25 +31,18 @@ end
 
 platform_options = node["glance"]["platform"][release]
 
-# are there any other glance-registry out there? if so grab the passwords off them
-if other_registry = get_settings_by_role("glance-registry", "glance", false)
-  if node["glance"]["api"]["default_store"] == "file"
-    Chef::Application.fatal! "Local file store not supported with multiple glance-registry nodes. 
-    Change file store to 'swift' or 'cloudfiles' or remove additional glance-registry nodes"
-  else
-    Chef::Log.info("There is at least one other glance-registry node - syncing glance passwords with it/them")
-    node.set["glance"]["db"]["password"] = other_registry["db"]["password"]
-    node.set["glance"]["service_pass"] = other_registry["service_pass"]
-  end
-else
-  Chef::Log.info("I am currently the only glance-registry node - setting passwords myself")
-  if node["developer_mode"]
-    node.set_unless["glance"]["db"]["password"] = "glance"
-  else
-    node.set_unless["glance"]["db"]["password"] = secure_password
-  end
-  node.set_unless["glance"]["service_pass"] = secure_password
+# make sure we die if there are multiple glance-registry-masters
+if other_master = get_settings_by_role("glance-registry-master", "glance", false)
+  Chef::Application.fatal! "You can only have one node with the glance-registry-master role"
 end
+
+Chef::Log.info("I am the master glance-registry node - setting passwords myself")
+if node["developer_mode"]
+  node.set_unless["glance"]["db"]["password"] = "glance"
+else
+  node.set_unless["glance"]["db"]["password"] = secure_password
+end
+node.set_unless["glance"]["service_pass"] = secure_password
 
 package "python-keystone" do
     action :install
