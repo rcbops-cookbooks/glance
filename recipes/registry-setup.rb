@@ -31,9 +31,9 @@ end
 
 platform_options = node["glance"]["platform"][release]
 
-# make sure we die if there are multiple glance-registry-masters
-if other_setup = get_settings_by_role("glance-registry-setup", "glance", false)
-  Chef::Application.fatal! "You can only have one node with the glance-registry-setup role"
+# make sure we die if there are multiple glance-setups
+if other_setup = get_settings_by_role("glance-setup", "glance", false)
+  Chef::Application.fatal! "You can only have one node with the glance-setup role"
 end
 
 unless node["glance"]["db"]["password"]
@@ -80,11 +80,11 @@ platform_options["glance_packages"].each do |pkg|
   end
 end
 
-service "glance-registry" do
-  service_name platform_options["glance_registry_service"]
-  supports :status => true, :restart => true
-  action :nothing
-end
+#service "glance-registry" do
+#  service_name platform_options["glance_registry_service"]
+#  supports :status => true, :restart => true
+#  action :nothing
+#end
 
 file "/var/lib/glance/glance.sqlite" do
     action :delete
@@ -165,20 +165,20 @@ execute "glance-manage db_sync" do
   action :run
 end
 
-template "/etc/glance/glance-registry-paste.ini" do
-  source "#{release}/glance-registry-paste.ini.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  variables(
-    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
-    "keystone_service_port" => ks_service_endpoint["port"],
-    "keystone_admin_port" => ks_admin_endpoint["port"],
-    "service_tenant_name" => node["glance"]["service_tenant_name"],
-    "service_user" => node["glance"]["service_user"],
-    "service_pass" => node["glance"]["service_pass"]
-  )
-  notifies :restart, resources(:service => "glance-registry"), :immediately
-  notifies :enable, resources(:service => "glance-registry"), :immediately
-end
+#template "/etc/glance/glance-registry-paste.ini" do
+#  source "#{release}/glance-registry-paste.ini.erb"
+#  owner "root"
+#  group "root"
+#  mode "0644"
+#  variables(
+#    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
+#    "keystone_service_port" => ks_service_endpoint["port"],
+#    "keystone_admin_port" => ks_admin_endpoint["port"],
+#    "service_tenant_name" => node["glance"]["service_tenant_name"],
+#    "service_user" => node["glance"]["service_user"],
+#    "service_pass" => node["glance"]["service_pass"]
+#  )
+#  notifies :restart, resources(:service => "glance-registry"), :immediately
+#  notifies :enable, resources(:service => "glance-registry"), :immediately
+#end
 

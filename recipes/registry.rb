@@ -35,18 +35,18 @@ platform_options = node["glance"]["platform"][release]
 if Chef::Config[:solo]
   Chef::Application.fatal! "This recipe uses search. Chef Solo does not support search."
 else
-  if node.run_list.expand(node.chef_environment).recipes.include?("glance::registry-setup")
-    Chef::Log.info("I ran the glance::registry-setup so I will use my own glance passwords")
+  if node.run_list.expand(node.chef_environment).recipes.include?("glance::setup")
+    Chef::Log.info("I ran the glance::setup so I will use my own glance passwords")
   else
-    setup = search(:node, "chef_environment:#{node.chef_environment} AND roles:glance-registry-setup")
+    setup = search(:node, "chef_environment:#{node.chef_environment} AND roles:glance-setup")
     if setup.length == 0
-      Chef::Application.fatal! "You must have run the glance::registry-setup recipe on one node already in order to be a glance-registry server."
+      Chef::Application.fatal! "You must have run the glance::setup recipe on one node already in order to be a glance-registry server."
     elsif setup.length == 1
       if node["glance"]["api"]["default_store"] == "file"
         Chef::Application.fatal! "Local file store not supported with multiple glance-registry nodes.
         Change file store to 'swift' or 'cloudfiles' or remove additional glance-registry nodes"
       else
-        Chef::Log.info "Found glance::registry-setup node: #{setup[0].name}"
+        Chef::Log.info "Found glance::setup node: #{setup[0].name}"
         node.set["glance"]["db"]["password"] = setup[0]["glance"]["db"]["password"]
         node.set["glance"]["service_pass"] = setup[0]["glance"]["service_pass"]
       end
