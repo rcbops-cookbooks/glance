@@ -67,14 +67,6 @@ keystone = get_settings_by_role("keystone", "keystone")
 registry_endpoint = get_bind_endpoint("glance", "registry")
 mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
 
-# creates db and user and returns connection info
-#mysql_info = create_db_and_user("mysql",
-#                                node["glance"]["db"]["name"],
-#                                node["glance"]["db"]["username"],
-#                                node["glance"]["db"]["password"])
-#
-
-
 package "curl" do
   action :install
 end
@@ -117,46 +109,6 @@ file "/var/lib/glance/glance.sqlite" do
     action :delete
 end
 
-# Register Service Tenant
-#keystone_tenant "Register Service Tenant" do
-#  auth_host ks_admin_endpoint["host"]
-#  auth_port ks_admin_endpoint["port"]
-#  auth_protocol ks_admin_endpoint["scheme"]
-#  api_ver ks_admin_endpoint["path"]
-#  auth_token keystone["admin_token"]
-#  tenant_name node["glance"]["service_tenant_name"]
-#  tenant_description "Service Tenant"
-#  tenant_enabled "true" # Not required as this is the default
-#  action :create
-#end
-
-# Register Service User
-#keystone_user "Register Service User" do
-#  auth_host ks_admin_endpoint["host"]
-#  auth_port ks_admin_endpoint["port"]
-#  auth_protocol ks_admin_endpoint["scheme"]
-#  api_ver ks_admin_endpoint["path"]
-#  auth_token keystone["admin_token"]
-#  tenant_name node["glance"]["service_tenant_name"]
-#  user_name node["glance"]["service_user"]
-#  user_pass node["glance"]["service_pass"]
-#  user_enabled "true" # Not required as this is the default
-#  action :create
-#end
-
-## Grant Admin role to Service User for Service Tenant ##
-#keystone_role "Grant 'admin' Role to Service User for Service Tenant" do
-#  auth_host ks_admin_endpoint["host"]
-#  auth_port ks_admin_endpoint["port"]
-#  auth_protocol ks_admin_endpoint["scheme"]
-#  api_ver ks_admin_endpoint["path"]
-#  auth_token keystone["admin_token"]
-#  tenant_name node["glance"]["service_tenant_name"]
-#  user_name node["glance"]["service_user"]
- # role_name node["glance"]["service_role"]
- # action :grant
-#end
-
 directory "/etc/glance" do
   action :create
   group "glance"
@@ -180,17 +132,6 @@ template "/etc/glance/glance-registry.conf" do
     "log_facility" => node["glance"]["syslog"]["facility"]
   )
 end
-
-#execute "glance-manage db_sync" do
-#  if platform?(%w{ubuntu debian})
-#    command "sudo -u glance glance-manage version_control 0 && sudo -u glance glance-manage db_sync"
-#  end
-#  if platform?(%w{redhat centos fedora scientific})
-#    command "sudo -u glance glance-manage db_sync"
-#  end
-#  not_if "sudo -u glance glance-manage db_version"
-#  action :run
-#end
 
 template "/etc/glance/glance-registry-paste.ini" do
   source "#{release}/glance-registry-paste.ini.erb"
