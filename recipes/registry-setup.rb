@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: glance
-# Recipe:: registry
+# Recipe:: registry-setup
 #
 # Copyright 2012, Rackspace US, Inc.
 #
@@ -32,11 +32,14 @@ end
 platform_options = node["glance"]["platform"][release]
 
 # make sure we die if there are multiple glance-registry-masters
-if other_master = get_settings_by_role("glance-registry-master", "glance", false)
-  Chef::Application.fatal! "You can only have one node with the glance-registry-master role"
+if other_setup = get_settings_by_role("glance-registry-setup", "glance", false)
+  Chef::Application.fatal! "You can only have one node with the glance-registry-setup role"
 end
 
-Chef::Log.info("I am the master glance-registry node - setting passwords myself")
+unless node["glance"]["db"]["password"]
+  Chef::Log.info("Running glance setup - setting glance passwords")
+end
+
 if node["developer_mode"]
   node.set_unless["glance"]["db"]["password"] = "glance"
 else

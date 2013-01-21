@@ -98,9 +98,9 @@ ks_admin_endpoint = get_access_endpoint("keystone", "keystone", "admin-api")
 ks_service_endpoint = get_access_endpoint("keystone", "keystone","service-api")
 keystone = get_settings_by_role("keystone", "keystone")
 glance = get_settings_by_role("glance-api", "glance")
-registry = get_settings_by_role("glance-registry-master", "glance")
+registry = get_settings_by_role("glance-registry-setup", "glance")
 
-registry_endpoint = get_access_endpoint("glance-registry-master", "glance", "registry")
+registry_endpoint = get_access_endpoint("glance-registry-setup", "glance", "registry")
 api_endpoint = get_bind_endpoint("glance", "api")
 
 # Possible combinations of options here

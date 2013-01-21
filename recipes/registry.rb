@@ -31,27 +31,27 @@ end
 
 platform_options = node["glance"]["platform"][release]
 
-# Find the master node and grab his passswords
+# Find the node that ran the glance-setup recipe and grab his passswords
 if Chef::Config[:solo]
   Chef::Application.fatal! "This recipe uses search. Chef Solo does not support search."
 else
-  if (node.run_list.include? "recipe[glance::registry-master]")
-    Chef::Log.info("I am the glance::registry-master so I will use my own glance passwords")
+  if node.run_list.expand(node.chef_environment).recipes.include?("glance::registry-setup")
+    Chef::Log.info("I ran the glance::registry-setup so I will use my own glance passwords")
   else
-    master = search(:node, "chef_environment:#{node.chef_environment} AND roles:glance-registry-master")
-    if master.length == 0
-      Chef::Application.fatal! "You must have one node with the glance::registry-master recipe in their run list to be a client."
-    elsif master.length == 1
+    setup = search(:node, "chef_environment:#{node.chef_environment} AND roles:glance-registry-setup")
+    if setup.length == 0
+      Chef::Application.fatal! "You must have run the glance::registry-setup recipe on one node already in order to be a glance-registry server."
+    elsif setup.length == 1
       if node["glance"]["api"]["default_store"] == "file"
-        Chef::Application.fatal! "Local file store not supported with multiple glance-registry nodes. 
+        Chef::Application.fatal! "Local file store not supported with multiple glance-registry nodes.
         Change file store to 'swift' or 'cloudfiles' or remove additional glance-registry nodes"
       else
-        Chef::Log.info "Found glance::registry-master node: #{master[0].name}"
-        node.set["glance"]["db"]["password"] = master[0]["glance"]["db"]["password"]
-        node.set["glance"]["service_pass"] = master[0]["glance"]["service_pass"]
+        Chef::Log.info "Found glance::registry-setup node: #{setup[0].name}"
+        node.set["glance"]["db"]["password"] = setup[0]["glance"]["db"]["password"]
+        node.set["glance"]["service_pass"] = setup[0]["glance"]["service_pass"]
       end
-    elsif master.length >1
-      Chef::Application.fatal! "You have specified more than one glance-registry master node and this is not a valid configuration."
+    elsif setup.length >1
+      Chef::Application.fatal! "You have specified more than one glance-registry setup node and this is not a valid configuration."
     end
   end
 end
@@ -65,12 +65,15 @@ ks_service_endpoint = get_access_endpoint("keystone", "keystone", "service-api")
 keystone = get_settings_by_role("keystone", "keystone")
 
 registry_endpoint = get_bind_endpoint("glance", "registry")
+mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
 
 # creates db and user and returns connection info
-mysql_info = create_db_and_user("mysql",
-                                node["glance"]["db"]["name"],
-                                node["glance"]["db"]["username"],
-                                node["glance"]["db"]["password"])
+#mysql_info = create_db_and_user("mysql",
+#                                node["glance"]["db"]["name"],
+#                                node["glance"]["db"]["username"],
+#                                node["glance"]["db"]["password"])
+#
+
 
 package "curl" do
   action :install
@@ -115,44 +118,44 @@ file "/var/lib/glance/glance.sqlite" do
 end
 
 # Register Service Tenant
-keystone_tenant "Register Service Tenant" do
-  auth_host ks_admin_endpoint["host"]
-  auth_port ks_admin_endpoint["port"]
-  auth_protocol ks_admin_endpoint["scheme"]
-  api_ver ks_admin_endpoint["path"]
-  auth_token keystone["admin_token"]
-  tenant_name node["glance"]["service_tenant_name"]
-  tenant_description "Service Tenant"
-  tenant_enabled "true" # Not required as this is the default
-  action :create
-end
+#keystone_tenant "Register Service Tenant" do
+#  auth_host ks_admin_endpoint["host"]
+#  auth_port ks_admin_endpoint["port"]
+#  auth_protocol ks_admin_endpoint["scheme"]
+#  api_ver ks_admin_endpoint["path"]
+#  auth_token keystone["admin_token"]
+#  tenant_name node["glance"]["service_tenant_name"]
+#  tenant_description "Service Tenant"
+#  tenant_enabled "true" # Not required as this is the default
+#  action :create
+#end
 
 # Register Service User
-keystone_user "Register Service User" do
-  auth_host ks_admin_endpoint["host"]
-  auth_port ks_admin_endpoint["port"]
-  auth_protocol ks_admin_endpoint["scheme"]
-  api_ver ks_admin_endpoint["path"]
-  auth_token keystone["admin_token"]
-  tenant_name node["glance"]["service_tenant_name"]
-  user_name node["glance"]["service_user"]
-  user_pass node["glance"]["service_pass"]
-  user_enabled "true" # Not required as this is the default
-  action :create
-end
+#keystone_user "Register Service User" do
+#  auth_host ks_admin_endpoint["host"]
+#  auth_port ks_admin_endpoint["port"]
+#  auth_protocol ks_admin_endpoint["scheme"]
+#  api_ver ks_admin_endpoint["path"]
+#  auth_token keystone["admin_token"]
+#  tenant_name node["glance"]["service_tenant_name"]
+#  user_name node["glance"]["service_user"]
+#  user_pass node["glance"]["service_pass"]
+#  user_enabled "true" # Not required as this is the default
+#  action :create
+#end
 
 ## Grant Admin role to Service User for Service Tenant ##
-keystone_role "Grant 'admin' Role to Service User for Service Tenant" do
-  auth_host ks_admin_endpoint["host"]
-  auth_port ks_admin_endpoint["port"]
-  auth_protocol ks_admin_endpoint["scheme"]
-  api_ver ks_admin_endpoint["path"]
-  auth_token keystone["admin_token"]
-  tenant_name node["glance"]["service_tenant_name"]
-  user_name node["glance"]["service_user"]
-  role_name node["glance"]["service_role"]
-  action :grant
-end
+#keystone_role "Grant 'admin' Role to Service User for Service Tenant" do
+#  auth_host ks_admin_endpoint["host"]
+#  auth_port ks_admin_endpoint["port"]
+#  auth_protocol ks_admin_endpoint["scheme"]
+#  api_ver ks_admin_endpoint["path"]
+#  auth_token keystone["admin_token"]
+#  tenant_name node["glance"]["service_tenant_name"]
+#  user_name node["glance"]["service_user"]
+ # role_name node["glance"]["service_role"]
+ # action :grant
+#end
 
 directory "/etc/glance" do
   action :create
@@ -169,7 +172,7 @@ template "/etc/glance/glance-registry.conf" do
   variables(
     "registry_bind_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
-    "db_ip_address" => mysql_info["bind_address"],
+    "db_ip_address" => mysql_info["host"],
     "db_user" => node["glance"]["db"]["username"],
     "db_password" => node["glance"]["db"]["password"],
     "db_name" => node["glance"]["db"]["name"],
@@ -178,16 +181,16 @@ template "/etc/glance/glance-registry.conf" do
   )
 end
 
-execute "glance-manage db_sync" do
-  if platform?(%w{ubuntu debian})
-    command "sudo -u glance glance-manage version_control 0 && sudo -u glance glance-manage db_sync"
-  end
-  if platform?(%w{redhat centos fedora scientific})
-    command "sudo -u glance glance-manage db_sync"
-  end
-  not_if "sudo -u glance glance-manage db_version"
-  action :run
-end
+#execute "glance-manage db_sync" do
+#  if platform?(%w{ubuntu debian})
+#    command "sudo -u glance glance-manage version_control 0 && sudo -u glance glance-manage db_sync"
+#  end
+#  if platform?(%w{redhat centos fedora scientific})
+#    command "sudo -u glance glance-manage db_sync"
+#  end
+#  not_if "sudo -u glance glance-manage db_version"
+#  action :run
+#end
 
 template "/etc/glance/glance-registry-paste.ini" do
   source "#{release}/glance-registry-paste.ini.erb"
