@@ -80,12 +80,6 @@ platform_options["glance_packages"].each do |pkg|
   end
 end
 
-#service "glance-registry" do
-#  service_name platform_options["glance_registry_service"]
-#  supports :status => true, :restart => true
-#  action :nothing
-#end
-
 file "/var/lib/glance/glance.sqlite" do
     action :delete
 end
@@ -164,21 +158,3 @@ execute "glance-manage db_sync" do
   not_if "sudo -u glance glance-manage db_version"
   action :run
 end
-
-#template "/etc/glance/glance-registry-paste.ini" do
-#  source "#{release}/glance-registry-paste.ini.erb"
-#  owner "root"
-#  group "root"
-#  mode "0644"
-#  variables(
-#    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
-#    "keystone_service_port" => ks_service_endpoint["port"],
-#    "keystone_admin_port" => ks_admin_endpoint["port"],
-#    "service_tenant_name" => node["glance"]["service_tenant_name"],
-#    "service_user" => node["glance"]["service_user"],
-#    "service_pass" => node["glance"]["service_pass"]
-#  )
-#  notifies :restart, resources(:service => "glance-registry"), :immediately
-#  notifies :enable, resources(:service => "glance-registry"), :immediately
-#end
-
