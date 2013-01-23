@@ -100,7 +100,7 @@ keystone = get_settings_by_role("keystone", "keystone")
 glance = get_settings_by_role("glance-api", "glance")
 settings = get_settings_by_role("glance-setup", "glance")
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
-api_endpoint = get_access_endpoint("glance-api", "glance", "api")
+api_endpoint = get_bind_endpoint("glance", "api")
 
 # Possible combinations of options here
 # - default_store=file
