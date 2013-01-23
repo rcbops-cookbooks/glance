@@ -63,6 +63,8 @@ mysql_info = create_db_and_user("mysql",
                                 node["glance"]["db"]["username"],
                                 node["glance"]["db"]["password"])
 
+mysql_connect_ip = get_access_endpoint('mysql-master', 'mysql', 'db')["host"]
+
 package "curl" do
   action :install
 end
@@ -139,7 +141,7 @@ template "/etc/glance/glance-registry.conf" do
   variables(
     "registry_bind_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
-    "db_ip_address" => mysql_info["bind_address"],
+    "db_ip_address" => mysql_connect_ip,
     "db_user" => node["glance"]["db"]["username"],
     "db_password" => node["glance"]["db"]["password"],
     "db_name" => node["glance"]["db"]["name"],
