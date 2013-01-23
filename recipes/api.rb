@@ -100,7 +100,7 @@ keystone = get_settings_by_role("keystone", "keystone")
 glance = get_settings_by_role("glance-api", "glance")
 settings = get_settings_by_role("glance-setup", "glance")
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
-api_endpoint = get_bind_endpoint("glance", "api")
+api_endpoint = get_access_endpoint("glance-api", "glance", "api")
 
 # Possible combinations of options here
 # - default_store=file
@@ -138,7 +138,7 @@ template "/etc/glance/glance-api.conf" do
   group "root"
   mode "0644"
   variables(
-    "api_bind_address" => api_endpoint["host"],
+    "api_bind_address" => "0.0.0.0",
     "api_bind_port" => api_endpoint["port"],
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],

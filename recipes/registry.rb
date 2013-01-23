@@ -64,7 +64,7 @@ ks_admin_endpoint = get_access_endpoint("keystone", "keystone", "admin-api")
 ks_service_endpoint = get_access_endpoint("keystone", "keystone", "service-api")
 keystone = get_settings_by_role("keystone", "keystone")
 
-registry_endpoint = get_bind_endpoint("glance", "registry")
+registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
 
 package "curl" do
@@ -122,7 +122,7 @@ template "/etc/glance/glance-registry.conf" do
   group "root"
   mode "0644"
   variables(
-    "registry_bind_address" => registry_endpoint["host"],
+    "registry_bind_address" => "0.0.0.0",
     "registry_port" => registry_endpoint["port"],
     "db_ip_address" => mysql_info["host"],
     "db_user" => node["glance"]["db"]["username"],
