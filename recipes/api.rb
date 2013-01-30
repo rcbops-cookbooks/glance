@@ -82,9 +82,9 @@ end
 # FIXME: seems like misfeature
 template "/etc/glance/policy.json" do
   source "policy.json.erb"
-  owner "root"
-  group "root"
-  mode "0644"
+  owner "glance"
+  group "glance"
+  mode "0600"
   notifies :restart, resources(:service => "glance-api"), :immediately
   not_if do
     File.exists?("/etc/glance/policy.json")
@@ -132,11 +132,23 @@ else
   glance_flavor="keystone+cachemanagement"
 end
 
+template "/etc/glance/logging.conf" do
+  source "glance-logging.conf.erb"
+  owner "glance"
+  group "glance"
+  mode "0640"
+  variables(
+    "use_syslog" => node["glance"]["syslog"]["use"],
+    "log_facility" => node["glance"]["syslog"]["facility"]
+  )
+  notifies :restart, resources(:service => "glance-api"), :delayed
+end
+
 template "/etc/glance/glance-api.conf" do
   source "#{release}/glance-api.conf.erb"
-  owner "root"
-  group "root"
-  mode "0644"
+  owner "glance"
+  group "glance"
+  mode "0600"
   variables(
     "api_bind_address" => "0.0.0.0",
     "api_bind_port" => api_endpoint["port"],
@@ -165,9 +177,9 @@ end
 
 template "/etc/glance/glance-api-paste.ini" do
   source "#{release}/glance-api-paste.ini.erb"
-  owner "root"
-  group "root"
-  mode "0644"
+  owner "glance"
+  group "glance"
+  mode "0600"
   variables(
     "keystone_api_ipaddress" => ks_admin_endpoint["host"],
     "keystone_service_port" => ks_service_endpoint["port"],
@@ -182,9 +194,9 @@ end
 
 template "/etc/glance/glance-cache.conf" do
   source "glance-cache.conf.erb"
-  owner "root"
-  group "root"
-  mode "0644"
+  owner "glance"
+  group "glance"
+  mode "0600"
   variables(
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
@@ -197,17 +209,17 @@ end
 
 template "/etc/glance/glance-cache-paste.ini" do
   source "glance-cache-paste.ini.erb"
-  owner "root"
-  group "root"
-  mode "0644"
+  owner "glance"
+  group "glance"
+  mode "0600"
   notifies :restart, resources(:service => "glance-api"), :delayed
 end
 
 template "/etc/glance/glance-scrubber.conf" do
   source "glance-scrubber.conf.erb"
-  owner "root"
-  group "root"
-  mode "0644"
+  owner "glance"
+  group "glance"
+  mode "0600"
   variables(
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"]
@@ -229,9 +241,9 @@ end
 
 template "/etc/glance/glance-scrubber-paste.ini" do
   source "glance-scrubber-paste.ini.erb"
-  owner "root"
-  group "root"
-  mode "0644"
+  owner "glance"
+  group "glance"
+  mode "0600"
 end
 
 # Register Image Service

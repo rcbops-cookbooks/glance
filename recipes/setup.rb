@@ -133,11 +133,22 @@ directory "/etc/glance" do
   mode "0700"
 end
 
+template "/etc/glance/logging.conf" do
+  source "glance-logging.conf.erb"
+  owner "glance"
+  group "glance"
+  mode "0600"
+  variables(
+    "use_syslog" => node["glance"]["syslog"]["use"],
+    "log_facility" => node["glance"]["syslog"]["facility"]
+  )
+end
+
 template "/etc/glance/glance-registry.conf" do
   source "#{release}/glance-registry.conf.erb"
-  owner "root"
-  group "root"
-  mode "0644"
+  owner "glance"
+  group "glance"
+  mode "0600"
   variables(
     "registry_bind_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
