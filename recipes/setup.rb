@@ -140,7 +140,7 @@ template "/etc/glance/logging.conf" do
   mode "0600"
   variables(
     "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"],
+    "log_facility" => node["glance"]["syslog"]["facility"]
   )
 end
 
