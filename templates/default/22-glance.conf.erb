@@ -9,5 +9,7 @@ $DirCreateMode 0755
 $FileGroup adm
 
 $template GlanceLog, "/var/log/glance/glance.log"
-
 <%= @log_facility %>.* 		-?GlanceLog
+
+# stop processing
+& ~
