@@ -16,6 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# die early if we are trying HA with local file store
+if other_api = get_settings_by_role("glance-api", "api", false)
+  if node["glance"]["api"]["default_store"] == "file"
+    Chef::Application.fatal! "Local file store not supported with multiple glance-api nodes>
+    Change file store to 'swift' or 'cloudfiles' or remove additional glance-api nodes"
+  end
+end
+
 include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
@@ -28,7 +37,7 @@ end
 platform_options = node["glance"]["platform"][release]
 
 package "curl" do
-  action :upgrade
+  action :install
 end
 
 package "python-keystone" do
@@ -37,7 +46,7 @@ end
 
 platform_options["glance_packages"].each do |pkg|
   package pkg do
-    action :upgrade
+    action :install
     options platform_options["package_overrides"]
   end
 end
@@ -89,7 +98,7 @@ ks_admin_endpoint = get_access_endpoint("keystone", "keystone", "admin-api")
 ks_service_endpoint = get_access_endpoint("keystone", "keystone","service-api")
 keystone = get_settings_by_role("keystone", "keystone")
 glance = get_settings_by_role("glance-api", "glance")
-
+settings = get_settings_by_role("glance-setup", "glance")
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 api_endpoint = get_bind_endpoint("glance", "api")
 
@@ -107,13 +116,13 @@ api_endpoint = get_bind_endpoint("glance", "api")
 if glance["api"]["swift_store_auth_address"].nil?
     swift_store_auth_address="http://#{ks_admin_endpoint["host"]}:#{ks_service_endpoint["port"]}/v2.0"
     swift_store_user="#{glance["service_tenant_name"]}:#{glance["service_user"]}"
-    swift_store_key=glance["service_pass"]
+    swift_store_key=settings["service_pass"]
     swift_store_auth_version=2
 else
-    swift_store_auth_address=glance["api"]["swift_store_auth_address"]
-    swift_store_user=glance["api"]["swift_store_user"]
-    swift_store_key=glance["api"]["swift_store_key"]
-    swift_store_auth_version=glance["api"]["swift_store_auth_version"]
+    swift_store_auth_address=settings["api"]["swift_store_auth_address"]
+    swift_store_user=settings["api"]["swift_store_user"]
+    swift_store_key=settings["api"]["swift_store_key"]
+    swift_store_auth_version=settings["api"]["swift_store_auth_version"]
 end
 
 # Only use the glance image cacher if we aren't using file for our backing store.
@@ -129,7 +138,7 @@ template "/etc/glance/glance-api.conf" do
   group "root"
   mode "0644"
   variables(
-    "api_bind_address" => api_endpoint["host"],
+    "api_bind_address" => "0.0.0.0",
     "api_bind_port" => api_endpoint["port"],
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
@@ -147,9 +156,9 @@ template "/etc/glance/glance-api.conf" do
     "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
     "swift_store_container" => glance["api"]["swift"]["store_container"],
     "db_ip_address" => mysql_info["host"],
-    "db_user" => node["glance"]["db"]["username"],
-    "db_password" => node["glance"]["db"]["password"],
-    "db_name" => node["glance"]["db"]["name"]
+    "db_user" => settings["db"]["username"],
+    "db_password" => settings["db"]["password"],
+    "db_name" => settings["db"]["name"]
   )
   notifies :restart, resources(:service => "glance-api"), :immediately
 end
@@ -164,9 +173,9 @@ template "/etc/glance/glance-api-paste.ini" do
     "keystone_service_port" => ks_service_endpoint["port"],
     "keystone_admin_port" => ks_admin_endpoint["port"],
     "keystone_admin_token" => keystone["admin_token"],
-    "service_tenant_name" => node["glance"]["service_tenant_name"],
-    "service_user" => node["glance"]["service_user"],
-    "service_pass" => node["glance"]["service_pass"]
+    "service_tenant_name" => settings["service_tenant_name"],
+    "service_user" => settings["service_user"],
+    "service_pass" => settings["service_pass"]
   )
   notifies :restart, resources(:service => "glance-api"), :immediately
 end
@@ -226,7 +235,7 @@ template "/etc/glance/glance-scrubber-paste.ini" do
 end
 
 # Register Image Service
-keystone_register "Register Image Service" do
+keystone_service "Register Image Service" do
   auth_host ks_admin_endpoint["host"]
   auth_port ks_admin_endpoint["port"]
   auth_protocol ks_admin_endpoint["scheme"]
@@ -235,11 +244,11 @@ keystone_register "Register Image Service" do
   service_name "glance"
   service_type "image"
   service_description "Glance Image Service"
-  action :create_service
+  action :create
 end
 
 # Register Image Endpoint
-keystone_register "Register Image Endpoint" do
+keystone_endpoint "Register Image Endpoint" do
   auth_host ks_admin_endpoint["host"]
   auth_port ks_admin_endpoint["port"]
   auth_protocol ks_admin_endpoint["scheme"]
@@ -250,7 +259,7 @@ keystone_register "Register Image Endpoint" do
   endpoint_adminurl api_endpoint["uri"]
   endpoint_internalurl api_endpoint["uri"]
   endpoint_publicurl api_endpoint["uri"]
-  action :create_endpoint
+  action :create
 end
 
 if node["glance"]["image_upload"]
