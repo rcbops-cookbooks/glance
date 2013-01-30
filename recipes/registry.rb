@@ -123,7 +123,7 @@ template "/etc/glance/logging.conf" do
   mode "0640"
   variables(
     "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"],
+    "log_facility" => node["glance"]["syslog"]["facility"]
   )
   notifies :restart, resources(:service => "glance-registry"), :delayed
 end
