@@ -40,6 +40,12 @@ package "curl" do
   action :install
 end
 
+platform_options["mysql_python_packages"].each do |pkg|
+  package pkg do
+    action :install
+  end
+end
+
 package "python-keystone" do
     action :install
 end
