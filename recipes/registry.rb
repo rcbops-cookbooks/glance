@@ -90,6 +90,14 @@ service "glance-registry" do
   action :nothing
 end
 
+unless node.run_list.expand(node.chef_environment).recipes.include?("glance::api")
+  service "glance-api" do
+    service_name platform_options["glance_api_service"]
+    supports :status => true, :restart => true
+    action [ :stop, :disable ]
+  end
+end
+
 monitoring_procmon "glance-registry" do
   sname = platform_options["glance_registry_service"]
   pname = platform_options["glance_registry_process_name"]
