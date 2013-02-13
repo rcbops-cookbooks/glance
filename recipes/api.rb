@@ -164,7 +164,7 @@ template "/etc/glance/glance-api.conf" do
   group "glance"
   mode "0600"
   variables(
-    "api_bind_address" => "0.0.0.0",
+    "api_bind_address" => api_endpoint["host"],
     "api_bind_port" => api_endpoint["port"],
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
