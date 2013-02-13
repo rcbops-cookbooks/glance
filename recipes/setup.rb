@@ -165,7 +165,7 @@ execute "glance-manage db_sync" do
   user "glance"
   group "glance"
   if platform?(%w{ubuntu debian})
-    command "glance-manage version_control 0 && sudo -u glance glance-manage db_sync"
+    command "glance-manage version_control 0 && glance-manage db_sync"
   end
   if platform?(%w{redhat centos fedora scientific})
     command "glance glance-manage db_sync"
