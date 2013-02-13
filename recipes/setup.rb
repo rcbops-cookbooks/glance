@@ -162,12 +162,14 @@ template "/etc/glance/glance-registry.conf" do
 end
 
 execute "glance-manage db_sync" do
+  user "glance"
+  group "glance"
   if platform?(%w{ubuntu debian})
-    command "sudo -u glance glance-manage version_control 0 && sudo -u glance glance-manage db_sync"
+    command "glance-manage version_control 0 && sudo -u glance glance-manage db_sync"
   end
   if platform?(%w{redhat centos fedora scientific})
-    command "sudo -u glance glance-manage db_sync"
+    command "glance glance-manage db_sync"
   end
-  not_if "sudo -u glance glance-manage db_version"
+  not_if "glance-manage db_version"
   action :run
 end
