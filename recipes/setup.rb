@@ -161,13 +161,23 @@ template "/etc/glance/glance-registry.conf" do
   )
 end
 
+# TODO(breu): need to find out why this is happening
+# Workaround an installation bug where glance-console gets owned by root
+file "/var/log/glance/glance-console.log" do
+  owner "glance"
+  group "glance"
+  action :touch
+end
+
 execute "glance-manage db_sync" do
+  user "glance"
+  group "glance"
   if platform?(%w{ubuntu debian})
-    command "sudo -u glance glance-manage version_control 0 && sudo -u glance glance-manage db_sync"
+    command "glance-manage version_control 0 && glance-manage db_sync"
   end
   if platform?(%w{redhat centos fedora scientific})
-    command "sudo -u glance glance-manage db_sync"
+    command "glance-manage db_sync"
   end
-  not_if "sudo -u glance glance-manage db_version"
+  not_if "glance-manage db_version"
   action :run
 end
