@@ -167,7 +167,6 @@ file "/var/log/glance/glance-console.log" do
   owner "glance"
   group "glance"
   action :touch
-  only_if { platform?("fedora","redhat","centos") }
 end
 
 execute "glance-manage db_sync" do
@@ -177,7 +176,7 @@ execute "glance-manage db_sync" do
     command "glance-manage version_control 0 && glance-manage db_sync"
   end
   if platform?(%w{redhat centos fedora scientific})
-    command "glance glance-manage db_sync"
+    command "glance-manage db_sync"
   end
   not_if "glance-manage db_version"
   action :run
