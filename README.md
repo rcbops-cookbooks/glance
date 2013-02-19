@@ -119,24 +119,24 @@ None
 Attributes 
 ==========
 
-* `glance["services"]["api"]["scheme"] - http or https
-* `glance["services"]["api"]["network"] - Network name to place service on
-* `glance["services"]["api"]["port"] - registry port
-* `glance["services"]["api"]["path"] - URI to use when using glance api
-* `glance["services"]["registry"]["scheme"] - http or https
-* `glance["services"]["registry"]["network"] - Network name to place service on
-* `glance["services"]["registry"]["port"] - registry port
-* `glance["services"]["registry"]["path"] - URI to use when using glance registry
+* `glance["services"]["api"]["scheme"]` - http or https
+* `glance["services"]["api"]["network"]` - Network name to place service on
+* `glance["services"]["api"]["port"]` - registry port
+* `glance["services"]["api"]["path"]` - URI to use when using glance api
+* `glance["services"]["registry"]["scheme"]` - http or https
+* `glance["services"]["registry"]["network"]` - Network name to place service on
+* `glance["services"]["registry"]["port"]` - registry port
+* `glance["services"]["registry"]["path"]` - URI to use when using glance registry
 * `glance["db"]["name"]` - Name of glance database
 * `glance["db"]["user"]` - Username for glance database access
 * `glance["service_tenant_name"]` - Tenant name used by glance when interacting with keystone - used in the API and registry paste.ini files
 * `glance["service_user"]` - User name used by glance when interacting with keystone - used in the API and registry paste.ini files
 * `glance["service_role"]` - User role used by glance when interacting with keystone - used in the API and registry paste.ini files
 * `glance["api"]["default_store"]` - Toggles the backend storage type.  Currently supported is "file" and "swift", defaults to "file"
-* `glance["api"]["swift"]["store_container"] - Set the container used by glance to store images and snapshots.  Defaults to "glance"
-* `glance["api"]["swift"]["store_large_object_size"] - Set the size at which glance starts to chunnk files.  Defaults to "200" MB
-* `glance["api"]["swift"]["store_large_object_chunk_size"] - Set the chunk size for glance.  Defaults to "200" MB
-* `glance["api"]["cache"]["image_cache_max_size"] - Set the maximum size of image cache.  Defaults to "10" GB
+* `glance["api"]["swift"]["store_container"]` - Set the container used by glance to store images and snapshots.  Defaults to "glance"
+* `glance["api"]["swift"]["store_large_object_size"]` - Set the size at which glance starts to chunnk files.  Defaults to "200" MB
+* `glance["api"]["swift"]["store_large_object_chunk_size"]` - Set the chunk size for glance.  Defaults to "200" MB
+* `glance["api"]["cache"]["image_cache_max_size"]` - Set the maximum size of image cache.  Defaults to "10" GB
 * `glance["image_upload"]` - Toggles whether to automatically upload images in the `glance["images"]` array
 * `glance["images"]` - Default list of images to upload to the glance repository as part of the install
 * `glance["image]["<imagename>"]` - URL location of the <imagename> image. There can be multiple instances of this line to define multiple images (eg natty, maverick, fedora17 etc)
