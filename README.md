@@ -6,7 +6,7 @@ Installs the OpenStack Image Repository/Server (codename: glance) from packages.
 http://glance.openstack.org/
 
 Usage
-====
+=====
 
 The Glance cookbook currently supports file, swift, and Rackspace Cloud Files (swift API compliant) backing stores.  NOTE: changing the storage location from cloudfiles to swift (and vice versa) requires that you manually export and import your stored images.
 
@@ -66,8 +66,8 @@ Chef 0.10.0 or higher required (for Chef environment use)
 Platform
 --------
 
-* Ubuntu-12.04
-* Fedora-17
+* CentOS >= 6.3
+* Ubuntu >= 12.04
 
 Cookbooks
 ---------
@@ -75,9 +75,11 @@ Cookbooks
 The following cookbooks are dependencies:
 
 * database
-* mysql
 * keystone
-
+* monitoring
+* mysql
+* openssl
+* osops-utils
 
 Resources/Providers
 ===================
@@ -90,17 +92,23 @@ Recipes
 
 default
 -------
--Includes recipes `api`, `registry`  
+- Includes recipes `api`, `registry`  
+
+setup
+-----
+- Handles keystone registration and glance database creation
 
 api
 ------
--Installs the glance-api server  
+- Installs the glance-api server
 
 registry
 --------
--Includes recipe `mysql:client`  
--Installs the glance-registry server  
+- Installs the glance-registry server  
 
+glance-rsyslog
+--------------
+- rsyslog glance configuration, automatically included in `setup`, `api`, and `registry`
 
 Data Bags
 =========
@@ -111,39 +119,45 @@ None
 Attributes 
 ==========
 
+* `glance["services"]["api"]["scheme"] - http or https
+* `glance["services"]["api"]["network"] - Network name to place service on
+* `glance["services"]["api"]["port"] - registry port
+* `glance["services"]["api"]["path"] - URI to use when using glance api
+* `glance["services"]["registry"]["scheme"] - http or https
+* `glance["services"]["registry"]["network"] - Network name to place service on
+* `glance["services"]["registry"]["port"] - registry port
+* `glance["services"]["registry"]["path"] - URI to use when using glance registry
 * `glance["db"]["name"]` - Name of glance database
 * `glance["db"]["user"]` - Username for glance database access
-* `glance["db"]["password"]` - Password for glance database access
-* `glance["api"]["ip_address"]` - IP address to use for communicating with the glance API
-* `glance["api"]["bind_address"]` - IP address for the glance API to bind to
-* `glance["api"]["port"]` - Port for the glance API to bind to
-* `glance["api"]["adminURL"]` - Used when registering image endpoint with keystone
-* `glance["api"]["internalURL"]` - Used when registering image endpoint with keystone
-* `glance["api"]["publicURL"]` - Used when registering image endpoint with keystone
-* `glance["registry"]["ip_address"]` - IP address to use for communicating with the glance registry
-* `glance["registry"]["bind_address"]` - IP address for the glance registry to bind to
-* `glance["registry"]["port"]` - IP address for the glance port to bind to
 * `glance["service_tenant_name"]` - Tenant name used by glance when interacting with keystone - used in the API and registry paste.ini files
 * `glance["service_user"]` - User name used by glance when interacting with keystone - used in the API and registry paste.ini files
-* `glance["service_pass"]` - User password used by glance when interacting with keystone - used in the API and registry paste.ini files
 * `glance["service_role"]` - User role used by glance when interacting with keystone - used in the API and registry paste.ini files
-* `glance["image_upload"]` - Toggles whether to automatically upload images in the `glance["images"]` array
-* `glance["images"]` - Default list of images to upload to the glance repository as part of the install
-* `glance["image]["<imagename>"]` - URL location of the <imagename> image. There can be multiple instances of this line to define multiple imagess (eg natty, maverick, fedora17 etc)
---- example `glance["image]["natty"]` - "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
-* `glance["api"]["default_store"]` - Toggles the backend storage type.  Currently supported is "file" and "swift"
+* `glance["api"]["default_store"]` - Toggles the backend storage type.  Currently supported is "file" and "swift", defaults to "file"
 * `glance["api"]["swift"]["store_container"] - Set the container used by glance to store images and snapshots.  Defaults to "glance"
 * `glance["api"]["swift"]["store_large_object_size"] - Set the size at which glance starts to chunnk files.  Defaults to "200" MB
 * `glance["api"]["swift"]["store_large_object_chunk_size"] - Set the chunk size for glance.  Defaults to "200" MB
-
+* `glance["api"]["cache"]["image_cache_max_size"] - Set the maximum size of image cache.  Defaults to "10" GB
+* `glance["image_upload"]` - Toggles whether to automatically upload images in the `glance["images"]` array
+* `glance["images"]` - Default list of images to upload to the glance repository as part of the install
+* `glance["image]["<imagename>"]` - URL location of the <imagename> image. There can be multiple instances of this line to define multiple images (eg natty, maverick, fedora17 etc)
+--- example `glance["image]["natty"]` - "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
+* `glance["syslog"]["use"]`
+* `glance["syslog"]["facility"]`
+* `glance["syslog"]["config_facility"]`
+* `glance["platform"]` - Hash of platform specific package/service names and options
 
 Templates
 =========
 
+* `22-glance.conf.erb` - rsyslog config file for glance
 * `glance-api-paste.ini.erb` - Paste config for glance-api middleware
 * `glance-api.conf.erb` - Config file for glance-api server
+* `glance-cache-paste.ini.erb` - Paste config for glance-cache middleware
+* `glance-cache.conf.erb` - Config file for glance image cache service
+* `glance-logging.conf.erb` - Logging config for glance services
 * `glance-registry-paste.ini.erb` - Paste config for glance-registry middleware
 * `glance-registry.conf.erb` - Config file for glance-registry server
+* `glance-scrubber-paste.ini.erb` - Paste config for glance-scrubber middleware
 * `glance-scrubber.conf.erb` - Config file for glance image scrubber service
 * `policy.json.erb` - Configuration of ACLs for glance API server
 
@@ -158,6 +172,7 @@ Author:: Joseph Breu (<joseph.breu@rackspace.com>)
 Author:: William Kelly (<william.kelly@rackspace.com>)  
 Author:: Darren Birkett (<darren.birkett@rackspace.co.uk>)  
 Author:: Evan Callicoat (<evan.callicoat@rackspace.com>)  
+Author:: Matt Thompson (<matt.thompson@rackspace.co.uk>)  
 
 Copyright 2012, Rackspace US, Inc.
 
