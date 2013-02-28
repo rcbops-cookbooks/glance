@@ -12,7 +12,7 @@ recipe            "glance::glance-rsyslog", "Creates rsyslog configuration for g
   supports os
 end
 
-%w{ database monitoring mysql openssl osops-utils }.each do |dep|
+%w{ database dsh monitoring mysql openssl osops-utils }.each do |dep|
   depends dep
 end
 
