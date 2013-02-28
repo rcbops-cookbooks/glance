@@ -18,8 +18,12 @@
 #
 
 # die early if we are trying HA with local file store
-if other_api = get_settings_by_role("glance-api", "api", false)
-  if node["glance"]["api"]["default_store"] == "file"
+glance_api_count = get_realserver_endpoints("glance-api", "glance", "api").length
+
+if node["glance"]["api"]["default_store"] == "file"
+  if glance_api_count == 2
+    include_recipe "glance::replicator"
+  elsif glance_api_count > 2
     Chef::Application.fatal! "Local file store not supported with multiple glance-api nodes>
     Change file store to 'swift' or 'cloudfiles' or remove additional glance-api nodes"
   end
