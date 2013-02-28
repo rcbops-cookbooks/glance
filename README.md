@@ -75,6 +75,7 @@ Cookbooks
 The following cookbooks are dependencies:
 
 * database
+* dsh
 * keystone
 * monitoring
 * mysql
@@ -109,6 +110,10 @@ registry
 glance-rsyslog
 --------------
 - rsyslog glance configuration, automatically included in `setup`, `api`, and `registry`
+
+replicator
+----------
+- drops in cron jobs to sync glance images when running 2 node HA setup w/ file storage
 
 Data Bags
 =========
@@ -157,6 +162,8 @@ Templates
 * `glance-logging.conf.erb` - Logging config for glance services
 * `glance-registry-paste.ini.erb` - Paste config for glance-registry middleware
 * `glance-registry.conf.erb` - Config file for glance-registry server
+* `glance-replicator.py.erb` - Connects to glance API to pull list of active images
+* `glance-replicator.sh.erb` - Wrapper for glance-replicator.py
 * `glance-scrubber-paste.ini.erb` - Paste config for glance-scrubber middleware
 * `glance-scrubber.conf.erb` - Config file for glance image scrubber service
 * `policy.json.erb` - Configuration of ACLs for glance API server

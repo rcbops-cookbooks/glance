@@ -7,6 +7,7 @@ recipe            "glance::setup", "Handles glance keystone registration and dat
 recipe            "glance::api", "Installs packages required for a glance api server"
 recipe            "glance::registry", "Installs packages required for a glance registry server"
 recipe            "glance::glance-rsyslog", "Creates rsyslog configuration for glance"
+recipe            "glance::replicator", "Drops in cronjobs to sync glance images when running 2 node HA setup w/ file storage"
 
 %w{ centos ubuntu }.each do |os|
   supports os
