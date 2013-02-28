@@ -16,9 +16,9 @@
 #
 #set -x
 declare -a processes
-processes=($(pgrep -f glance-replicator))
+processes=($(pgrep -f glance-replicator.py))
 source /root/openrc
-if [ ${#processes[@]} -eq 1 ]; then
+if [ ${#processes[@]} -eq 0 ]; then
     token=$(keystone token-get | sed -En "/ id/ s/^.* ([a-f0-9]{3,}) .*$/\1/p")
     python /var/lib/glance/glance-replicator.py -t $token check_filesystem_store <%= @glance_ip %>:<%= @glance_port %> /var/lib/glance/images
 else
