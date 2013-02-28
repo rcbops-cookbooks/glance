@@ -23,9 +23,6 @@ glance_servers.delete(me)
 other_glance_server = glance_servers[0]
 glance_endpoint = get_access_endpoint("glance-api", "glance", "api")
 
-#### DELETE ME
-node.set["keepalived"]["shared_address"] = true
-
 dsh_group "glance" do
   user "root"
   admin_user "root"

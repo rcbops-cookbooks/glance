@@ -29,7 +29,6 @@ if node["glance"]["api"]["default_store"] == "file"
   end
 end
 
-include_recipe "glance::replicator"
 include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
