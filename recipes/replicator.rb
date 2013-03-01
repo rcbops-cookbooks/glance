@@ -17,6 +17,10 @@
 # limitations under the License.
 #
 
+if Chef::Config[:solo]
+  Chef::Application.fatal! "This recipe uses search. Chef Solo does not support search."
+end
+
 glance_servers = get_realserver_endpoints("glance-api", "glance", "api").map { |g| g["host"] }
 me = get_ip_for_net(node["glance"]["services"]["api"]["network"], node)
 glance_servers.delete(me)
