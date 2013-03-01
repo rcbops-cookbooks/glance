@@ -50,8 +50,8 @@ template "/var/lib/glance/glance-replicator.sh" do
   group "root"
   mode "0755"
   variables(
-      :glance_ip => glance_endpoint["host"],
-      :glance_port => glance_endpoint["port"]
+      :glance_endpoint_ip => glance_endpoint["host"],
+      :glance_endpoint_port => glance_endpoint["port"]
   )
 end
 
