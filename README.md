@@ -149,6 +149,7 @@ Attributes
 * `glance["syslog"]["use"]`
 * `glance["syslog"]["facility"]`
 * `glance["syslog"]["config_facility"]`
+* `glance["replicator"]["interval"]` - Define how frequently replicator cron job should run
 * `glance["platform"]` - Hash of platform specific package/service names and options
 
 Templates

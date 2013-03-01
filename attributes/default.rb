@@ -59,6 +59,9 @@ default["glance"]["syslog"]["use"] = true                   # node_attribute
 default["glance"]["syslog"]["facility"] = "LOG_LOCAL2"      # node_attribute
 default["glance"]["syslog"]["config_facility"] = "local2"   # node_attribute
 
+# replicator attributes
+default["glance"]["replicator"]["interval"] = 10
+
 # platform-specific settings
 case platform
 when "fedora", "redhat", "centos"

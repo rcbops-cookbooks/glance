@@ -20,7 +20,18 @@
 glance_servers = get_realserver_endpoints("glance-api", "glance", "api").map { |g| g["host"] }
 me = get_ip_for_net(node["glance"]["services"]["api"]["network"], node)
 glance_servers.delete(me)
-other_glance_server = glance_servers[0]
+# This recipe is only called when we have 2 glance-api servers, so there should
+# only be one left once we remove ourself.
+other_glance_server_ip = glance_servers[0]
+
+if Chef::Config[:solo]
+  Chef::Application.fatal! "This recipe uses search. Chef Solo does not support search."
+  other_glance_server_port = "22"
+else
+  other_glance_server_node = search(:node, "chef_environment:#{node.chef_environment} AND network_*_addresses:#{other_glance_server_ip}")[0]
+  other_glance_server_port = other_glance_server_node["openssh"]["server"]["port"]
+end
+
 glance_endpoint = get_access_endpoint("glance-api", "glance", "api")
 
 dsh_group "glance" do
@@ -34,7 +45,10 @@ template "/var/lib/glance/glance-replicator.py" do
   owner "glance"
   group "glance"
   mode "0755"
-  variables(:other_glance_server => other_glance_server)
+  variables(
+      :other_glance_server_ip => other_glance_server_ip,
+      :other_glance_server_port => other_glance_server_port
+  )
 end
 
 template "/var/lib/glance/glance-replicator.sh" do
@@ -42,10 +56,13 @@ template "/var/lib/glance/glance-replicator.sh" do
   owner "root"
   group "root"
   mode "0755"
-  variables(:glance_ip => glance_endpoint["host"], :glance_port => glance_endpoint["port"])
+  variables(
+      :glance_endpoint_ip => glance_endpoint["host"],
+      :glance_endpoint_port => glance_endpoint["port"]
+  )
 end
 
 cron "glance-replicator" do
-  minute "*/10"
+  minute "*/#{node['glance']['replicator']['interval']}"
   command "/var/lib/glance/glance-replicator.sh"
 end
