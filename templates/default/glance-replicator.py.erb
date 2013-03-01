@@ -622,8 +622,8 @@ def replication_check_filesystem_store(options, args):
         fs_path = os.path.join(path, image['id'])
         if (not os.path.exists(fs_path)) and ( image['status'] == 'active'):
             print '%s replicated' % fs_path
-            os.system("rsync -az -e 'ssh -q -o StrictHostKeyChecking=no' "
-                      "root@<%= @other_glance_server %>:%s %s" % (fs_path, fs_path))
+            os.system("rsync -az -e 'ssh -q -o StrictHostKeyChecking=no -p <%= @other_glance_server_port %>' "
+                      "root@<%= @other_glance_server_ip %>:%s %s" % (fs_path, fs_path))
 
     for filename in os.listdir(path):
         logging.info(_('Considering: %s' % filename))
