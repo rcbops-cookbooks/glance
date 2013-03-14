@@ -31,8 +31,8 @@ end
 
 platform_options = node["glance"]["platform"][release]
 
-# make sure we die if there are multiple glance-setups
-if other_setup = get_settings_by_role("glance-setup", "glance", false)
+# make sure we die if there are glance-setups other than us
+if get_role_count("glance-setup", false) > 0
   Chef::Application.fatal! "You can only have one node with the glance-setup role"
 end
 
