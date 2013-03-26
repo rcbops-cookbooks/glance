@@ -22,6 +22,7 @@ glance_api_count = get_realserver_endpoints("glance-api", "glance", "api").lengt
 
 if node["glance"]["api"]["default_store"] == "file"
   if glance_api_count == 2
+    node.set["glance"]["api"]["notifier_strategy"] = "rabbit"
     include_recipe "glance::replicator"
   elsif glance_api_count > 2
     Chef::Application.fatal! "Local file store not supported with multiple glance-api nodes>
@@ -177,6 +178,7 @@ template "/etc/glance/glance-api.conf" do
     "rabbit_ipaddress" => rabbit_info["host"],
     "rabbit_port" => rabbit_info["port"],
     "default_store" => glance["api"]["default_store"],
+    "notifier_strategy" => glance["api"]["notifier_strategy"],
     "glance_flavor" => glance_flavor,
     "swift_store_key" => swift_store_key,
     "swift_store_user" => swift_store_user,

@@ -44,6 +44,7 @@ default["glance"]["api"]["swift"]["store_container"] = "glance"             # no
 default["glance"]["api"]["swift"]["store_large_object_size"] = "200"        # node_attribute
 default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"  # node_attribute
 default["glance"]["api"]["cache"]["image_cache_max_size"] = "10737418240"   # node_attribute
+default["glance"]["api"]["notifier_strategy"] = "noop"                      # node_attribute
 
 
 # Default Image Locations
@@ -60,7 +61,7 @@ default["glance"]["syslog"]["facility"] = "LOG_LOCAL2"      # node_attribute
 default["glance"]["syslog"]["config_facility"] = "local2"   # node_attribute
 
 # replicator attributes
-default["glance"]["replicator"]["interval"] = 10
+default["glance"]["replicator"]["interval"] = 5
 
 # platform-specific settings
 case platform
