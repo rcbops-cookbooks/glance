@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import glob
 import os
 import socket
 import sys
@@ -23,37 +24,40 @@ def _read_api_nodes_config():
 
 
 def _read_glance_api_config():
-    rabbit_cfg = {}
+    glance_cfg = {}
     section = 'DEFAULT'
     config = ConfigParser.RawConfigParser()
 
     if config.read(GLANCE_API_CONFIG):
         if config.get(section, 'notifier_strategy') == 'rabbit':
-            rabbit_cfg['host'] = config.get(section, 'rabbit_host')
-            rabbit_cfg['port'] = config.get(section, 'rabbit_port')
-            rabbit_cfg['use_ssl'] = config.get(section, 'rabbit_use_ssl')
-            rabbit_cfg['userid'] = config.get(section, 'rabbit_userid')
-            rabbit_cfg['password'] = config.get(section, 'rabbit_password')
-            rabbit_cfg['virtual_host'] = config.get(section,
+            glance_cfg['host'] = config.get(section, 'rabbit_host')
+            glance_cfg['port'] = config.get(section, 'rabbit_port')
+            glance_cfg['use_ssl'] = config.get(section, 'rabbit_use_ssl')
+            glance_cfg['userid'] = config.get(section, 'rabbit_userid')
+            glance_cfg['password'] = config.get(section,
+                                                'rabbit_password')
+            glance_cfg['virtual_host'] = config.get(section,
                                                     'rabbit_virtual_host')
-            rabbit_cfg['exchange'] = config.get(section,
+            glance_cfg['exchange'] = config.get(section,
                                                 'rabbit_notification_exchange')
-            rabbit_cfg['topic'] = config.get(section,
+            glance_cfg['topic'] = config.get(section,
                                              'rabbit_notification_topic')
+            glance_cfg['datadir'] = config.get(section,
+                                               'filesystem_store_datadir')
 
-            return rabbit_cfg
+            return glance_cfg
         else:
             return None
     else:
         return None
 
 
-def _connect(rabbit_cfg):
-    conn = Connection('amqp://%s:%s@%s:%s//' % (rabbit_cfg['userid'],
-                                                rabbit_cfg['password'],
-                                                rabbit_cfg['host'],
-                                                rabbit_cfg['port']))
-    exchange = Exchange(rabbit_cfg['exchange'],
+def _connect(glance_cfg):
+    conn = Connection('amqp://%s:%s@%s:%s//' % (glance_cfg['userid'],
+                                                glance_cfg['password'],
+                                                glance_cfg['host'],
+                                                glance_cfg['port']))
+    exchange = Exchange(glance_cfg['exchange'],
                         type='topic',
                         durable=False,
                         channel=conn.channel())
@@ -61,7 +65,7 @@ def _connect(rabbit_cfg):
     return conn, exchange
 
 
-def _declare_queue(rabbit_cfg, routing_key, conn, exchange):
+def _declare_queue(glance_cfg, routing_key, conn, exchange):
     queue = Queue(name=routing_key,
                   routing_key=routing_key,
                   exchange=exchange,
@@ -72,9 +76,9 @@ def _declare_queue(rabbit_cfg, routing_key, conn, exchange):
     return queue
 
 
-def _duplicate_notifications(rabbit_cfg, api_nodes, conn, exchange):
-    routing_key = '%s.info' % rabbit_cfg['topic']
-    notification_queue = _declare_queue(rabbit_cfg,
+def _duplicate_notifications(glance_cfg, api_nodes, conn, exchange):
+    routing_key = '%s.info' % glance_cfg['topic']
+    notification_queue = _declare_queue(glance_cfg,
                                         routing_key,
                                         conn,
                                         exchange)
@@ -87,24 +91,23 @@ def _duplicate_notifications(rabbit_cfg, api_nodes, conn, exchange):
 
         for node in api_nodes:
             routing_key = 'glance_replicator.%s.info' % node
-            node_queue = _declare_queue(rabbit_cfg,
+            node_queue = _declare_queue(glance_cfg,
                                         routing_key,
                                         conn,
                                         exchange)
 
-            if msg.payload['publisher_id'] != node:
-                msg_new = exchange.Message(msg.body,
-                                           content_type='application/json')
-                exchange.publish(msg_new, routing_key)
+            msg_new = exchange.Message(msg.body,
+                                       content_type='application/json')
+            exchange.publish(msg_new, routing_key)
 
         msg.ack()
 
 
-def _sync_images(rabbit_cfg, conn, exchange):
+def _sync_images(glance_cfg, conn, exchange):
     hostname = socket.gethostname()
 
     routing_key = 'glance_replicator.%s.info' % hostname
-    queue = _declare_queue(rabbit_cfg, routing_key, conn, exchange)
+    queue = _declare_queue(glance_cfg, routing_key, conn, exchange)
 
     while True:
         msg = queue.get()
@@ -112,19 +115,26 @@ def _sync_images(rabbit_cfg, conn, exchange):
         if msg is None:
             break
 
-        if (msg.payload['payload']['location'] is not None and
-            'file://' in msg.payload['payload']['location']):
-            file = msg.payload['payload']['location'].replace('file://', '')
-            if msg.payload['event_type'] == 'image.update':
-                print 'Update detected on %s ...' % (file)
-                os.system("rsync -a -e 'ssh -o StrictHostKeyChecking=no' "
-                          "root@%s:%s %s" % (msg.payload['publisher_id'],
-                                             file, file))
-            elif msg.payload['event_type'] == 'image.delete':
-                print 'Delete detected on %s ...' % (file)
-                os.system('rm %s' % (file))
+        image_filename = "%s/%s" % (glance_cfg['datadir'],
+                                    msg.payload['payload']['id'])
 
-        msg.ack()
+        if (msg.payload['event_type'] == 'image.update' and
+            msg.payload['publisher_id'] != hostname):
+            print 'Update detected on %s ...' % (image_filename)
+            os.system("rsync -a -e 'ssh -o StrictHostKeyChecking=no' "
+                      "root@%s:%s %s" % (msg.payload['publisher_id'],
+                                         image_filename, image_filename))
+            msg.ack()
+        elif msg.payload['event_type'] == 'image.delete':
+            print 'Delete detected on %s ...' % (image_filename)
+            # don't delete file if it's still being copied
+            image_glob = '%s/.*%s*' % (glance_cfg['datadir'],
+                                       msg.payload['payload']['id'])
+            if not glob.glob(image_glob):
+                os.system('rm %s' % (image_filename))
+                msg.ack()
+        else:
+            msg.ack()
 
 
 def main(args):
@@ -134,23 +144,23 @@ def main(args):
         sys.exit(1)
 
     if cmd in ('duplicate-notifications', 'sync-images', 'both'):
-        rabbit_cfg = _read_glance_api_config()
+        glance_cfg = _read_glance_api_config()
         api_nodes = _read_api_nodes_config()
 
-        if rabbit_cfg and api_nodes:
-            conn, exchange = _connect(rabbit_cfg)
+        if glance_cfg and api_nodes:
+            conn, exchange = _connect(glance_cfg)
         else:
             sys.exit(1)
     else:
         sys.exit(1)
 
     if cmd == 'duplicate-notifications':
-        _duplicate_notifications(rabbit_cfg, api_nodes, conn, exchange)
+        _duplicate_notifications(glance_cfg, api_nodes, conn, exchange)
     elif cmd == 'sync-images':
-        _sync_images(rabbit_cfg, conn, exchange)
+        _sync_images(glance_cfg, conn, exchange)
     elif cmd == 'both':
-        _duplicate_notifications(rabbit_cfg, api_nodes, conn, exchange)
-        _sync_images(rabbit_cfg, conn, exchange)
+        _duplicate_notifications(glance_cfg, api_nodes, conn, exchange)
+        _sync_images(glance_cfg, conn, exchange)
 
     conn.close()
 
