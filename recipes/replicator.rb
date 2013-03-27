@@ -17,22 +17,11 @@
 # limitations under the License.
 #
 
-glance_servers = get_realserver_endpoints("glance-api", "glance", "api").map { |g| g["host"] }
-me = get_ip_for_net(node["glance"]["services"]["api"]["network"], node)
-glance_servers.delete(me)
-# This recipe is only called when we have 2 glance-api servers, so there should
-# only be one left once we remove ourself.
-other_glance_server_ip = glance_servers[0]
-
 if Chef::Config[:solo]
   Chef::Application.fatal! "This recipe uses search. Chef Solo does not support search."
-  other_glance_server_port = "22"
-else
-  other_glance_server_node = search(:node, "chef_environment:#{node.chef_environment} AND network_*_addresses:#{other_glance_server_ip}")[0]
-  other_glance_server_port = other_glance_server_node["openssh"]["server"]["port"]
 end
 
-glance_endpoint = get_access_endpoint("glance-api", "glance", "api")
+api_nodes = search(:node, "chef_environment:#{node.chef_environment} AND roles:glance-api").map { |n| n["hostname"] }.join(",")
 
 dsh_group "glance" do
   user "root"
@@ -40,29 +29,27 @@ dsh_group "glance" do
   group "root"
 end
 
-template "/var/lib/glance/glance-replicator.py" do
-  source "glance-replicator.py.erb"
+cookbook_file "/var/lib/glance/glance-replicator.py" do
+  source "glance-replicator.py"
   owner "glance"
   group "glance"
   mode "0755"
-  variables(
-      :other_glance_server_ip => other_glance_server_ip,
-      :other_glance_server_port => other_glance_server_port
-  )
 end
 
-template "/var/lib/glance/glance-replicator.sh" do
-  source "glance-replicator.sh.erb"
-  owner "root"
-  group "root"
-  mode "0755"
-  variables(
-      :glance_endpoint_ip => glance_endpoint["host"],
-      :glance_endpoint_port => glance_endpoint["port"]
-  )
+template "/etc/glance/replicator.conf" do
+  source "replicator.conf.erb"
+  owner "glance"
+  group "glance"
+  mode "0600"
+  variables(:api_nodes => api_nodes)
 end
 
 cron "glance-replicator" do
   minute "*/#{node['glance']['replicator']['interval']}"
-  command "/var/lib/glance/glance-replicator.sh"
+  command "/var/lib/glance/glance-replicator.py both"
+end
+
+# clean up previous replicator
+file "/var/lib/glance/glance-replicator.sh" do
+  action :delete
 end
