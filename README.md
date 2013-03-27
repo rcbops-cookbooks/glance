@@ -113,7 +113,7 @@ glance-rsyslog
 
 replicator
 ----------
-- drops in cron jobs to sync glance images when running 2 node HA setup w/ file storage
+- Drops in cron job to sync glance images when running 2 node HA setup w/ file storage
 
 Data Bags
 =========
@@ -161,11 +161,10 @@ Templates
 * `glance-api.conf.erb` - Config file for glance-api server
 * `glance-cache-paste.ini.erb` - Paste config for glance-cache middleware
 * `glance-cache.conf.erb` - Config file for glance image cache service
+* `glance-image-sync.conf.erb` - Config for glance-image-sync cron
 * `glance-logging.conf.erb` - Logging config for glance services
 * `glance-registry-paste.ini.erb` - Paste config for glance-registry middleware
 * `glance-registry.conf.erb` - Config file for glance-registry server
-* `glance-replicator.py.erb` - Connects to glance API to pull list of active images
-* `glance-replicator.sh.erb` - Wrapper for glance-replicator.py
 * `glance-scrubber-paste.ini.erb` - Paste config for glance-scrubber middleware
 * `glance-scrubber.conf.erb` - Config file for glance image scrubber service
 * `policy.json.erb` - Configuration of ACLs for glance API server

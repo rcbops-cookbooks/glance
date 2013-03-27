@@ -24,7 +24,7 @@ from kombu import Connection
 from kombu import Exchange
 from kombu import Queue
 
-REPLICATOR_CONFIG = '/etc/glance/replicator.conf'
+IMAGE_SYNC_CONFIG = '/etc/glance/glance-image-sync.conf'
 GLANCE_API_CONFIG = '/etc/glance/glance-api.conf'
 
 
@@ -32,7 +32,7 @@ def _read_api_nodes_config():
     config = ConfigParser.RawConfigParser()
     section = 'DEFAULT'
 
-    if config.read(REPLICATOR_CONFIG):
+    if config.read(IMAGE_SYNC_CONFIG):
         return config.get(section, 'api_nodes').replace(' ', '').split(',')
     else:
         return None
@@ -105,7 +105,7 @@ def _duplicate_notifications(glance_cfg, api_nodes, conn, exchange):
             break
 
         for node in api_nodes:
-            routing_key = 'glance_replicator.%s.info' % node
+            routing_key = 'glance_image_sync.%s.info' % node
             node_queue = _declare_queue(glance_cfg,
                                         routing_key,
                                         conn,
@@ -121,7 +121,7 @@ def _duplicate_notifications(glance_cfg, api_nodes, conn, exchange):
 def _sync_images(glance_cfg, conn, exchange):
     hostname = socket.gethostname()
 
-    routing_key = 'glance_replicator.%s.info' % hostname
+    routing_key = 'glance_image_sync.%s.info' % hostname
     queue = _declare_queue(glance_cfg, routing_key, conn, exchange)
 
     while True:
