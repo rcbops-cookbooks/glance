@@ -29,27 +29,35 @@ dsh_group "glance" do
   group "root"
 end
 
-cookbook_file "/var/lib/glance/glance-replicator.py" do
-  source "glance-replicator.py"
+cookbook_file "/var/lib/glance/glance-image-sync.py" do
+  source "glance-image-sync.py"
   owner "glance"
   group "glance"
   mode "0755"
 end
 
-template "/etc/glance/replicator.conf" do
-  source "replicator.conf.erb"
+template "/etc/glance/glance-image-sync.conf" do
+  source "glance-image-sync.conf.erb"
   owner "glance"
   group "glance"
   mode "0600"
   variables(:api_nodes => api_nodes)
 end
 
-cron "glance-replicator" do
+cron "glance-image-sync" do
   minute "*/#{node['glance']['replicator']['interval']}"
-  command "/var/lib/glance/glance-replicator.py both"
+  command "/var/lib/glance/glance-image-sync.py both"
 end
 
 # clean up previous replicator
 file "/var/lib/glance/glance-replicator.sh" do
+  action :delete
+end
+
+cookbook_file "/var/lib/glance/glance-replicator.py" do
+  action :delete
+end
+
+cron "glance-replicator" do
   action :delete
 end
