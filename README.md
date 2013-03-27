@@ -113,7 +113,7 @@ glance-rsyslog
 
 replicator
 ----------
-- drops in cron jobs to sync glance images when running 2 node HA setup w/ file storage
+- Drops in cron job to sync glance images when running 2 node HA setup w/ file storage
 
 Data Bags
 =========
