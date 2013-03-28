@@ -20,7 +20,7 @@ import os
 import socket
 import sys
 import ConfigParser
-from kombu import Connection
+from kombu import BrokerConnection
 from kombu import Exchange
 from kombu import Queue
 
@@ -68,10 +68,13 @@ def _read_glance_api_config():
 
 
 def _connect(glance_cfg):
-    conn = Connection('amqp://%s:%s@%s:%s//' % (glance_cfg['userid'],
-                                                glance_cfg['password'],
-                                                glance_cfg['host'],
-                                                glance_cfg['port']))
+    # We use BrokerConnection rather than Connection as RHEL 6 has an ancient
+    # version of kombu library.
+    conn = BrokerConnection(hostname=glance_cfg['host'],
+                            port=glance_cfg['port'],
+                            userid=glance_cfg['userid'],
+                            password=glance_cfg['password'],
+                            virtual_host=glance_cfg['virtual_host'])
     exchange = Exchange(glance_cfg['exchange'],
                         type='topic',
                         durable=False,
@@ -101,8 +104,7 @@ def _duplicate_notifications(glance_cfg, api_nodes, conn, exchange):
     while True:
         msg = notification_queue.get()
 
-        if msg is None:
-            break
+        if msg is None: break
 
         for node in api_nodes:
             routing_key = 'glance_image_sync.%s.info' % node
@@ -127,12 +129,19 @@ def _sync_images(glance_cfg, conn, exchange):
     while True:
         msg = queue.get()
 
-        if msg is None:
-            break
+        if msg is None: break
 
         image_filename = "%s/%s" % (glance_cfg['datadir'],
                                     msg.payload['payload']['id'])
 
+        # An image create creates a create and update notification, so we
+        # just pass over the create notification and use the update one
+        # instead.
+        # Also, we don't send the update notification to the node which
+        # processed the request (publisher_id) since that node will already
+        # have the image; we do send deletes to all nodes though since the 
+        # node which receives the delete request may not have the completed
+        # image yet.
         if (msg.payload['event_type'] == 'image.update' and
             msg.payload['publisher_id'] != hostname):
             print 'Update detected on %s ...' % (image_filename)
@@ -142,7 +151,8 @@ def _sync_images(glance_cfg, conn, exchange):
             msg.ack()
         elif msg.payload['event_type'] == 'image.delete':
             print 'Delete detected on %s ...' % (image_filename)
-            # don't delete file if it's still being copied
+            # Don't delete file if it's still being copied (we're looking for
+            # the temporary file as it's being copied by rsync here).
             image_glob = '%s/.*%s*' % (glance_cfg['datadir'],
                                        msg.payload['payload']['id'])
             if not glob.glob(image_glob):
