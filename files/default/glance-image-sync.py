@@ -140,7 +140,8 @@ def _sync_images(glance_cfg, conn, exchange):
     while True:
         msg = queue.get()
 
-        if msg is None: break
+        if msg is None:
+            break
 
         image_filename = "%s/%s" % (glance_cfg['datadir'],
                                     msg.payload['payload']['id'])
