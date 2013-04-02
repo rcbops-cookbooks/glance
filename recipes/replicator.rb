@@ -23,12 +23,6 @@ end
 
 api_nodes = search(:node, "chef_environment:#{node.chef_environment} AND roles:glance-api").map { |n| n["hostname"] }.join(",")
 
-dsh_group "glance" do
-  user "root"
-  admin_user "root"
-  group "root"
-end
-
 cookbook_file "/var/lib/glance/glance-image-sync.py" do
   source "glance-image-sync.py"
   owner "glance"

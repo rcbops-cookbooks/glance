@@ -21,6 +21,14 @@
 glance_api_count = get_realserver_endpoints("glance-api", "glance", "api").length
 
 if node["glance"]["api"]["default_store"] == "file"
+  # this is really only needed when glance::replicator is included, however we
+  # want to install early on to minimize number of chef-client runs needed
+  dsh_group "glance" do
+    user "root"
+    admin_user "root"
+    group "root"
+  end
+
   if glance_api_count == 2
     node.set["glance"]["api"]["notifier_strategy"] = "rabbit"
     include_recipe "glance::replicator"
