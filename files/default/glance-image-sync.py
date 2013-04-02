@@ -94,6 +94,16 @@ def _declare_queue(glance_cfg, routing_key, conn, exchange):
     return queue
 
 
+def _shorten_hostname(node):
+    # If hostname is an FQDN, split it up and return the short name. Some
+    # systems may return FQDN on socket.gethostname(), so we choose one
+    # and run w/ that.
+    if '.' in node:
+        return node.split('.')[0]
+    else:
+        return node 
+
+
 def _duplicate_notifications(glance_cfg, api_nodes, conn, exchange):
     routing_key = '%s.info' % glance_cfg['topic']
     notification_queue = _declare_queue(glance_cfg,
@@ -104,10 +114,11 @@ def _duplicate_notifications(glance_cfg, api_nodes, conn, exchange):
     while True:
         msg = notification_queue.get()
 
-        if msg is None: break
+        if msg is None:
+            break
 
         for node in api_nodes:
-            routing_key = 'glance_image_sync.%s.info' % node
+            routing_key = 'glance_image_sync.%s.info' % _shorten_hostname(node)
             node_queue = _declare_queue(glance_cfg,
                                         routing_key,
                                         conn,
@@ -123,7 +134,7 @@ def _duplicate_notifications(glance_cfg, api_nodes, conn, exchange):
 def _sync_images(glance_cfg, conn, exchange):
     hostname = socket.gethostname()
 
-    routing_key = 'glance_image_sync.%s.info' % hostname
+    routing_key = 'glance_image_sync.%s.info' % _shorten_hostname(hostname)
     queue = _declare_queue(glance_cfg, routing_key, conn, exchange)
 
     while True:
@@ -134,7 +145,7 @@ def _sync_images(glance_cfg, conn, exchange):
         image_filename = "%s/%s" % (glance_cfg['datadir'],
                                     msg.payload['payload']['id'])
 
-        # An image create creates a create and update notification, so we
+        # An image create generates a create and update notification, so we
         # just pass over the create notification and use the update one
         # instead.
         # Also, we don't send the update notification to the node which
