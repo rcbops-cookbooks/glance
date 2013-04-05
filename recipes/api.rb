@@ -113,9 +113,6 @@ template "/etc/glance/policy.json" do
   group "glance"
   mode "0600"
   notifies :restart, resources(:service => "glance-api"), :immediately
-  not_if do
-    File.exists?("/etc/glance/policy.json")
-  end
 end
 
 rabbit_info = get_access_endpoint("rabbitmq-server", "rabbitmq", "queue")
