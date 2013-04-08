@@ -184,7 +184,8 @@ template "/etc/glance/glance-api.conf" do
     "keystone_admin_token" => keystone["admin_token"],
     "service_tenant_name" => settings["service_tenant_name"],
     "service_user" => settings["service_user"],
-    "service_pass" => settings["service_pass"]
+    "service_pass" => settings["service_pass"],
+    "glance_workers" => glance["api"]["workers"]
   )
   notifies :restart, resources(:service => "glance-api"), :immediately
 end
