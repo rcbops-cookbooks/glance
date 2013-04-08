@@ -59,7 +59,9 @@ paste.filter_factory = glance.api.middleware.context:ContextMiddleware.factory
 paste.filter_factory = glance.api.middleware.context:UnauthenticatedContextMiddleware.factory
 
 [filter:authtoken]
-paste.filter_factory = keystone.middleware.auth_token:filter_factory
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+delay_auth_decision = true
+
 service_protocol = http
 service_host = <%= @keystone_api_ipaddress %>
 service_port = <%= @keystone_service_port %>
@@ -70,4 +72,3 @@ auth_uri = http://<%= @keystone_api_ipaddress %>:<%= @keystone_service_port %>/
 admin_tenant_name = <%= @service_tenant_name %>
 admin_user = <%= @service_user %>
 admin_password = <%= @service_pass %>
-delay_auth_decision = true

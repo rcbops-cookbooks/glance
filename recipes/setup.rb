@@ -23,13 +23,7 @@ include_recipe "mysql::ruby"
 include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
-if not node["package_component"].nil?
-  release = node["package_component"]
-else
-  release = "folsom"
-end
-
-platform_options = node["glance"]["platform"][release]
+platform_options = node["glance"]["platform"]
 
 # make sure we die if there are glance-setups other than us
 if get_role_count("glance-setup", false) > 0
@@ -95,7 +89,7 @@ keystone_tenant "Register Service Tenant" do
   auth_token keystone["admin_token"]
   tenant_name node["glance"]["service_tenant_name"]
   tenant_description "Service Tenant"
-  tenant_enabled "true" # Not required as this is the default
+  tenant_enabled "1" # Not required as this is the default
   action :create
 end
 
@@ -109,7 +103,7 @@ keystone_user "Register Service User" do
   tenant_name node["glance"]["service_tenant_name"]
   user_name node["glance"]["service_user"]
   user_pass node["glance"]["service_pass"]
-  user_enabled "true" # Not required as this is the default
+  user_enabled "1" # Not required as this is the default
   action :create
 end
 
@@ -133,19 +127,8 @@ directory "/etc/glance" do
   mode "0700"
 end
 
-template "/etc/glance/logging.conf" do
-  source "glance-logging.conf.erb"
-  owner "glance"
-  group "glance"
-  mode "0600"
-  variables(
-    "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"]
-  )
-end
-
 template "/etc/glance/glance-registry.conf" do
-  source "#{release}/glance-registry.conf.erb"
+  source "glance-registry.conf.erb"
   owner "glance"
   group "glance"
   mode "0600"

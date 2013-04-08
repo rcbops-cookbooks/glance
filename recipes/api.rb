@@ -41,13 +41,7 @@ end
 include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
-if not node['package_component'].nil?
-    release = node['package_component']
-else
-    release = "folsom"
-end
-
-platform_options = node["glance"]["platform"][release]
+platform_options = node["glance"]["platform"]
 
 package "curl" do
   action :install
@@ -156,20 +150,8 @@ else
   glance_flavor="keystone+cachemanagement"
 end
 
-template "/etc/glance/logging.conf" do
-  source "glance-logging.conf.erb"
-  owner "glance"
-  group "glance"
-  mode "0640"
-  variables(
-    "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"]
-  )
-  notifies :restart, resources(:service => "glance-api"), :delayed
-end
-
 template "/etc/glance/glance-api.conf" do
-  source "#{release}/glance-api.conf.erb"
+  source "glance-api.conf.erb"
   owner "glance"
   group "glance"
   mode "0600"
@@ -195,13 +177,20 @@ template "/etc/glance/glance-api.conf" do
     "db_ip_address" => mysql_info["host"],
     "db_user" => settings["db"]["username"],
     "db_password" => settings["db"]["password"],
-    "db_name" => settings["db"]["name"]
+    "db_name" => settings["db"]["name"],
+    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
+    "keystone_service_port" => ks_service_endpoint["port"],
+    "keystone_admin_port" => ks_admin_endpoint["port"],
+    "keystone_admin_token" => keystone["admin_token"],
+    "service_tenant_name" => settings["service_tenant_name"],
+    "service_user" => settings["service_user"],
+    "service_pass" => settings["service_pass"]
   )
   notifies :restart, resources(:service => "glance-api"), :immediately
 end
 
 template "/etc/glance/glance-api-paste.ini" do
-  source "#{release}/glance-api-paste.ini.erb"
+  source "glance-api-paste.ini.erb"
   owner "glance"
   group "glance"
   mode "0600"
@@ -223,6 +212,13 @@ template "/etc/glance/glance-cache.conf" do
   group "glance"
   mode "0600"
   variables(
+    "swift_store_key" => swift_store_key,
+    "swift_store_user" => swift_store_user,
+    "swift_store_auth_address" => swift_store_auth_address,
+    "swift_store_auth_version" => swift_store_auth_version,
+    "swift_large_object_size" => glance["api"]["swift"]["store_large_object_size"],
+    "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
+    "swift_store_container" => glance["api"]["swift"]["store_container"],
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
     "use_syslog" => node["glance"]["syslog"]["use"],
