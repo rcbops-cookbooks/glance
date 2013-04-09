@@ -23,13 +23,7 @@ include_recipe "mysql::ruby"
 include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
 
-if not node["package_component"].nil?
-  release = node["package_component"]
-else
-  release = "folsom"
-end
-
-platform_options = node["glance"]["platform"][release]
+platform_options = node["glance"]["platform"]
 
 # Find the node that ran the glance-setup recipe and grab his passswords
 if Chef::Config[:solo]
@@ -119,20 +113,8 @@ directory "/etc/glance" do
   mode "0700"
 end
 
-template "/etc/glance/logging.conf" do
-  source "glance-logging.conf.erb"
-  owner "glance"
-  group "glance"
-  mode "0640"
-  variables(
-    "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"]
-  )
-  notifies :restart, resources(:service => "glance-registry"), :delayed
-end
-
 template "/etc/glance/glance-registry.conf" do
-  source "#{release}/glance-registry.conf.erb"
+  source "glance-registry.conf.erb"
   owner "glance"
   group "glance"
   mode "0600"
@@ -144,12 +126,18 @@ template "/etc/glance/glance-registry.conf" do
     "db_password" => node["glance"]["db"]["password"],
     "db_name" => node["glance"]["db"]["name"],
     "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"]
+    "log_facility" => node["glance"]["syslog"]["facility"],
+    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
+    "keystone_service_port" => ks_service_endpoint["port"],
+    "keystone_admin_port" => ks_admin_endpoint["port"],
+    "service_tenant_name" => node["glance"]["service_tenant_name"],
+    "service_user" => node["glance"]["service_user"],
+    "service_pass" => node["glance"]["service_pass"]
   )
 end
 
 template "/etc/glance/glance-registry-paste.ini" do
-  source "#{release}/glance-registry-paste.ini.erb"
+  source "glance-registry-paste.ini.erb"
   owner "glance"
   group "glance"
   mode "0600"
