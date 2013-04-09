@@ -67,7 +67,7 @@ def _upload_qcow(name, url)
     code <<-EOH
         #{glance_cmd} add name="#{new_name}" is_public=true #{c_fmt} #{d_fmt} location="#{url}"
     EOH
-    not_if "#{glance_cmd} -f index | grep #{new_name.to_s}"
+    not_if "#{glance_cmd} -f image-list | grep #{new_name.to_s}"
   end
 end
 
@@ -117,6 +117,6 @@ def _upload_ami(name, url)
         rid=$(#{glance_cmd} add name="${image_name}-initrd" is_public=true #{ari_fmt} < ${ramdisk} | cut -d: -f2 | sed 's/ //')
         #{glance_cmd} add name="#{new_name}" is_public=true #{ami_fmt} kernel_id=$kid ramdisk_id=$rid < ${kernel}
     EOH
-    not_if "#{glance_cmd} -f index | grep #{new_name.to_s}"
+    not_if "#{glance_cmd} -f image-list | grep #{new_name.to_s}"
   end
 end

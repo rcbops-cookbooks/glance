@@ -24,6 +24,10 @@ log_file = /var/log/glance/registry.log
 # Backlog requests when creating socket
 backlog = 4096
 
+# TCP_KEEPIDLE value in seconds when creating socket.
+# Not supported on OS X.
+#tcp_keepidle = 600
+
 # SQLAlchemy connection string for the reference implementation
 # registry server. Any valid SQLAlchemy connection string is fine.
 # See: http://www.sqlalchemy.org/docs/05/reference/sqlalchemy/connections.html#sqlalchemy.create_engine
@@ -46,26 +50,51 @@ api_limit_max = 1000
 # default to `limit_param_default`
 limit_param_default = 25
 
+# Role used to identify an authenticated user as administrator
+#admin_role = admin
+
+# Whether to automatically create the database tables.
+# Default: False
+#db_auto_create = False
+
 # ================= Syslog Options ============================
 
 # Send logs to syslog (/dev/log) instead of to file specified
 # by `log_file`
-use_syslog = <%= @use_syslog %>
+#use_syslog = False
 
-<% if @use_syslog == true %>
 # Facility to use. If unset defaults to LOG_USER.
-syslog_log_facility = <%= @log_facility %>
-<% else %>
-# syslog_log_facility = LOG_USER
-<% end %>
+#syslog_log_facility = LOG_LOCAL1
 
 # ================= SSL Options ===============================
 
 # Certificate file to use when starting registry server securely
-# cert_file = /path/to/certfile
+#cert_file = /path/to/certfile
 
 # Private key file to use when starting registry server securely
-# key_file = /path/to/keyfile
+#key_file = /path/to/keyfile
+
+# CA certificate file to use to verify connecting clients
+#ca_file = /path/to/cafile
+
+[keystone_authtoken]
+service_protocol = http
+service_host = <%= @keystone_api_ipaddress %>
+service_port = <%= @keystone_service_port %>
+auth_host = <%= @keystone_api_ipaddress %>
+auth_port = <%= @keystone_admin_port %>
+auth_protocol = http
+auth_uri = http://<%= @keystone_api_ipaddress %>:<%= @keystone_service_port %>/
+admin_tenant_name = <%= @service_tenant_name %>
+admin_user = <%= @service_user %>
+admin_password = <%= @service_pass %>
 
 [paste_deploy]
+# Name of the paste configuration file that defines the available pipelines
+#config_file = glance-registry-paste.ini
+
+# Partial name of a pipeline in your paste configuration file with the
+# service name removed. For example, if your paste section name is
+# [pipeline:glance-registry-keystone], you would configure the flavor below
+# as 'keystone'.
 flavor = keystone
