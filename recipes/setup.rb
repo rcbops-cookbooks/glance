@@ -152,14 +152,6 @@ file "/var/log/glance/glance-console.log" do
   action :touch
 end
 
-# Something is creating /var/log/glance/registry.log as root on CentOS 6.x,
-# temp workaround until we figure out what as it's causing db_sync to fail
-file "/var/log/glance/registry.log" do
-  owner "glance"
-  group "glance"
-  action :touch
-end
-
 execute "glance-manage db_sync" do
   user "glance"
   group "glance"
@@ -169,6 +161,8 @@ execute "glance-manage db_sync" do
   if platform?(%w{redhat centos fedora scientific})
     command "glance-manage db_sync"
   end
-  not_if "glance-manage db_version"
+  # the not_if doesn't run as glance:glance which results in
+  # /var/log/glance/registry.log being owned by root:root on CentOS 6.x
+  not_if "sudo -u glance-manage db_version"
   action :run
 end
