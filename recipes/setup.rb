@@ -163,6 +163,6 @@ execute "glance-manage db_sync" do
   end
   # the not_if doesn't run as glance:glance which results in
   # /var/log/glance/registry.log being owned by root:root on CentOS 6.x
-  not_if "sudo -u glance-manage db_version"
+  not_if "sudo -u glance glance-manage db_version"
   action :run
 end
