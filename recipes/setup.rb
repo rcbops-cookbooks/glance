@@ -161,6 +161,8 @@ execute "glance-manage db_sync" do
   if platform?(%w{redhat centos fedora scientific})
     command "glance-manage db_sync"
   end
-  not_if "glance-manage db_version"
+  # the not_if doesn't run as glance:glance which results in
+  # /var/log/glance/registry.log being owned by root:root on CentOS 6.x
+  not_if "sudo -u glance glance-manage db_version"
   action :run
 end
