@@ -152,6 +152,14 @@ file "/var/log/glance/glance-console.log" do
   action :touch
 end
 
+# Something is creating /var/log/glance/registry.log as root on CentOS 6.x,
+# temp workaround until we figure out what as it's causing db_sync to fail
+file "/var/log/glance/registry.log" do
+  owner "glance"
+  group "glance"
+  action :touch
+end
+
 execute "glance-manage db_sync" do
   user "glance"
   group "glance"
