@@ -73,16 +73,7 @@ end
 
 private
 def _upload_ami(name, url)
-  if not node['package_component'].nil?
-    release = node['package_component']
-  else
-    release = "folsom"
-  end 
-  if release < "folsom"
-    glance_cmd = "glance --silent-upload -I #{@user} -K #{@pass} -T #{@tenant} -N #{@ks_uri}"
-  else
-    glance_cmd = "glance -I #{@user} -K #{@pass} -T #{@tenant} -N #{@ks_uri}"
-  end
+  glance_cmd = "glance -I #{@user} -K #{@pass} -T #{@tenant} -N #{@ks_uri}"
   new_name = "#{name}-image"
   aki_fmt = "container_format=aki disk_format=aki"
   ari_fmt = "container_format=ari disk_format=ari"
