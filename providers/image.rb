@@ -56,16 +56,17 @@ end
 
 private
 def _upload_qcow(name, url)
-  glance_cmd = "glance -I #{@user} -K #{@pass} -T #{@tenant} -N #{@ks_uri}"
+  glance_cmd = "glance --os-username #{@user} --os-password #{@pass} --os-tenant-name #{@tenant} --os-auth-url #{@ks_uri}"
   new_name = "#{name}-image"
-  c_fmt = "container_format=bare"
-  d_fmt = "disk_format=qcow2"
+  c_fmt = "--container-format bare"
+  d_fmt = "--disk format qcow2"
+  is_pub = "--is-public True"
 
   bash "Uploading QCOW2 image #{name}" do
     cwd "/tmp"
     user "root"
     code <<-EOH
-        #{glance_cmd} add name="#{new_name}" is_public=true #{c_fmt} #{d_fmt} location="#{url}"
+        #{glance_cmd} image-create --name "#{new_name}" #{is_pub} #{c_fmt} #{d_fmt} --location "#{url}"
     EOH
     not_if "#{glance_cmd} -f image-list | grep #{new_name.to_s}"
   end
