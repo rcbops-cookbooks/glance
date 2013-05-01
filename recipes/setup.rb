@@ -103,7 +103,7 @@ keystone_user "Register Service User" do
   tenant_name node["glance"]["service_tenant_name"]
   user_name node["glance"]["service_user"]
   user_pass node["glance"]["service_pass"]
-  user_enabled "1" # Not required as this is the default
+  user_enabled true # Not required as this is the default
   action :create
 end
 
