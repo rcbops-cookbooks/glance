@@ -89,7 +89,7 @@ keystone_tenant "Register Service Tenant" do
   auth_token keystone["admin_token"]
   tenant_name node["glance"]["service_tenant_name"]
   tenant_description "Service Tenant"
-  tenant_enabled "1" # Not required as this is the default
+  tenant_enabled true # Not required as this is the default
   action :create
 end
 
