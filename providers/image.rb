@@ -59,7 +59,7 @@ def _upload_qcow(name, url)
   glance_cmd = "glance --os-username #{@user} --os-password #{@pass} --os-tenant-name #{@tenant} --os-auth-url #{@ks_uri}"
   new_name = "#{name}-image"
   c_fmt = "--container-format bare"
-  d_fmt = "--disk format qcow2"
+  d_fmt = "--disk-format qcow2"
   is_pub = "--is-public True"
 
   bash "Uploading QCOW2 image #{name}" do
