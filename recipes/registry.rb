@@ -20,7 +20,7 @@
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 include_recipe "mysql::client"
 include_recipe "mysql::ruby"
-include_recipe "glance::glance-rsyslog"
+include_recipe "glance::glance-common"
 include_recipe "monitoring"
 
 platform_options = node["glance"]["platform"]
@@ -45,46 +45,26 @@ else
   end
 end
 
-package "python-keystone" do
-    action :install
-end
-
-ks_admin_endpoint = get_access_endpoint("keystone-api", "keystone", "admin-api")
 ks_service_endpoint = get_access_endpoint("keystone-api", "keystone", "service-api")
 keystone = get_settings_by_role("keystone", "keystone")
-
 registry_endpoint = get_bind_endpoint("glance", "registry")
 mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
-
-package "curl" do
-  action :install
-end
-
-platform_options["mysql_python_packages"].each do |pkg|
-  package pkg do
-    action :install
-  end
-end
-
-platform_options["glance_packages"].each do |pkg|
-  package pkg do
-    action :install
-    options platform_options["package_overrides"]
-  end
-end
 
 service "glance-registry" do
   service_name platform_options["glance_registry_service"]
   supports :status => true, :restart => true
-  action :nothing
+  action :enable
+  subscribes :restart, "template[/etc/glance/glance-registry.conf]", :immediately
+  subscribes :restart, "template[/etc/glance/glance-registry-paste.ini]", :immediately
 end
 
-unless node.run_list.expand(node.chef_environment).recipes.include?("glance::api")
-  service "glance-api" do
-    service_name platform_options["glance_api_service"]
-    supports :status => true, :restart => true
-    action [ :stop, :disable ]
-  end
+# glance-api gets pulled in when we install glance-registry.  Unless we are
+# meant to be a glance-api node too, make sure it's stopped
+service "glance-api" do
+  service_name platform_options["glance_api_service"]
+  supports :status => true, :restart => true
+  action [ :stop, :disable ]
+  not_if { node.run_list.expand(node.chef_environment).recipes.include?("glance::api") }
 end
 
 monitoring_procmon "glance-registry" do
@@ -98,58 +78,5 @@ monitoring_metric "glance-registry-proc" do
   type "proc"
   proc_name "glance-registry"
   proc_regex platform_options["glance_registry_service"]
-
   alarms(:failure_min => 2.0)
 end
-
-file "/var/lib/glance/glance.sqlite" do
-    action :delete
-end
-
-directory "/etc/glance" do
-  action :create
-  group "glance"
-  owner "glance"
-  mode "0700"
-end
-
-template "/etc/glance/glance-registry.conf" do
-  source "glance-registry.conf.erb"
-  owner "glance"
-  group "glance"
-  mode "0600"
-  variables(
-    "registry_bind_address" => registry_endpoint["host"],
-    "registry_port" => registry_endpoint["port"],
-    "db_ip_address" => mysql_info["host"],
-    "db_user" => node["glance"]["db"]["username"],
-    "db_password" => node["glance"]["db"]["password"],
-    "db_name" => node["glance"]["db"]["name"],
-    "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"],
-    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
-    "keystone_service_port" => ks_service_endpoint["port"],
-    "keystone_admin_port" => ks_admin_endpoint["port"],
-    "service_tenant_name" => node["glance"]["service_tenant_name"],
-    "service_user" => node["glance"]["service_user"],
-    "service_pass" => node["glance"]["service_pass"]
-  )
-end
-
-template "/etc/glance/glance-registry-paste.ini" do
-  source "glance-registry-paste.ini.erb"
-  owner "glance"
-  group "glance"
-  mode "0600"
-  variables(
-    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
-    "keystone_service_port" => ks_service_endpoint["port"],
-    "keystone_admin_port" => ks_admin_endpoint["port"],
-    "service_tenant_name" => node["glance"]["service_tenant_name"],
-    "service_user" => node["glance"]["service_user"],
-    "service_pass" => node["glance"]["service_pass"]
-  )
-  notifies :restart, resources(:service => "glance-registry"), :immediately
-  notifies :enable, resources(:service => "glance-registry"), :immediately
-end
-

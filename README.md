@@ -131,6 +131,11 @@ replicator
 ----------
 - Drops in cron job to sync glance images when running 2 node HA setup w/ file storage
 
+glance-common
+-------------
+- Drops in all config files for api and registry. Gets included by other recipes
+- Installs common packages
+
 Data Bags
 =========
 

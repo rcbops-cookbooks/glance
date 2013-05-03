@@ -38,43 +38,27 @@ if node["glance"]["api"]["default_store"] == "file"
   end
 end
 
-include_recipe "glance::glance-rsyslog"
 include_recipe "monitoring"
+include_recipe "glance::glance-common"
 
 platform_options = node["glance"]["platform"]
-
-package "curl" do
-  action :install
-end
-
-platform_options["mysql_python_packages"].each do |pkg|
-  package pkg do
-    action :install
-  end
-end
-
-package "python-keystone" do
-    action :install
-end
-
-platform_options["glance_packages"].each do |pkg|
-  package pkg do
-    action :install
-    options platform_options["package_overrides"]
-  end
-end
 
 service "glance-api" do
   service_name platform_options["glance_api_service"]
   supports :status => true, :restart => true
   action :enable
+  subscribes :restart, "template[/etc/glance/glance-api.conf]", :immediately
+  subscribes :restart, "template[/etc/glance/glance-api-paste.ini]", :immediately
 end
 
-unless node.run_list.expand(node.chef_environment).recipes.include?("glance::registry")
-  service "glance-registry" do
-    service_name platform_options["glance_registry_service"]
-    supports :status => true, :restart => true
-    action [ :stop, :disable ]
+# glance-registry gets pulled in when we install glance-api.  Unless we are
+# meant to be a glance-registry node too, make sure it's stopped
+service "glance-registry" do
+  service_name platform_options["glance_registry_service"]
+  supports :status => true, :restart => true
+  action [ :stop, :disable ]
+  not_if do
+    node.run_list.expand(node.chef_environment).recipes.include?("glance::registry")
   end
 end
 
@@ -93,160 +77,22 @@ monitoring_metric "glance-api-proc" do
   alarms(:failure_min => 2.0)
 end
 
-directory "/etc/glance" do
-  action :create
-  group "glance"
-  owner "glance"
-  mode "0700"
-end
-
 # FIXME: seems like misfeature
 template "/etc/glance/policy.json" do
   source "policy.json.erb"
   owner "glance"
   group "glance"
   mode "0600"
-  notifies :restart, resources(:service => "glance-api"), :immediately
+  notifies :restart, "service[glance-api]", :immediately
 end
 
-rabbit_info = get_access_endpoint("rabbitmq-server", "rabbitmq", "queue")
-mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
 
 ks_admin_endpoint = get_access_endpoint("keystone-api", "keystone", "admin-api")
 ks_service_endpoint = get_access_endpoint("keystone-api", "keystone","service-api")
 keystone = get_settings_by_role("keystone", "keystone")
 glance = get_settings_by_role("glance-api", "glance")
 settings = get_settings_by_role("glance-setup", "glance")
-registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 api_endpoint = get_bind_endpoint("glance", "api")
-
-# Possible combinations of options here
-# - default_store=file
-#     * no other options required
-# - default_store=swift
-#     * if swift_store_auth_address is not defined
-#         - default to local swift
-#     * else if swift_store_auth_address is defined
-#         - get swift_store_auth_address, swift_store_user, swift_store_key, and
-#           swift_store_auth_version from the node attributes and use them to connect
-#           to the swift compatible API service running elsewhere - possibly
-#           Rackspace Cloud Files.
-if glance["api"]["swift_store_auth_address"].nil?
-    swift_store_auth_address="http://#{ks_admin_endpoint["host"]}:#{ks_service_endpoint["port"]}/v2.0"
-    swift_store_user="#{glance["service_tenant_name"]}:#{glance["service_user"]}"
-    swift_store_key=settings["service_pass"]
-    swift_store_auth_version=2
-else
-    swift_store_auth_address=settings["api"]["swift_store_auth_address"]
-    swift_store_user=settings["api"]["swift_store_user"]
-    swift_store_key=settings["api"]["swift_store_key"]
-    swift_store_auth_version=settings["api"]["swift_store_auth_version"]
-end
-
-# Only use the glance image cacher if we aren't using file for our backing store.
-if glance["api"]["default_store"]=="file"
-  glance_flavor="keystone"
-else
-  glance_flavor="keystone+cachemanagement"
-end
-
-template "/etc/glance/glance-api.conf" do
-  source "glance-api.conf.erb"
-  owner "glance"
-  group "glance"
-  mode "0600"
-  variables(
-    "api_bind_address" => api_endpoint["host"],
-    "api_bind_port" => api_endpoint["port"],
-    "registry_ip_address" => registry_endpoint["host"],
-    "registry_port" => registry_endpoint["port"],
-    "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"],
-    "rabbit_ipaddress" => rabbit_info["host"],
-    "rabbit_port" => rabbit_info["port"],
-    "default_store" => glance["api"]["default_store"],
-    "notifier_strategy" => glance["api"]["notifier_strategy"],
-    "glance_flavor" => glance_flavor,
-    "swift_store_key" => swift_store_key,
-    "swift_store_user" => swift_store_user,
-    "swift_store_auth_address" => swift_store_auth_address,
-    "swift_store_auth_version" => swift_store_auth_version,
-    "swift_large_object_size" => glance["api"]["swift"]["store_large_object_size"],
-    "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
-    "swift_store_container" => glance["api"]["swift"]["store_container"],
-    "db_ip_address" => mysql_info["host"],
-    "db_user" => settings["db"]["username"],
-    "db_password" => settings["db"]["password"],
-    "db_name" => settings["db"]["name"],
-    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
-    "keystone_service_port" => ks_service_endpoint["port"],
-    "keystone_admin_port" => ks_admin_endpoint["port"],
-    "keystone_admin_token" => keystone["admin_token"],
-    "service_tenant_name" => settings["service_tenant_name"],
-    "service_user" => settings["service_user"],
-    "service_pass" => settings["service_pass"],
-    "glance_workers" => glance["api"]["workers"]
-  )
-  notifies :restart, resources(:service => "glance-api"), :immediately
-end
-
-template "/etc/glance/glance-api-paste.ini" do
-  source "glance-api-paste.ini.erb"
-  owner "glance"
-  group "glance"
-  mode "0600"
-  variables(
-    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
-    "keystone_service_port" => ks_service_endpoint["port"],
-    "keystone_admin_port" => ks_admin_endpoint["port"],
-    "keystone_admin_token" => keystone["admin_token"],
-    "service_tenant_name" => settings["service_tenant_name"],
-    "service_user" => settings["service_user"],
-    "service_pass" => settings["service_pass"]
-  )
-  notifies :restart, resources(:service => "glance-api"), :immediately
-end
-
-template "/etc/glance/glance-cache.conf" do
-  source "glance-cache.conf.erb"
-  owner "glance"
-  group "glance"
-  mode "0600"
-  variables(
-    "swift_store_key" => swift_store_key,
-    "swift_store_user" => swift_store_user,
-    "swift_store_auth_address" => swift_store_auth_address,
-    "swift_store_auth_version" => swift_store_auth_version,
-    "swift_large_object_size" => glance["api"]["swift"]["store_large_object_size"],
-    "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
-    "swift_store_container" => glance["api"]["swift"]["store_container"],
-    "registry_ip_address" => registry_endpoint["host"],
-    "registry_port" => registry_endpoint["port"],
-    "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"],
-    "image_cache_max_size" => node["glance"]["api"]["cache"]["image_cache_max_size"]
-  )
-  notifies :restart, resources(:service => "glance-api"), :delayed
-end
-
-template "/etc/glance/glance-cache-paste.ini" do
-  source "glance-cache-paste.ini.erb"
-  owner "glance"
-  group "glance"
-  mode "0600"
-  notifies :restart, resources(:service => "glance-api"), :delayed
-end
-
-template "/etc/glance/glance-scrubber.conf" do
-  source "glance-scrubber.conf.erb"
-  owner "glance"
-  group "glance"
-  mode "0600"
-  variables(
-    "registry_ip_address" => registry_endpoint["host"],
-    "registry_port" => registry_endpoint["port"]
-  )
-end
 
 # Configure glance-cache-pruner to run every 30 minutes
 cron "glance-cache-pruner" do
