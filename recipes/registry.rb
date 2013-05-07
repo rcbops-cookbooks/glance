@@ -31,7 +31,7 @@ else
   # README(shep): recipes brought in via include_recipe are not added
   # to the run_list. I think this makes this the same as
   # node.run_list.expand(node.chef_environment).recipes.include?(<recipe>)
-  if node.recipes.include?("glance::setup")
+  if node["recipes"].include?("glance::setup")
     msg = "I ran the glance::setup so I will use my own glance passwords"
     Chef::Log.info(msg)
   else
