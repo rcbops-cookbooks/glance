@@ -21,7 +21,9 @@
 
 # install common packages
 platform_options = node["glance"]["platform"]
-pkgs = platform_options["glance_packages"] + platform_options["supporting_packages"]
+
+pkgs = platform_options["glance_packages"] +
+  platform_options["supporting_packages"]
 
 pkgs.each do |pkg|
   package pkg do
@@ -37,16 +39,26 @@ directory "/etc/glance" do
   mode "0700"
 end
 
-# do some searches
+# Search for rabbit endpoint info
 rabbit_info = get_access_endpoint("rabbitmq-server", "rabbitmq", "queue")
+# Search for mysql endpoint info
 mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
-ks_admin_endpoint = get_access_endpoint("keystone-api", "keystone", "admin-api")
-ks_service_endpoint = get_access_endpoint("keystone-api", "keystone","service-api")
-keystone = get_settings_by_role("keystone", "keystone")
+# Search for keystone endpoint info
+ks_api_role = "keystone-api"
+ks_ns = "keystone"
+ks_admin_endpoint = get_access_endpoint(ks_api_role, ks_ns, "admin-api")
+ks_service_endpoint = get_access_endpoint(ks_api_role, ks_ns, "service-api")
+# Get settings from role[keystone-setup]
+keystone = get_settings_by_role("keystone-setup", "keystone")
+# Get settings from role[glance-api]
 glance = get_settings_by_role("glance-api", "glance")
+# Get settings from role[glance-setup]
 settings = get_settings_by_role("glance-setup", "glance")
+# Get api endpoint bind info
 api_bind = get_bind_endpoint("glance", "api")
+# Get registry endpoint bind info
 registry_bind = get_bind_endpoint("glance", "registry")
+# Search for glance-registry endpoint info
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 
 # Only use the glance image cacher if we aren't using file for our backing store.
@@ -68,29 +80,29 @@ end
 #           to the swift compatible API service running elsewhere - possibly
 #           Rackspace Cloud Files.
 if glance["api"]["swift_store_auth_address"].nil?
-    swift_store_auth_address="http://#{ks_admin_endpoint["host"]}:#{ks_service_endpoint["port"]}#{ks_service_endpoint["path"]}"
-    swift_store_user="#{glance["service_tenant_name"]}:#{glance["service_user"]}"
-    swift_store_key=settings["service_pass"]
-    swift_store_auth_version=2
+  swift_store_auth_address="http://#{ks_admin_endpoint["host"]}:#{ks_service_endpoint["port"]}#{ks_service_endpoint["path"]}"
+  swift_store_user="#{glance["service_tenant_name"]}:#{glance["service_user"]}"
+  swift_store_key=settings["service_pass"]
+  swift_store_auth_version=2
 else
-    swift_store_auth_address=settings["api"]["swift_store_auth_address"]
-    swift_store_user=settings["api"]["swift_store_user"]
-    swift_store_key=settings["api"]["swift_store_key"]
-    swift_store_auth_version=settings["api"]["swift_store_auth_version"]
+  swift_store_auth_address=settings["api"]["swift_store_auth_address"]
+  swift_store_user=settings["api"]["swift_store_user"]
+  swift_store_key=settings["api"]["swift_store_key"]
+  swift_store_auth_version=settings["api"]["swift_store_auth_version"]
 end
 
 # configure syslog
 template "/etc/rsyslog.d/22-glance.conf" do
-    source "22-glance.conf.erb"
-    owner "root"
-    group "root"
-    mode "0644"
-    variables(
-        "use_syslog" => node["glance"]["syslog"]["use"],
-        "log_facility" => node["glance"]["syslog"]["config_facility"]
-    )
-    only_if { node["glance"]["syslog"]["use"]  }
-    notifies :restart, "service[rsyslog]", :immediately
+  source "22-glance.conf.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(
+    "use_syslog" => node["glance"]["syslog"]["use"],
+    "log_facility" => node["glance"]["syslog"]["config_facility"]
+  )
+  only_if { node["glance"]["syslog"]["use"] }
+  notifies :restart, "service[rsyslog]", :immediately
 end
 
 template "/etc/glance/glance-registry.conf" do

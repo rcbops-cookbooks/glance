@@ -18,7 +18,8 @@
 #
 
 # die early if we are trying HA with local file store
-glance_api_count = get_realserver_endpoints("glance-api", "glance", "api").length
+glance_api_count =
+  get_realserver_endpoints("glance-api", "glance", "api").length
 
 if node["glance"]["api"]["default_store"] == "file"
   # this is really only needed when glance::replicator is included, however we
@@ -33,8 +34,10 @@ if node["glance"]["api"]["default_store"] == "file"
     node.set["glance"]["api"]["notifier_strategy"] = "rabbit"
     include_recipe "glance::replicator"
   elsif glance_api_count > 2
-    Chef::Application.fatal! "Local file store not supported with multiple glance-api nodes>
-    Change file store to 'swift' or 'cloudfiles' or remove additional glance-api nodes"
+    msg = "Local file store not supported with multiple glance-api nodes\n" +
+      "Change file store to 'swift' or 'cloudfiles' or " +
+      "remove additional glance-api nodes"
+    Chef::Application.fatal! msg
   end
 end
 
@@ -48,7 +51,9 @@ service "glance-api" do
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, "template[/etc/glance/glance-api.conf]", :immediately
-  subscribes :restart, "template[/etc/glance/glance-api-paste.ini]", :immediately
+  subscribes :restart,
+    "template[/etc/glance/glance-api-paste.ini]",
+    :immediately
 end
 
 # glance-registry gets pulled in when we install glance-api.  Unless we are
@@ -56,10 +61,11 @@ end
 service "glance-registry" do
   service_name platform_options["glance_registry_service"]
   supports :status => true, :restart => true
-  action [ :stop, :disable ]
-  not_if do
-    node.run_list.expand(node.chef_environment).recipes.include?("glance::registry")
-  end
+  action [:stop, :disable]
+  not_if {
+    node.run_list.expand(
+      node.chef_environment).recipes.include?("glance::registry")
+  }
 end
 
 monitoring_procmon "glance-api" do
@@ -87,11 +93,18 @@ template "/etc/glance/policy.json" do
 end
 
 
-ks_admin_endpoint = get_access_endpoint("keystone-api", "keystone", "admin-api")
-ks_service_endpoint = get_access_endpoint("keystone-api", "keystone","service-api")
-keystone = get_settings_by_role("keystone", "keystone")
+# Search for keystone endpoint info
+ks_api_role = "keystone-api"
+ks_ns = "keystone"
+ks_admin_endpoint = get_access_endpoint(ks_api_role, ks_ns, "admin-api")
+ks_service_endpoint = get_access_endpoint(ks_api_role, ks_ns, "service-api")
+# Get settings from role[keystone-setup]
+keystone = get_settings_by_role("keystone-setup", "keystone")
+# Get settings from role[glance-api]
 glance = get_settings_by_role("glance-api", "glance")
+# Get settings from role[glance-setup]
 settings = get_settings_by_role("glance-setup", "glance")
+# Get endpoint bind settings
 api_endpoint = get_bind_endpoint("glance", "api")
 
 # Configure glance-cache-pruner to run every 30 minutes
@@ -167,8 +180,10 @@ end
 monitoring_metric "glance-api" do
   type "pyscript"
   script "glance_plugin.py"
-  options("Username" => node["glance"]["service_user"],
-          "Password" => node["glance"]["service_pass"],
-          "TenantName" => node["glance"]["service_tenant_name"],
-          "AuthURL" => ks_service_endpoint["uri"] )
+  options(
+    "Username" => node["glance"]["service_user"],
+    "Password" => node["glance"]["service_pass"],
+    "TenantName" => node["glance"]["service_tenant_name"],
+    "AuthURL" => ks_service_endpoint["uri"]
+  )
 end
