@@ -35,7 +35,9 @@ else
     msg = "I ran the glance::setup so I will use my own glance passwords"
     Chef::Log.info(msg)
   else
-    setup = get_role_count("glance-setup", includeme=true)
+    search_str "chef_environment:#{node.chef_environment} " +
+      "AND roles:glance-setup"
+    setup = search(:node, search_str)
     if setup.length == 0
       msg = "You must have run the glance::setup recipe on one node " +
         "already in order to be a glance-registry server."
