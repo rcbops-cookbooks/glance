@@ -35,7 +35,7 @@ else
     msg = "I ran the glance::setup so I will use my own glance passwords"
     Chef::Log.info(msg)
   else
-    search_str "chef_environment:#{node.chef_environment} " +
+    search_str = "chef_environment:#{node.chef_environment} " +
       "AND roles:glance-setup"
     setup = search(:node, search_str)
     if setup.length == 0
