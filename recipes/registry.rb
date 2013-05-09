@@ -23,39 +23,50 @@ include_recipe "mysql::ruby"
 include_recipe "glance::glance-common"
 include_recipe "monitoring"
 
-platform_options = node["glance"]["platform"]
-
 # Find the node that ran the glance-setup recipe and grab his passswords
 if Chef::Config[:solo]
-  Chef::Application.fatal! "This recipe uses search. Chef Solo does not support search."
+  msg = "This recipe uses search. Chef Solo does not support search"
+  Chef::Application.fatal!(msg)
 else
-  if node.run_list.expand(node.chef_environment).recipes.include?("glance::setup")
-    Chef::Log.info("I ran the glance::setup so I will use my own glance passwords")
+  # README(shep): recipes brought in via include_recipe are not added
+  # to the run_list. I think this makes this the same as
+  # node.run_list.expand(node.chef_environment).recipes.include?(<recipe>)
+  if node["recipes"].include?("glance::setup")
+    msg = "I ran the glance::setup so I will use my own glance passwords"
+    Chef::Log.info(msg)
   else
-    setup = search(:node, "chef_environment:#{node.chef_environment} AND roles:glance-setup")
+    search_str = "chef_environment:#{node.chef_environment} " +
+      "AND roles:glance-setup"
+    setup = search(:node, search_str)
     if setup.length == 0
-      Chef::Application.fatal! "You must have run the glance::setup recipe on one node already in order to be a glance-registry server."
+      msg = "You must have run the glance::setup recipe on one node " +
+        "already in order to be a glance-registry server."
+      Chef::Application.fatal!(msg)
     elsif setup.length == 1
       Chef::Log.info "Found glance::setup node: #{setup[0].name}"
-      node.set["glance"]["db"]["password"] = setup[0]["glance"]["db"]["password"]
+      node.set["glance"]["db"]["password"] =
+        setup[0]["glance"]["db"]["password"]
       node.set["glance"]["service_pass"] = setup[0]["glance"]["service_pass"]
     elsif setup.length >1
-      Chef::Application.fatal! "You have specified more than one glance-registry setup node and this is not a valid configuration."
+      msg = "You have specified more than one glance-registry setup node " +
+        "and this is not a valid configuration."
+      Chef::Application.fatal!(msg)
     end
   end
 end
 
-ks_service_endpoint = get_access_endpoint("keystone-api", "keystone", "service-api")
-keystone = get_settings_by_role("keystone", "keystone")
-registry_endpoint = get_bind_endpoint("glance", "registry")
-mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
+platform_options = node["glance"]["platform"]
 
 service "glance-registry" do
   service_name platform_options["glance_registry_service"]
   supports :status => true, :restart => true
   action :enable
-  subscribes :restart, "template[/etc/glance/glance-registry.conf]", :immediately
-  subscribes :restart, "template[/etc/glance/glance-registry-paste.ini]", :immediately
+  subscribes :restart,
+    "template[/etc/glance/glance-registry.conf]",
+    :immediately
+  subscribes :restart,
+    "template[/etc/glance/glance-registry-paste.ini]",
+    :immediately
 end
 
 # glance-api gets pulled in when we install glance-registry.  Unless we are
@@ -63,8 +74,10 @@ end
 service "glance-api" do
   service_name platform_options["glance_api_service"]
   supports :status => true, :restart => true
-  action [ :stop, :disable ]
-  not_if { node.run_list.expand(node.chef_environment).recipes.include?("glance::api") }
+  action [:stop, :disable]
+  not_if {
+    node.run_list.expand(node.chef_environment).recipes.include?("glance::api")
+  }
 end
 
 monitoring_procmon "glance-registry" do

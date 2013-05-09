@@ -20,7 +20,8 @@
 
 # make sure we die early if there are glance-setups other than us
 if get_role_count("glance-setup", false) > 0
-  Chef::Application.fatal! "You can only have one node with the glance-setup role"
+  msg = "You can only have one node with the glance-setup role"
+  Chef::Application.fatal!(msg)
 end
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
@@ -41,15 +42,20 @@ else
 end
 node.set_unless["glance"]["service_pass"] = secure_password
 
-ks_admin_endpoint = get_access_endpoint("keystone-api", "keystone", "admin-api")
-ks_service_endpoint = get_access_endpoint("keystone-api", "keystone", "service-api")
-keystone = get_settings_by_role("keystone", "keystone")
+# Search for keystone endpoint info
+ks_api_role = "keystone-api"
+ks_ns = "keystone"
+ks_admin_endpoint = get_access_endpoint(ks_api_role, ks_ns, "admin-api")
+# Get settings from role[keystone-setup]
+keystone = get_settings_by_role("keystone-setup", "keystone")
 
 # creates db and user and returns connection info
-mysql_info = create_db_and_user("mysql",
-                                node["glance"]["db"]["name"],
-                                node["glance"]["db"]["username"],
-                                node["glance"]["db"]["password"])
+mysql_info = create_db_and_user(
+  "mysql",
+  node["glance"]["db"]["name"],
+  node["glance"]["db"]["username"],
+  node["glance"]["db"]["password"]
+)
 
 mysql_connect_ip = get_access_endpoint('mysql-master', 'mysql', 'db')["host"]
 
@@ -71,7 +77,7 @@ execute "glance-manage db_sync" do
 end
 
 file "/var/lib/glance/glance.sqlite" do
-    action :delete
+  action :delete
 end
 
 # Register Service Tenant

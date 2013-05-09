@@ -27,7 +27,8 @@ def initialize(*args)
 end
 
 attribute :image_url, :kind_of => String
-attribute :image_type, :kind_of => String, :default => "unknown", :equal_to => ["unknown", "ami", "qcow"]
+attribute :image_type, :kind_of => String,
+  :default => "unknown", :equal_to => ["unknown", "ami", "qcow"]
 attribute :image_name, :kind_of => String, :default => "default"
 attribute :keystone_user, :kind_of => String
 attribute :keystone_pass, :kind_of => String
