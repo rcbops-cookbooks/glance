@@ -68,7 +68,8 @@ default["glance"]["replicator"]["interval"] = 5
 case platform
 when "fedora", "redhat", "centos"
   default["glance"]["platform"] = {
-    "supporting_packages" => ["MySQL-python", "python-keystone", "curl"],                  # node_attribute
+    "supporting_packages" => ["MySQL-python", "python-keystone", "curl",
+                              "python-glanceclient", "python-warlock"],                  # node_attribute
     "glance_packages" => ["openstack-glance", "python-swiftclient", "cronie", "python-prettytable"], # node_attribute
     "glance_api_service" => "openstack-glance-api",                 # node_attribute
     "glance_registry_service" => "openstack-glance-registry",       # node_attribute
@@ -77,7 +78,8 @@ when "fedora", "redhat", "centos"
   }
 when "ubuntu"
   default["glance"]["platform"] = {
-    "supporting_packages" => ["python-mysqldb", "python-keystone", "curl"],                # node_attribute
+    "supporting_packages" => ["python-mysqldb", "python-keystone", "curl",
+                              "python-glanceclient", "python-warlock"],                # node_attribute
     "glance_packages" => ["glance", "python-swift", "python-prettytable"],              # node_attribute
     "glance_api_service" => "glance-api",                           # node_attribute
     "glance_registry_service" => "glance-registry",                 # node_attribute
