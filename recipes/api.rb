@@ -41,7 +41,6 @@ if node["glance"]["api"]["default_store"] == "file"
   end
 end
 
-include_recipe "monitoring"
 include_recipe "glance::glance-common"
 
 platform_options = node["glance"]["platform"]
@@ -66,21 +65,6 @@ service "glance-registry" do
     node.run_list.expand(
       node.chef_environment).recipes.include?("glance::registry")
   }
-end
-
-monitoring_procmon "glance-api" do
-  sname = platform_options["glance_api_service"]
-  pname = platform_options["glance_api_process_name"]
-  process_name pname
-  script_name sname
-end
-
-monitoring_metric "glance-api-proc" do
-  type "proc"
-  proc_name "glance-api"
-  proc_regex platform_options["glance_api_service"]
-
-  alarms(:failure_min => 2.0)
 end
 
 # FIXME: seems like misfeature
@@ -174,16 +158,4 @@ if node["glance"]["image_upload"]
     end
 
   end
-end
-
-# set up glance api monitoring (bytes/objects per tentant, etc)
-monitoring_metric "glance-api" do
-  type "pyscript"
-  script "glance_plugin.py"
-  options(
-    "Username" => node["glance"]["service_user"],
-    "Password" => node["glance"]["service_pass"],
-    "TenantName" => node["glance"]["service_tenant_name"],
-    "AuthURL" => ks_service_endpoint["uri"]
-  )
 end
