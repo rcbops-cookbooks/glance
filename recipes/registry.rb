@@ -21,7 +21,6 @@
 include_recipe "mysql::client"
 include_recipe "mysql::ruby"
 include_recipe "glance::glance-common"
-include_recipe "monitoring"
 
 # Find the node that ran the glance-setup recipe and grab his passswords
 if Chef::Config[:solo]
@@ -78,18 +77,4 @@ service "glance-api" do
   not_if {
     node.run_list.expand(node.chef_environment).recipes.include?("glance::api")
   }
-end
-
-monitoring_procmon "glance-registry" do
-  sname = platform_options["glance_registry_service"]
-  pname = platform_options["glance_registry_process_name"]
-  process_name pname
-  script_name sname
-end
-
-monitoring_metric "glance-registry-proc" do
-  type "proc"
-  proc_name "glance-registry"
-  proc_regex platform_options["glance_registry_service"]
-  alarms(:failure_min => 2.0)
 end
