@@ -91,20 +91,6 @@ else
   swift_store_auth_version=settings["api"]["swift_store_auth_version"]
 end
 
-# configure syslog
-template "/etc/rsyslog.d/22-glance.conf" do
-  source "22-glance.conf.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  variables(
-    "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["config_facility"]
-  )
-  only_if { node["glance"]["syslog"]["use"] }
-  notifies :restart, "service[rsyslog]", :immediately
-end
-
 template "/etc/glance/glance-registry.conf" do
   source "glance-registry.conf.erb"
   owner "glance"
@@ -117,8 +103,6 @@ template "/etc/glance/glance-registry.conf" do
     "db_user" => node["glance"]["db"]["username"],
     "db_password" => node["glance"]["db"]["password"],
     "db_name" => node["glance"]["db"]["name"],
-    "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"],
     "keystone_api_ipaddress" => ks_admin_endpoint["host"],
     "keystone_service_port" => ks_service_endpoint["port"],
     "keystone_admin_port" => ks_admin_endpoint["port"],
@@ -153,8 +137,6 @@ template "/etc/glance/glance-api.conf" do
     "api_bind_port" => api_bind["port"],
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
-    "use_syslog" => node["glance"]["syslog"]["use"],
-    "log_facility" => node["glance"]["syslog"]["facility"],
     "rabbit_ipaddress" => rabbit_info["host"],
     "rabbit_port" => rabbit_info["port"],
     "default_store" => glance["api"]["default_store"],
