@@ -176,7 +176,7 @@ rabbit_userid = guest
 rabbit_password = guest
 rabbit_virtual_host = /
 rabbit_notification_exchange = glance
-rabbit_notification_topic = notifications
+rabbit_notification_topic = <%= @notification_topic %>
 rabbit_durable_queues = False
 
 # Configuration options if sending notifications via Qpid (these are
