@@ -45,6 +45,7 @@ default["glance"]["api"]["swift"]["store_large_object_size"] = "200"        # no
 default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"  # node_attribute
 default["glance"]["api"]["cache"]["image_cache_max_size"] = "10737418240"   # node_attribute
 default["glance"]["api"]["notifier_strategy"] = "noop"                      # node_attribute
+default["glance"]["api"]["notification_topic"] = "glance_notifications"     # node_attribute
 default["glance"]["api"]["workers"] = [8, node["cpu"]["total"].to_i].min    # node_attribute
 
 
@@ -63,6 +64,7 @@ default["glance"]["syslog"]["config_facility"] = "local2"   # node_attribute
 
 # replicator attributes
 default["glance"]["replicator"]["interval"] = 5
+default["glance"]["replicator"]["checksum"] = "c675ed6de305e90d27cc2706f918d503b5f7463a"
 
 # platform-specific settings
 case platform
