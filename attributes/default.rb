@@ -64,7 +64,7 @@ default["glance"]["syslog"]["config_facility"] = "local2"   # node_attribute
 
 # replicator attributes
 default["glance"]["replicator"]["interval"] = 5
-default["glance"]["replicator"]["checksum"] = "c675ed6de305e90d27cc2706f918d503b5f7463a"
+default["glance"]["replicator"]["checksum"] = "dacf5e585884c7a694bd36a9e5cc2752ef2f9513"
 
 # platform-specific settings
 case platform
