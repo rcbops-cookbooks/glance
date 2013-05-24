@@ -57,11 +57,6 @@ default["glance"]["image"]["oneiric"] = "http://cloud-images.ubuntu.com/oneiric/
 default["glance"]["image"]["natty"] = "http://cloud-images.ubuntu.com/natty/current/natty-server-cloudimg-amd64-disk1.img"          # node_attribute
 default["glance"]["image"]["cirros"] = "https://launchpadlibrarian.net/83305348/cirros-0.3.0-x86_64-disk.img"                       # node_attribute
 
-# logging attribute
-default["glance"]["syslog"]["use"] = true                   # node_attribute
-default["glance"]["syslog"]["facility"] = "LOG_LOCAL2"      # node_attribute
-default["glance"]["syslog"]["config_facility"] = "local2"   # node_attribute
-
 # replicator attributes
 default["glance"]["replicator"]["interval"] = 5
 default["glance"]["replicator"]["checksum"] = "dacf5e585884c7a694bd36a9e5cc2752ef2f9513"
