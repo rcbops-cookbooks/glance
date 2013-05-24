@@ -21,6 +21,10 @@
 glance_api_count =
   get_realserver_endpoints("glance-api", "glance", "api").length
 
+if get_role_count("ceilometer-setup") == 1 or glance_api_count == 2
+  node.set["glance"]["api"]["notifier_strategy"] = "rabbit"
+end
+
 if node["glance"]["api"]["default_store"] == "file"
   # this is really only needed when glance::replicator is included, however we
   # want to install early on to minimize number of chef-client runs needed
@@ -31,7 +35,6 @@ if node["glance"]["api"]["default_store"] == "file"
   end
 
   if glance_api_count == 2
-    node.set["glance"]["api"]["notifier_strategy"] = "rabbit"
     include_recipe "glance::replicator"
   elsif glance_api_count > 2
     msg = "Local file store not supported with multiple glance-api nodes\n" +

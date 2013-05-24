@@ -159,11 +159,13 @@ Attributes
 * `glance["api"]["swift"]["store_large_object_chunk_size"]` - Set the chunk size for glance.  Defaults to "200" MB
 * `glance["api"]["cache"]["image_cache_max_size"]` - Set the maximum size of image cache.  Defaults to "10" GB
 * `glance["api"]["notifier_strategy"]` - Toggles the notifier strategy.  Currently supported are "noop", "rabbit", "qpid", and "logging", defaults to "noop"
+* `glance["api"]["notification_topic"]` - Define the rabbitmq notification topic, defaults to "glance_notifications"
 * `glance["image_upload"]` - Toggles whether to automatically upload images in the `glance["images"]` array
 * `glance["images"]` - Default list of images to upload to the glance repository as part of the install
 * `glance["image]["<imagename>"]` - URL location of the <imagename> image. There can be multiple instances of this line to define multiple images (eg natty, maverick, fedora17 etc)
 --- example `glance["image]["natty"]` - "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
 * `glance["replicator"]["interval"]` - Define how frequently replicator cron job should run
+* `glance["replicator"]["checksum"]` - The git checksum to use when downloading the glance-image-sync.py tool
 * `glance["platform"]` - Hash of platform specific package/service names and options
 
 Templates

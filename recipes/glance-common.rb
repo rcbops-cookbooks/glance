@@ -141,6 +141,7 @@ template "/etc/glance/glance-api.conf" do
     "rabbit_port" => rabbit_info["port"],
     "default_store" => glance["api"]["default_store"],
     "notifier_strategy" => glance["api"]["notifier_strategy"],
+    "notification_topic" => glance["api"]["notification_topic"],
     "glance_flavor" => glance_flavor,
     "swift_store_key" => swift_store_key,
     "swift_store_user" => swift_store_user,
