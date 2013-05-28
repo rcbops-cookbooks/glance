@@ -63,16 +63,8 @@ include_recipe "glance::glance-common"
 execute "glance-manage db_sync" do
   user "glance"
   group "glance"
-  if platform?(%w{ubuntu debian})
-    command "glance-manage version_control 0 && glance-manage db_sync"
-  end
-  if platform?(%w{redhat centos fedora scientific})
-    command "glance-manage db_sync"
-  end
-  # the not_if doesn't run as glance:glance which results in
-  # /var/log/glance/registry.log being owned by root:root on CentOS 6.x
-  not_if "sudo -u glance glance-manage db_version"
-  action :run
+  command "glance-manage db_sync"
+  action :nothing
 end
 
 file "/var/lib/glance/glance.sqlite" do
