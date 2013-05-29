@@ -60,10 +60,12 @@ mysql_connect_ip = get_access_endpoint('mysql-master', 'mysql', 'db')["host"]
 
 include_recipe "glance::glance-common"
 
+# use the full connection string here...  we may not yet have a valid config
+# file dropped
 execute "glance-manage db_sync" do
   user "glance"
   group "glance"
-  command "glance-manage db_sync"
+  command "glance-manage --sql_connection mysql://#{node["glance"]["db"]["username"]}:#{node["glance"]["db"]["password"]}@#{mysql_connect_ip}/#{node["glance"]["db"]["name"]} db_sync"
   action :nothing
 end
 
