@@ -25,11 +25,14 @@ platform_options = node["glance"]["platform"]
 pkgs = platform_options["glance_packages"] +
   platform_options["supporting_packages"]
 
+# install (or upgrade) glance packages.  We execute 'glance-manage db_sync'
+# on package transition but the execute block only runs when do_package_upgrades
+# is set to true
 pkgs.each do |pkg|
   package pkg do
     action node["osops"]["do_package_upgrades"] == true ? :upgrade : :install
     options platform_options["package_overrides"]
-    notifies :run, "execute[glance-manage db_sync]", :immediately
+    notifies :run, "execute[glance-manage db_sync]", :delayed
   end
 end
 
