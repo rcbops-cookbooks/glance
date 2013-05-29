@@ -58,8 +58,6 @@ mysql_info = create_db_and_user(
 
 mysql_connect_ip = get_access_endpoint('mysql-master', 'mysql', 'db')["host"]
 
-include_recipe "glance::glance-common"
-
 # only run this if do_package_upgrade is enabled.  If you upgrade the package
 # outside of chef you will need to run 'glance-manage db_sync' by hand.
 execute "glance-manage db_sync" do
@@ -69,6 +67,8 @@ execute "glance-manage db_sync" do
   action :nothing
   only_if { node["osops"]["do_package_upgrades"] == true }
 end
+
+include_recipe "glance::glance-common"
 
 file "/var/lib/glance/glance.sqlite" do
   action :delete
