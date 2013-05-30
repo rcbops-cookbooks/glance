@@ -25,10 +25,24 @@ platform_options = node["glance"]["platform"]
 pkgs = platform_options["glance_packages"] +
   platform_options["supporting_packages"]
 
+# only run this if do_package_upgrade is enabled.  If you upgrade the package
+# outside of chef you will need to run 'glance-manage db_sync' by hand.
+execute "glance-manage db_sync" do
+  user "glance"
+  group "glance"
+  command "glance-manage db_sync"
+  action :nothing
+  only_if { node["osops"]["do_package_upgrades"] == true }
+end
+
+# install (or upgrade) glance packages.  We execute 'glance-manage db_sync'
+# on package transition but the execute block only runs when do_package_upgrades
+# is set to true
 pkgs.each do |pkg|
   package pkg do
     action node["osops"]["do_package_upgrades"] == true ? :upgrade : :install
     options platform_options["package_overrides"]
+    notifies :run, "execute[glance-manage db_sync]", :delayed
   end
 end
 
