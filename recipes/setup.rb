@@ -60,6 +60,13 @@ mysql_connect_ip = get_access_endpoint('mysql-master', 'mysql', 'db')["host"]
 
 include_recipe "glance::glance-common"
 
+execute "glance-manage db_sync" do
+  user "glance"
+  group "glance"
+  command "glance-manage db_sync"
+  action :run
+end
+
 file "/var/lib/glance/glance.sqlite" do
   action :delete
 end
