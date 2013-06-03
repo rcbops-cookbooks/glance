@@ -32,7 +32,6 @@ pkgs.each do |pkg|
   package pkg do
     action node["osops"]["do_package_upgrades"] == true ? :upgrade : :install
     options platform_options["package_overrides"]
-    notifies :run, "execute[glance-manage db_sync]", :delayed
   end
 end
 
