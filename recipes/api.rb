@@ -76,12 +76,13 @@ service "glance-api" do
   action :enable
 end
 
-unless node.run_list.expand(node.chef_environment).recipes.include?("glance::registry")
-  service "glance-registry" do
-    service_name platform_options["glance_registry_service"]
-    supports :status => true, :restart => true
-    action [ :stop, :disable ]
-  end
+service "glance-registry" do
+  service_name platform_options["glance_registry_service"]
+  supports :status => true, :restart => true
+  action [ :stop, :disable ]
+  not_if { 
+    node.run_list.expand(node.chef_environment).recipes.include?("glance::registry")
+  }
 end
 
 monitoring_procmon "glance-api" do
@@ -112,7 +113,7 @@ template "/etc/glance/policy.json" do
   owner "glance"
   group "glance"
   mode "0600"
-  notifies :restart, resources(:service => "glance-api"), :immediately
+  notifies :restart, "service[glance-api]", :immediately
 end
 
 rabbit_info = get_access_endpoint("rabbitmq-server", "rabbitmq", "queue")
@@ -165,7 +166,7 @@ template "/etc/glance/logging.conf" do
     "use_syslog" => node["glance"]["syslog"]["use"],
     "log_facility" => node["glance"]["syslog"]["facility"]
   )
-  notifies :restart, resources(:service => "glance-api"), :delayed
+  notifies :restart, "service[glance-api]", :delayed
 end
 
 template "/etc/glance/glance-api.conf" do
@@ -197,7 +198,7 @@ template "/etc/glance/glance-api.conf" do
     "db_password" => settings["db"]["password"],
     "db_name" => settings["db"]["name"]
   )
-  notifies :restart, resources(:service => "glance-api"), :immediately
+  notifies :restart, "service[glance-api]", :immediately
 end
 
 template "/etc/glance/glance-api-paste.ini" do
@@ -214,7 +215,7 @@ template "/etc/glance/glance-api-paste.ini" do
     "service_user" => settings["service_user"],
     "service_pass" => settings["service_pass"]
   )
-  notifies :restart, resources(:service => "glance-api"), :immediately
+  notifies :restart, "service[glance-api]", :immediately
 end
 
 template "/etc/glance/glance-cache.conf" do
@@ -229,7 +230,7 @@ template "/etc/glance/glance-cache.conf" do
     "log_facility" => node["glance"]["syslog"]["facility"],
     "image_cache_max_size" => node["glance"]["api"]["cache"]["image_cache_max_size"]
   )
-  notifies :restart, resources(:service => "glance-api"), :delayed
+  notifies :restart, "service[glance-api]", :delayed
 end
 
 template "/etc/glance/glance-cache-paste.ini" do
@@ -237,7 +238,7 @@ template "/etc/glance/glance-cache-paste.ini" do
   owner "glance"
   group "glance"
   mode "0600"
-  notifies :restart, resources(:service => "glance-api"), :delayed
+  notifies :restart, "service[glance-api]", :delayed
 end
 
 template "/etc/glance/glance-scrubber.conf" do
