@@ -131,6 +131,10 @@ replicator
 ----------
 - Drops in cron job to sync glance images when running 2 node HA setup w/ file storage
 
+common
+------
+- Simple recipe for shared code used by other recipes in glance cookbook
+
 Data Bags
 =========
 

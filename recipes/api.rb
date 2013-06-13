@@ -70,20 +70,7 @@ platform_options["glance_packages"].each do |pkg|
   end
 end
 
-service "glance-api" do
-  service_name platform_options["glance_api_service"]
-  supports :status => true, :restart => true
-  action :enable
-end
-
-service "glance-registry" do
-  service_name platform_options["glance_registry_service"]
-  supports :status => true, :restart => true
-  action [ :stop, :disable ]
-  not_if { 
-    node.run_list.expand(node.chef_environment).recipes.include?("glance::registry")
-  }
-end
+include_recipe "glance::common"
 
 monitoring_procmon "glance-api" do
   sname = platform_options["glance_api_service"]
