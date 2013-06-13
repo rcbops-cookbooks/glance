@@ -70,16 +70,6 @@ service "glance-registry" do
   }
 end
 
-# FIXME: seems like misfeature
-template "/etc/glance/policy.json" do
-  source "policy.json.erb"
-  owner "glance"
-  group "glance"
-  mode "0600"
-  notifies :restart, "service[glance-api]", :immediately
-end
-
-
 # Search for keystone endpoint info
 ks_api_role = "keystone-api"
 ks_ns = "keystone"
