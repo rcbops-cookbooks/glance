@@ -79,19 +79,7 @@ platform_options["glance_packages"].each do |pkg|
   end
 end
 
-service "glance-registry" do
-  service_name platform_options["glance_registry_service"]
-  supports :status => true, :restart => true
-  action :nothing
-end
-
-unless node.run_list.expand(node.chef_environment).recipes.include?("glance::api")
-  service "glance-api" do
-    service_name platform_options["glance_api_service"]
-    supports :status => true, :restart => true
-    action [ :stop, :disable ]
-  end
-end
+include_recipe "glance::common"
 
 monitoring_procmon "glance-registry" do
   sname = platform_options["glance_registry_service"]
@@ -128,7 +116,7 @@ template "/etc/glance/logging.conf" do
     "use_syslog" => node["glance"]["syslog"]["use"],
     "log_facility" => node["glance"]["syslog"]["facility"]
   )
-  notifies :restart, resources(:service => "glance-registry"), :delayed
+  notifies :restart, "service[glance-registry]", :delayed
 end
 
 template "/etc/glance/glance-registry.conf" do
@@ -161,7 +149,7 @@ template "/etc/glance/glance-registry-paste.ini" do
     "service_user" => node["glance"]["service_user"],
     "service_pass" => node["glance"]["service_pass"]
   )
-  notifies :restart, resources(:service => "glance-registry"), :immediately
-  notifies :enable, resources(:service => "glance-registry"), :immediately
+  notifies :restart, "service[glance-registry]", :immediately
+  notifies :enable, "service[glance-registry]", :immediately
 end
 

@@ -1,3 +1,4 @@
+name              "glance"
 maintainer        "Rackspace US, Inc."
 license           "Apache 2.0"
 description       "Installs and configures the Glance Image Registry and Delivery Service"
@@ -8,6 +9,7 @@ recipe            "glance::api", "Installs packages required for a glance api se
 recipe            "glance::registry", "Installs packages required for a glance registry server"
 recipe            "glance::glance-rsyslog", "Creates rsyslog configuration for glance"
 recipe            "glance::replicator", "Drops in cronjobs to sync glance images when running 2 node HA setup w/ file storage"
+recipe            "glance::common", "Simple recipe for shared code used by other recipes in glance cookbook"
 
 %w{ centos ubuntu }.each do |os|
   supports os
