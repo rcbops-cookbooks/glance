@@ -35,7 +35,7 @@ template "/etc/glance/glance-image-sync.conf" do
   owner "glance"
   group "glance"
   mode "0600"
-  variables(:api_nodes => api_nodes)
+  variables(:api_nodes => api_nodes, :rsync_user => node['glance']['replicator']['rsync_user'])
 end
 
 cron "glance-image-sync" do

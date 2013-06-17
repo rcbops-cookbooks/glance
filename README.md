@@ -166,6 +166,7 @@ Attributes
 --- example `glance["image]["natty"]` - "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
 * `glance["replicator"]["interval"]` - Define how frequently replicator cron job should run
 * `glance["replicator"]["checksum"]` - The git checksum to use when downloading the glance-image-sync.py tool
+* `glance["replicator"]["rsync_user"]` - System user to use when copying glance images with rsync
 * `glance["platform"]` - Hash of platform specific package/service names and options
 
 Templates
