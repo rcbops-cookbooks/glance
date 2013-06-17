@@ -60,6 +60,7 @@ default["glance"]["image"]["cirros"] = "http://download.cirros-cloud.net/0.3.1/c
 # replicator attributes
 default["glance"]["replicator"]["interval"] = 5
 default["glance"]["replicator"]["checksum"] = "dacf5e585884c7a694bd36a9e5cc2752ef2f9513"
+default["glance"]["replicator"]["rsync_user"] = "root"
 
 # platform-specific settings
 case platform
