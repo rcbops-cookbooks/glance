@@ -24,12 +24,12 @@ paste.filter_factory = glance.api.middleware.context:UnauthenticatedContextMiddl
 [filter:authtoken]
 paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
 
-service_protocol = http
+service_protocol = <%= @keystone_service_protocol %>
 service_host = <%= @keystone_api_ipaddress %>
 service_port = <%= @keystone_service_port %>
 auth_host = <%= @keystone_api_ipaddress %>
 auth_port = <%= @keystone_admin_port %>
-auth_protocol = http
+auth_protocol = <%= @keystone_admin_protocol %>
 auth_uri = http://<%= @keystone_api_ipaddress %>:<%= @keystone_service_port %>/
 admin_tenant_name = <%= @service_tenant_name %>
 admin_user = <%= @service_user %>
