@@ -171,6 +171,8 @@ Attributes
 * `glance["syslog"]["facility"]`
 * `glance["syslog"]["config_facility"]`
 * `glance["replicator"]["interval"]` - Define how frequently replicator cron job should run
+* `glance["replicator"]["checksum"]` - The git checksum to use when downloading the glance-image-sync.py tool
+* `glance["replicator"]["rsync_user"]` - System user to use when copying glance images with rsync
 * `glance["platform"]` - Hash of platform specific package/service names and options
 
 Templates
