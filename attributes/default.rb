@@ -50,12 +50,12 @@ default["glance"]["api"]["workers"] = [8, node["cpu"]["total"].to_i].min    # no
 
 
 # Default Image Locations
-default["glance"]["image_upload"] = false                                                                                           # node_attribute
+default["glance"]["image_upload"] = true                                                                                           # node_attribute
 default["glance"]["images"] = ["cirros"]                                                                                          # node_attribute
 default["glance"]["image"]["precise"] = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img"    # node_attribute
 default["glance"]["image"]["oneiric"] = "http://cloud-images.ubuntu.com/oneiric/current/oneiric-server-cloudimg-amd64-disk1.img"    # node_attribute
 default["glance"]["image"]["natty"] = "http://cloud-images.ubuntu.com/natty/current/natty-server-cloudimg-amd64-disk1.img"          # node_attribute
-default["glance"]["image"]["cirros"] = "http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-disk.img"                       # node_attribute
+default["glance"]["image"]["cirros"] = "http://ef550cb0f0ed69a100c1-40806b80b9b0290f6d33c73b927ee053.r51.cf2.rackcdn.com/cirros-0.3.0-x86_64-uec.tar.gz"                       # node_attribute
 
 # replicator attributes
 default["glance"]["replicator"]["interval"] = 5
