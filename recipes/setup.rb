@@ -34,7 +34,7 @@ unless node["glance"]["db"]["password"]
   Chef::Log.info("Running glance setup - setting glance passwords")
 end
 
-if node["developer_mode"]
+if node["developer_mode"] == true
   node.set_unless["glance"]["db"]["password"] = "glance"
 else
   node.set_unless["glance"]["db"]["password"] = secure_password
