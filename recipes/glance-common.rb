@@ -114,7 +114,7 @@ template "/etc/glance/glance-registry.conf" do
     "registry_port" => registry_bind["port"],
     "db_ip_address" => mysql_info["host"],
     "db_user" => node["glance"]["db"]["username"],
-    "db_password" => node["glance"]["db"]["password"],
+    "db_password" => settings["db"]["password"],
     "db_name" => node["glance"]["db"]["name"],
     "keystone_api_ipaddress" => ks_admin_endpoint["host"],
     "keystone_service_port" => ks_service_endpoint["port"],
@@ -122,7 +122,7 @@ template "/etc/glance/glance-registry.conf" do
     "keystone_admin_port" => ks_admin_endpoint["port"],
     "service_tenant_name" => node["glance"]["service_tenant_name"],
     "service_user" => node["glance"]["service_user"],
-    "service_pass" => node["glance"]["service_pass"]
+    "service_pass" => settings["service_pass"]
   )
 end
 

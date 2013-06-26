@@ -40,6 +40,7 @@ else
   node.set_unless["glance"]["db"]["password"] = secure_password
 end
 node.set_unless["glance"]["service_pass"] = secure_password
+node.save
 
 # Search for keystone endpoint info
 ks_api_role = "keystone-api"
