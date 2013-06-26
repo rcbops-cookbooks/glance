@@ -19,7 +19,6 @@
 
 ########################################################################
 # Toggles - These can be overridden at the environment level
-default["developer_mode"] = true  # cluster_attribute  # we want secure passwords by default
 ########################################################################
 
 default["glance"]["services"]["api"]["scheme"] = "http"    # node_attribute
