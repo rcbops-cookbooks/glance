@@ -74,6 +74,9 @@ To obtain your Cloud Files Tenant ID use the following:
 curl -s -X POST https://identity.api.rackspacecloud.com/v2.0/tokens -d '{"auth": {"passwordCredentials": {"username": "<Rackspace Cloud User Name>", "password": "<Rackspace Cloud Password"}}}' -H "Content-type: application/json" | python -mjson.tool | grep "tenantId.*Mosso" | head -1
 
 
+If you are hosted at Rackspace, you may also want to set
+node["glance"]["api"]["swift"]["enable_snet"] = "True"
+
 Requirements
 ============
 
