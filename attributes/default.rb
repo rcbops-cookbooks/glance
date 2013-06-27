@@ -42,6 +42,7 @@ default["glance"]["api"]["default_store"] = "file"                          # no
 default["glance"]["api"]["swift"]["store_container"] = "glance"             # node_attribute
 default["glance"]["api"]["swift"]["store_large_object_size"] = "200"        # node_attribute
 default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"  # node_attribute
+default["glance"]["api"]["swift"]["enable_snet"] = false                    # node_attribute
 default["glance"]["api"]["cache"]["image_cache_max_size"] = "10737418240"   # node_attribute
 default["glance"]["api"]["notifier_strategy"] = "noop"                      # node_attribute
 default["glance"]["api"]["notification_topic"] = "glance_notifications"     # node_attribute
