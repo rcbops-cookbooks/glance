@@ -250,7 +250,7 @@ swift_store_large_object_chunk_size = <%= @swift_large_object_chunk_size %>
 # To use ServiceNET for authentication, prefix hostname of
 # `swift_store_auth_address` with 'snet-'.
 # Ex. https://example.com/v1.0/ -> https://snet-example.com/v1.0/
-swift_enable_snet = False
+swift_enable_snet = <%= @swift_enable_snet %>
 
 # If set to True enables multi-tenant storage mode which causes Glance images
 # to be stored in tenant specific Swift accounts.
