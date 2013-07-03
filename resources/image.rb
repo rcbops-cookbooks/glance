@@ -34,3 +34,4 @@ attribute :keystone_user, :kind_of => String
 attribute :keystone_pass, :kind_of => String
 attribute :keystone_tenant, :kind_of => String
 attribute :keystone_uri, :kind_of => String
+attribute :scheme, :kind_of => String, :default => "http"

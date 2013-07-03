@@ -25,11 +25,17 @@ default["glance"]["services"]["api"]["scheme"] = "http"    # node_attribute
 default["glance"]["services"]["api"]["network"] = "public" # node_attribute
 default["glance"]["services"]["api"]["port"] = 9292        # node_attribute
 default["glance"]["services"]["api"]["path"] = "/v1"       # node_attribute
+default["glance"]["services"]["api"]["cert_file"] = "glance.pem"
+default["glance"]["services"]["api"]["key_file"] = "glance.key"
+default["glance"]["services"]["api"]["wsgi_file"] = "glance-api"
 
 default["glance"]["services"]["registry"]["scheme"] = "http"    # node_attribute
 default["glance"]["services"]["registry"]["network"] = "public" # node_attribute
 default["glance"]["services"]["registry"]["port"] = 9191        # node_attribute
 default["glance"]["services"]["registry"]["path"] = "/v1"       # node_attribute
+default["glance"]["services"]["registry"]["cert_file"] = "glance.pem"
+default["glance"]["services"]["registry"]["key_file"] = "glance.key"
+default["glance"]["services"]["registry"]["wsgi_file"] = "glance-registry"
 
 default["glance"]["db"]["name"] = "glance"     # node_attribute
 default["glance"]["db"]["username"] = "glance" # node_attribute
@@ -74,6 +80,7 @@ when "fedora", "redhat", "centos"
     "glance_api_process_name" => "glance-api",                      # node_attribute
     "package_overrides" => ""                                       # node_attribute
   }
+  default["glance"]["ssl"]["dir"] = "/etc/pki/tls"
 when "ubuntu"
   default["glance"]["platform"] = {
     "supporting_packages" => ["python-mysqldb", "python-keystone", "curl",
@@ -84,4 +91,5 @@ when "ubuntu"
     "glance_registry_process_name" => "glance-registry",            # node_attribute
     "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'" # node_attribute
   }
+  default["glance"]["ssl"]["dir"] = "/etc/ssl"
 end

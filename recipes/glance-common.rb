@@ -124,6 +124,9 @@ template "/etc/glance/glance-registry.conf" do
     "service_user" => node["glance"]["service_user"],
     "service_pass" => settings["service_pass"]
   )
+  if registry_bind["scheme"] == "https"
+    notifies :restart, "service[apache2]", :immediately
+  end
 end
 
 template "/etc/glance/glance-registry-paste.ini" do
@@ -141,6 +144,9 @@ template "/etc/glance/glance-registry-paste.ini" do
     "service_user" => node["glance"]["service_user"],
     "service_pass" => node["glance"]["service_pass"]
   )
+  if registry_bind["scheme"] == "https"
+    notifies :restart, "service[apache2]", :immediately
+  end
 end
 
 template "/etc/glance/glance-api.conf" do
@@ -153,6 +159,7 @@ template "/etc/glance/glance-api.conf" do
     "api_bind_port" => api_bind["port"],
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
+    "registry_scheme" => registry_endpoint["scheme"],
     "rabbit_ipaddress" => rabbit_info["host"],
     "rabbit_port" => rabbit_info["port"],
     "default_store" => glance["api"]["default_store"],
@@ -181,6 +188,9 @@ template "/etc/glance/glance-api.conf" do
     "service_pass" => settings["service_pass"],
     "glance_workers" => glance["api"]["workers"]
   )
+  if api_bind["scheme"] == "https"
+    notifies :restart, "service[apache2]", :immediately
+  end
 end
 
 template "/etc/glance/glance-api-paste.ini" do
@@ -199,4 +209,7 @@ template "/etc/glance/glance-api-paste.ini" do
     "service_user" => settings["service_user"],
     "service_pass" => settings["service_pass"]
   )
+  if api_bind["scheme"] == "https"
+    notifies :restart, "service[apache2]", :immediately
+  end
 end

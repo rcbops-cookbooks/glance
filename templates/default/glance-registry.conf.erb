@@ -78,7 +78,7 @@ db_auto_create = False
 #ca_file = /path/to/cafile
 
 [keystone_authtoken]
-service_protocol = http
+service_protocol = <%= @keystone_service_protocol %>
 service_host = <%= @keystone_api_ipaddress %>
 service_port = <%= @keystone_service_port %>
 auth_host = <%= @keystone_api_ipaddress %>

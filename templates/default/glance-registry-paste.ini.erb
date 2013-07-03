@@ -30,7 +30,7 @@ service_port = <%= @keystone_service_port %>
 auth_host = <%= @keystone_api_ipaddress %>
 auth_port = <%= @keystone_admin_port %>
 auth_protocol = <%= @keystone_admin_protocol %>
-auth_uri = http://<%= @keystone_api_ipaddress %>:<%= @keystone_service_port %>/
+auth_uri = <%= @keystone_admin_protocol %>://<%= @keystone_api_ipaddress %>:<%= @keystone_service_port %>/
 admin_tenant_name = <%= @service_tenant_name %>
 admin_user = <%= @service_user %>
 admin_password = <%= @service_pass %>

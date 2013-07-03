@@ -48,14 +48,30 @@ include_recipe "glance::glance-common"
 
 platform_options = node["glance"]["platform"]
 
+api_endpoint = get_bind_endpoint("glance", "api")
+
+if api_endpoint["scheme"] == "https"
+  include_recipe "glance::api-ssl"
+else
+  apache_site "openstack-glance-api" do
+    enable false
+    notifies :run, "execute[restore-selinux-context]", :immediately
+    notifies :restart, "service[apache2]", :immediately
+  end
+end
+
 service "glance-api" do
   service_name platform_options["glance_api_service"]
   supports :status => true, :restart => true
-  action :enable
-  subscribes :restart, "template[/etc/glance/glance-api.conf]", :immediately
-  subscribes :restart,
-    "template[/etc/glance/glance-api-paste.ini]",
-    :immediately
+  unless api_endpoint["scheme"] == "https"
+    action :enable
+    subscribes :restart, "template[/etc/glance/glance-api.conf]", :immediately
+    subscribes :restart,
+      "template[/etc/glance/glance-api-paste.ini]",
+      :immediately
+  else
+    action [ :disable, :stop ]
+  end
 end
 
 # glance-registry gets pulled in when we install glance-api.  Unless we are
@@ -81,8 +97,6 @@ keystone = get_settings_by_role("keystone-setup", "keystone")
 glance = get_settings_by_role("glance-api", "glance")
 # Get settings from role[glance-setup]
 settings = get_settings_by_role("glance-setup", "glance")
-# Get endpoint bind settings
-api_endpoint = get_bind_endpoint("glance", "api")
 
 # Configure glance-cache-pruner to run every 30 minutes
 cron "glance-cache-pruner" do
@@ -147,6 +161,7 @@ if node["glance"]["image_upload"]
       keystone_pass keystone_admin_password
       keystone_tenant keystone_tenant
       keystone_uri ks_admin_endpoint["uri"]
+      scheme api_endpoint["scheme"]
       action :upload
     end
 
