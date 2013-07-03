@@ -14,7 +14,7 @@ recipe            "glance::glance-config", "abstracts all config setup to be cal
   supports os
 end
 
-%w{ database dsh mysql openssl osops-utils }.each do |dep|
+%w{ database dsh mysql openssl osops-utils apache2 }.each do |dep|
   depends dep
 end
 

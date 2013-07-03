@@ -127,8 +127,11 @@ registry_port = <%= @registry_port %>
 
 # What protocol to use when connecting to the registry server?
 # Set to https for secure HTTP communication
-registry_client_protocol = http
+registry_client_protocol = <%= @registry_scheme %>
 
+<% if @registry_scheme == "https" %>
+registry_client_insecure = True
+<% end %>
 # The path to the key file to use in SSL connections to the
 # registry server, if any. Alternately, you may set the
 # GLANCE_CLIENT_KEY_FILE environ variable to a filepath of the key file

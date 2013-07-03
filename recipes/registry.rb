@@ -56,16 +56,32 @@ end
 
 platform_options = node["glance"]["platform"]
 
+registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
+
+if registry_endpoint["scheme"] == "https"
+  include_recipe "glance::registry-ssl"
+else
+  apache_site "openstack-glance-registry" do
+    enable false
+    notifies :run, "execute[restore-selinux-context]", :immediately
+    notifies :restart, "service[apache2]", :immediately
+  end
+end
+
 service "glance-registry" do
   service_name platform_options["glance_registry_service"]
   supports :status => true, :restart => true
-  action :enable
-  subscribes :restart,
-    "template[/etc/glance/glance-registry.conf]",
-    :immediately
-  subscribes :restart,
-    "template[/etc/glance/glance-registry-paste.ini]",
-    :immediately
+  unless registry_endpoint["scheme"] == "https"
+    action :enable
+    subscribes :restart,
+      "template[/etc/glance/glance-registry.conf]",
+      :immediately
+    subscribes :restart,
+      "template[/etc/glance/glance-registry-paste.ini]",
+      :immediately
+  else
+    action [ :disable, :stop ]
+  end
 end
 
 # glance-api gets pulled in when we install glance-registry.  Unless we are

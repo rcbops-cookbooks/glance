@@ -26,6 +26,11 @@ action :upload do
   name = new_resource.image_name
   url = new_resource.image_url
   type = new_resource.image_type
+  @insecure = ""
+  if new_resource.scheme == "https"
+    @insecure = "--insecure"
+  end
+
   if type == "unknown"
     type = _determine_type(url)
   end
@@ -56,7 +61,7 @@ end
 
 private
 def _upload_qcow(name, url)
-  glance_cmd = "glance --os-username #{@user} --os-password #{@pass} " +
+  glance_cmd = "glance #{@insecure} --os-username #{@user} --os-password #{@pass} " +
     "--os-tenant-name #{@tenant} --os-auth-url #{@ks_uri}"
   new_name = "#{name}-image"
   c_fmt = "--container-format bare"
@@ -75,7 +80,7 @@ end
 
 private
 def _upload_ami(name, url)
-  glance_cmd = "glance -I #{@user} -K #{@pass} -T #{@tenant} -N #{@ks_uri}"
+  glance_cmd = "glance #{@insecure} -I #{@user} -K #{@pass} -T #{@tenant} -N #{@ks_uri}"
   new_name = "#{name}-image"
   aki_fmt = "container_format=aki disk_format=aki"
   ari_fmt = "container_format=ari disk_format=ari"
