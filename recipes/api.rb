@@ -49,6 +49,8 @@ include_recipe "glance::glance-common"
 platform_options = node["glance"]["platform"]
 
 api_endpoint = get_bind_endpoint("glance", "api")
+internal_api_endpoint = get_bind_endpoint("glance", "internal-api")
+admin_api_endpoint = get_bind_endpoint("glance", "admin-api")
 
 if api_endpoint["scheme"] == "https"
   include_recipe "glance::api-ssl"
@@ -140,8 +142,8 @@ keystone_endpoint "Register Image Endpoint" do
   auth_token keystone["admin_token"]
   service_type "image"
   endpoint_region "RegionOne"
-  endpoint_adminurl api_endpoint["uri"]
-  endpoint_internalurl api_endpoint["uri"]
+  endpoint_adminurl admin_api_endpoint["uri"]
+  endpoint_internalurl internal_api_endpoint["uri"]
   endpoint_publicurl api_endpoint["uri"]
   action :create
 end
@@ -164,6 +166,5 @@ if node["glance"]["image_upload"]
       scheme api_endpoint["scheme"]
       action :upload
     end
-
   end
 end
