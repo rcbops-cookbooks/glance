@@ -62,7 +62,7 @@ default["glance"]["syslog"]["config_facility"] = "local2"   # node_attribute
 
 # replicator attributes
 default["glance"]["replicator"]["interval"] = 5
-default["glance"]["replicator"]["checksum"] = "dacf5e585884c7a694bd36a9e5cc2752ef2f9513"
+default["glance"]["replicator"]["checksum"] = "ba0582359f4bd5d18cc27188b481a13f7e655b55"
 default["glance"]["replicator"]["rsync_user"] = "root"
 
 # platform-specific settings
