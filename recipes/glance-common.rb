@@ -54,31 +54,40 @@ end
 
 # Search for rabbit endpoint info
 rabbit_info = get_access_endpoint("rabbitmq-server", "rabbitmq", "queue")
+
 # Search for mysql endpoint info
 mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
+
 # Search for keystone endpoint info
 ks_api_role = "keystone-api"
 ks_ns = "keystone"
 ks_admin_endpoint = get_access_endpoint(ks_api_role, ks_ns, "admin-api")
 ks_service_endpoint = get_access_endpoint(ks_api_role, ks_ns, "service-api")
+
 # Get settings from role[keystone-setup]
 keystone = get_settings_by_role("keystone-setup", "keystone")
+
 # Get settings from role[glance-api]
 glance = get_settings_by_role("glance-api", "glance")
+
 # Get settings from role[glance-setup]
-settings = get_settings_by_role("glance-setup", "glance")
-# Get api endpoint bind info
+if ! (settings = get_settings_by_role("glance-setup", "glance"))
+  msg = "No servers in your environment contain the glance::setup role!"
+  Chef::Application.fatal!(msg)
+end
+
+# Get api/registry endpoint bind info
 api_bind = get_bind_endpoint("glance", "api")
-# Get registry endpoint bind info
 registry_bind = get_bind_endpoint("glance", "registry")
+
 # Search for glance-registry endpoint info
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 
-# Only use the glance image cacher if we aren't using file for our backing store.
+# Only use glance image cacher if we aren't using file for our backing store.
 if glance["api"]["default_store"]=="file"
-  glance_flavor="keystone"
+  glance_flavor = "keystone"
 else
-  glance_flavor="keystone+cachemanagement"
+  glance_flavor = "keystone+cachemanagement"
 end
 
 # Possible combinations of options here
@@ -88,20 +97,28 @@ end
 #     * if swift_store_auth_address is not defined
 #         - default to local swift
 #     * else if swift_store_auth_address is defined
-#         - get swift_store_auth_address, swift_store_user, swift_store_key, and
-#           swift_store_auth_version from the node attributes and use them to connect
-#           to the swift compatible API service running elsewhere - possibly
-#           Rackspace Cloud Files.
+#         - get swift_store_auth_address, swift_store_user, swift_store_key,
+#           and swift_store_auth_version from the node attributes and use them
+#           to connect to the swift compatible API service running elsewhere
+#           (possibly Rackspace Cloud Files).
+#
 if glance["api"]["swift_store_auth_address"].nil?
-  swift_store_auth_address="http://#{ks_admin_endpoint["host"]}:#{ks_service_endpoint["port"]}#{ks_service_endpoint["path"]}"
-  swift_store_user="#{glance["service_tenant_name"]}:#{glance["service_user"]}"
-  swift_store_key=settings["service_pass"]
-  swift_store_auth_version=2
+
+  swift_store_auth_address =
+    "http://#{ks_admin_endpoint['host']}:" +
+    ks_service_endpoint['port'] +
+    ks_service_endpoint['path']
+
+  swift_store_user =
+    "#{glance['service_tenant_name']}:#{glance['service_user']}"
+
+  swift_store_key = settings["service_pass"]
+  swift_store_auth_version = 2
 else
-  swift_store_auth_address=settings["api"]["swift_store_auth_address"]
-  swift_store_user=settings["api"]["swift_store_user"]
-  swift_store_key=settings["api"]["swift_store_key"]
-  swift_store_auth_version=settings["api"]["swift_store_auth_version"]
+  swift_store_auth_address = settings["api"]["swift_store_auth_address"]
+  swift_store_auth_version = settings["api"]["swift_store_auth_version"]
+  swift_store_key  = settings["api"]["swift_store_key"]
+  swift_store_user = settings["api"]["swift_store_user"]
 end
 
 template "/etc/glance/glance-registry.conf" do
@@ -142,7 +159,7 @@ template "/etc/glance/glance-registry-paste.ini" do
     "keystone_admin_protocol" => ks_admin_endpoint["scheme"],
     "service_tenant_name" => node["glance"]["service_tenant_name"],
     "service_user" => node["glance"]["service_user"],
-    "service_pass" => node["glance"]["service_pass"]
+    "service_pass" => settings["service_pass"]
   )
   if registry_bind["scheme"] == "https"
     notifies :restart, "service[apache2]", :immediately
