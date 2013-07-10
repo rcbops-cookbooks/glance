@@ -55,10 +55,12 @@ admin_api_endpoint = get_bind_endpoint("glance", "admin-api")
 if api_endpoint["scheme"] == "https"
   include_recipe "glance::api-ssl"
 else
-  apache_site "openstack-glance-api" do
-    enable false
-    notifies :run, "execute[restore-selinux-context]", :immediately
-    notifies :restart, "service[apache2]", :immediately
+  if node.recipe?"apache2"
+    apache_site "openstack-glance-api" do
+      enable false
+      notifies :run, "execute[restore-selinux-context]", :immediately
+      notifies :restart, "service[apache2]", :immediately
+    end
   end
 end
 

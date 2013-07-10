@@ -61,10 +61,12 @@ registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 if registry_endpoint["scheme"] == "https"
   include_recipe "glance::registry-ssl"
 else
-  apache_site "openstack-glance-registry" do
-    enable false
-    notifies :run, "execute[restore-selinux-context]", :immediately
-    notifies :restart, "service[apache2]", :immediately
+  if node.recipe?"apache2"
+    apache_site "openstack-glance-registry" do
+      enable false
+      notifies :run, "execute[restore-selinux-context]", :immediately
+      notifies :restart, "service[apache2]", :immediately
+    end
   end
 end
 
