@@ -79,6 +79,7 @@ default["glance"]["image"]["fedora"] = "http://cloud.fedoraproject.org/fedora-la
 default["glance"]["replicator"]["interval"] = 5
 default["glance"]["replicator"]["checksum"] = "ba0582359f4bd5d18cc27188b481a13f7e655b55"
 default["glance"]["replicator"]["rsync_user"] = "root"
+default["glance"]["replicator"]["enabled"] = true
 
 # platform-specific settings
 case platform
