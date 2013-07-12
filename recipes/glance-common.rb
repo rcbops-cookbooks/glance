@@ -22,8 +22,8 @@
 # install common packages
 platform_options = node["glance"]["platform"]
 
-pkgs = platform_options["glance_packages"] +
-  platform_options["supporting_packages"]
+glance_pkgs = platform_options["glance_packages"]
+common_pkgs = platform_options["supporting_packages"]
 
 # only run this if do_package_upgrade is enabled.  If you upgrade the package
 # outside of chef you will need to run 'glance-manage db_sync' by hand.
@@ -38,11 +38,15 @@ end
 # install (or upgrade) glance packages.  We execute 'glance-manage db_sync'
 # on package transition but the execute block only runs when do_package_upgrades
 # is set to true
-pkgs.each do |pkg|
+glance_pkgs.each do |pkg|
   package pkg do
     action node["osops"]["do_package_upgrades"] == true ? :upgrade : :install
     options platform_options["package_overrides"]
   end
+end
+
+common_pkgs.each do |pkg|
+  include_recipe "osops-utils::#{pkg}"
 end
 
 directory "/etc/glance" do
