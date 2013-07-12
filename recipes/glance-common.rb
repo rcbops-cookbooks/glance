@@ -38,8 +38,10 @@ end
 # install (or upgrade) glance packages.  We execute 'glance-manage db_sync'
 # on package transition but the execute block only runs when do_package_upgrades
 # is set to true
+cb_name = run_context.cookbook_collection[cookbook_name].metadata.name
 pkgs.each do |pkg|
-  package pkg do
+  package "#{cb_name}: #{pkg}" do
+    package_name pkg
     action node["osops"]["do_package_upgrades"] == true ? :upgrade : :install
     options platform_options["package_overrides"]
   end
