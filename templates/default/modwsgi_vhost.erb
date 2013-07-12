@@ -1,7 +1,7 @@
 Listen <%= @listen_ip %>:<%= @service_port %>
 <VirtualHost <%= @listen_ip %>:<%= @service_port %>>
     WSGIScriptAlias / <%= @wsgi_file %>
-    WSGIDaemonProcess <%= @proc_group %> user=glance group=nogroup processes=3 threads=10 python-path=/usr/share/pyshared/glance
+    WSGIDaemonProcess <%= @proc_group %> user=glance group=glance processes=3 threads=10 python-path=/usr/share/pyshared/glance
     WSGIProcessGroup <%= @proc_group %>
 
     # SSL Config
