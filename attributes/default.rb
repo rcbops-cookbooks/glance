@@ -2,7 +2,7 @@
 # Cookbook Name:: glance
 # Attributes:: default
 #
-# Copyright 2012, Rackspace US, Inc.
+# Copyright 2012-2013, Rackspace US, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ default["glance"]["image"]["precise"] = "http://cloud-images.ubuntu.com/precise/
 default["glance"]["image"]["oneiric"] = "http://cloud-images.ubuntu.com/oneiric/current/oneiric-server-cloudimg-amd64-disk1.img"
 default["glance"]["image"]["natty"] = "http://cloud-images.ubuntu.com/natty/current/natty-server-cloudimg-amd64-disk1.img"
 default["glance"]["image"]["cirros"] = "http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-disk.img"
+default["glance"]["image"]["fedora"] = "http://cloud.fedoraproject.org/fedora-latest.x86_64.qcow2"
 
 # replicator attributes
 default["glance"]["replicator"]["interval"] = 5
