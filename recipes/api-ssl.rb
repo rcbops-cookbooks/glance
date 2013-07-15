@@ -21,6 +21,7 @@ include_recipe "apache2"
 include_recipe "apache2::mod_wsgi"
 include_recipe "apache2::mod_rewrite"
 include_recipe "osops-utils::mod_ssl"
+include_recipe "osops-utils::ssl_packages"
 
 # Remove monit file if it exists
 if node.attribute?"monit"
@@ -99,7 +100,7 @@ template value_for_platform(
     :key_file => "#{node["glance"]["ssl"]["dir"]}/private/#{node["glance"]["services"]["api"]["key_file"]}",
     :wsgi_file  => "#{node["apache"]["dir"]}/wsgi/#{node["glance"]["services"]["api"]["wsgi_file"]}",
     :proc_group => "glance-api",
-    :log_file => "/var/log/glance/api.log"
+    :log_file => "/var/log/glance/glance-api.log"
   )
   notifies :run, "execute[restore-selinux-context]", :immediately
   notifies :reload, "service[apache2]", :delayed
