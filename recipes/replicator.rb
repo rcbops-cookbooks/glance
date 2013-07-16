@@ -21,12 +21,7 @@ if Chef::Config[:solo]
   Chef::Application.fatal! "This recipe uses search. Chef Solo does not support search."
 end
 
-search_string = "chef_environment:#{node.chef_environment} AND recipes:glance\\:\\:replicator"
-search_result = search(:node, search_string)
-if not search_result.map { |n| n.name }.include?(node.name) and node["recipes"].include?("glance::replicator")
-  search_result << node
-end
-api_nodes = search_result.map { |n| n["hostname"] }.join(",")
+api_nodes = get_nodes_by_recipe("glance::replicator").map { |n| n["hostname"] }.join(",")
 
 dsh_group "glance" do
   user "root"

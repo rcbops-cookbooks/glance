@@ -56,13 +56,7 @@ directory "/etc/glance" do
   mode "0700"
 end
 
-search_string = "chef_environment:#{node.chef_environment} AND recipes:glance\\:\\:replicator"
-search_result = search(:node, search_string)
-if not search_result.map { |n| n.name }.include?(node.name) and node["recipes"].include?("glance::replicator")
-  search_result << node
-end
-replicator_count = search_result.length
-
+replicator_count = get_nodes_by_recipe("glance::replicator").length
 
 if get_role_count("ceilometer-setup") == 1 or replicator_count > 0
   node.set["glance"]["api"]["notifier_strategy"] = "rabbit"
