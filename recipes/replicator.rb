@@ -17,10 +17,6 @@
 # limitations under the License.
 #
 
-if Chef::Config[:solo]
-  Chef::Application.fatal! "This recipe uses search. Chef Solo does not support search."
-end
-
 api_nodes = get_nodes_by_recipe("glance::replicator").map { |n| n["hostname"] }.join(",")
 
 dsh_group "glance" do
