@@ -21,7 +21,18 @@ if Chef::Config[:solo]
   Chef::Application.fatal! "This recipe uses search. Chef Solo does not support search."
 end
 
-api_nodes = search(:node, "chef_environment:#{node.chef_environment} AND roles:glance-api").map { |n| n["hostname"] }.join(",")
+search_string = "chef_environment:#{node.chef_environment} AND recipes:glance\\:\\:replicator"
+search_result = search(:node, search_string)
+if not search_result.map { |n| n.name }.include?(node.name) and node["recipes"].include?("glance::replicator")
+  search_result << node
+end
+api_nodes = search_result.map { |n| n["hostname"] }.join(",")
+
+dsh_group "glance" do
+  user "root"
+  admin_user "root"
+  group "root"
+end
 
 remote_file "/var/lib/glance/glance-image-sync.py" do
   source "https://raw.github.com/rcbops/glance-image-sync/#{node['glance']['replicator']['checksum']}/glance-image-sync.py"

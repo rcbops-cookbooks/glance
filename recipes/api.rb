@@ -17,33 +17,6 @@
 # limitations under the License.
 #
 
-# die early if we are trying HA with local file store
-glance_api_count =
-  get_realserver_endpoints("glance-api", "glance", "api").length
-
-if get_role_count("ceilometer-setup") == 1 or glance_api_count == 2
-  node.set["glance"]["api"]["notifier_strategy"] = "rabbit"
-end
-
-if node["glance"]["api"]["default_store"] == "file"
-  # this is really only needed when glance::replicator is included, however we
-  # want to install early on to minimize number of chef-client runs needed
-  dsh_group "glance" do
-    user "root"
-    admin_user "root"
-    group "root"
-  end
-
-  if glance_api_count == 2
-    include_recipe "glance::replicator"
-  elsif glance_api_count > 2
-    msg = "Local file store not supported with multiple glance-api nodes\n" +
-      "Change file store to 'swift' or 'cloudfiles' or " +
-      "remove additional glance-api nodes"
-    Chef::Application.fatal! msg
-  end
-end
-
 include_recipe "glance::glance-common"
 
 platform_options = node["glance"]["platform"]
