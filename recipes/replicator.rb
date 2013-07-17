@@ -17,11 +17,13 @@
 # limitations under the License.
 #
 
-if Chef::Config[:solo]
-  Chef::Application.fatal! "This recipe uses search. Chef Solo does not support search."
-end
+api_nodes = get_nodes_by_recipe("glance::replicator").map { |n| n["hostname"] }.join(",")
 
-api_nodes = search(:node, "chef_environment:#{node.chef_environment} AND roles:glance-api").map { |n| n["hostname"] }.join(",")
+dsh_group "glance" do
+  user "root"
+  admin_user "root"
+  group "root"
+end
 
 remote_file "/var/lib/glance/glance-image-sync.py" do
   source "https://raw.github.com/rcbops/glance-image-sync/#{node['glance']['replicator']['checksum']}/glance-image-sync.py"
