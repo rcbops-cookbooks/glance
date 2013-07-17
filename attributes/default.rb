@@ -86,7 +86,9 @@ when "fedora", "redhat", "centos"
   default["glance"]["platform"] = {
     "supporting_packages" => ["MySQL-python", "python-keystone", "curl",
                               "python-glanceclient", "python-warlock"],
-    "glance_packages" => ["openstack-glance", "python-swiftclient", "cronie", "python-prettytable", "python-kombu", "python-anyjson"],
+    "glance_packages" => ["openstack-glance", "python-swiftclient", "cronie",
+                          "python-prettytable", "python-kombu",
+                          "python-anyjson", "python-amqplib"],
     "glance_api_service" => "openstack-glance-api",
     "glance_registry_service" => "openstack-glance-registry",
     "glance_api_process_name" => "glance-api",
