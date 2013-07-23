@@ -82,6 +82,15 @@ platform_options["glance_packages"].each do |pkg|
   end
 end
 
+# NOTE: mancdaz remove requirements.txt from python-glanceclient 0.5.1.
+# It has incorrect dependencies and is no good when used with RPM's anyway
+# If bug https://bugzilla.redhat.com/show_bug.cgi?id=987475 is fixed
+# this can be removed
+file "/usr/lib/python2.6/site-packages/python_glanceclient-0.5.1-py2.6.egg-info/requires.txt" do
+  action :delete
+  only_if { platform_family?('rhel') }
+end
+
 file "/var/lib/glance/glance.sqlite" do
     action :delete
 end
