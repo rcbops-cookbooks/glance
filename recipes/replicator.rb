@@ -17,43 +17,45 @@
 # limitations under the License.
 #
 
-api_nodes = get_nodes_by_recipe("glance::replicator").map { |n| n["hostname"] }.join(",")
+if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_store"] == "file"
+  api_nodes = get_nodes_by_recipe("glance::replicator").map { |n| n["hostname"] }.join(",")
 
-dsh_group "glance" do
-  user "root"
-  admin_user "root"
-  group "root"
-end
+  dsh_group "glance" do
+    user "root"
+    admin_user "root"
+    group "root"
+  end
 
-remote_file "/var/lib/glance/glance-image-sync.py" do
-  source "https://raw.github.com/rcbops/glance-image-sync/#{node['glance']['replicator']['checksum']}/glance-image-sync.py"
-  owner "glance"
-  group "glance"
-  mode "0755"
-end
+  remote_file "/var/lib/glance/glance-image-sync.py" do
+    source "https://raw.github.com/rcbops/glance-image-sync/#{node['glance']['replicator']['checksum']}/glance-image-sync.py"
+    owner "glance"
+    group "glance"
+    mode "0755"
+  end
 
-template "/etc/glance/glance-image-sync.conf" do
-  source "glance-image-sync.conf.erb"
-  owner "glance"
-  group "glance"
-  mode "0600"
-  variables(:api_nodes => api_nodes, :rsync_user => node['glance']['replicator']['rsync_user'])
-end
+  template "/etc/glance/glance-image-sync.conf" do
+    source "glance-image-sync.conf.erb"
+    owner "glance"
+    group "glance"
+    mode "0600"
+    variables(:api_nodes => api_nodes, :rsync_user => node['glance']['replicator']['rsync_user'])
+  end
 
-cron "glance-image-sync" do
-  minute "*/#{node['glance']['replicator']['interval']}"
-  command "/var/lib/glance/glance-image-sync.py both"
-end
+  cron "glance-image-sync" do
+    minute "*/#{node['glance']['replicator']['interval']}"
+    command "/var/lib/glance/glance-image-sync.py both"
+  end
 
-# clean up previous replicator
-file "/var/lib/glance/glance-replicator.sh" do
-  action :delete
-end
+  # clean up previous replicator
+  file "/var/lib/glance/glance-replicator.sh" do
+    action :delete
+  end
 
-cookbook_file "/var/lib/glance/glance-replicator.py" do
-  action :delete
-end
+  cookbook_file "/var/lib/glance/glance-replicator.py" do
+    action :delete
+  end
 
-cron "glance-replicator" do
-  action :delete
+  cron "glance-replicator" do
+    action :delete
+  end
 end
