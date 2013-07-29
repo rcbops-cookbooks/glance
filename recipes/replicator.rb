@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-if node["glance"]["replicator"]["enabled"]
+if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_store"] == "file"
   api_nodes = get_nodes_by_recipe("glance::replicator").map { |n| n["hostname"] }.join(",")
 
   dsh_group "glance" do
