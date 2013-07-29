@@ -77,7 +77,7 @@ default["glance"]["image"]["fedora"] = "http://cloud.fedoraproject.org/fedora-la
 
 # replicator attributes
 default["glance"]["replicator"]["interval"] = 5
-default["glance"]["replicator"]["checksum"] = "ba0582359f4bd5d18cc27188b481a13f7e655b55"
+default["glance"]["replicator"]["checksum"] = "971b7cec95105747e77088e3e0853a636a120383"
 default["glance"]["replicator"]["rsync_user"] = "root"
 
 # platform-specific settings
@@ -88,7 +88,7 @@ when "fedora", "redhat", "centos"
                               "python-glanceclient", "python-warlock"],
     "glance_packages" => ["openstack-glance", "python-swiftclient", "cronie",
                           "python-prettytable", "python-kombu",
-                          "python-anyjson", "python-amqplib"],
+                          "python-anyjson", "python-amqplib", "python-lockfile"],
     "glance_api_service" => "openstack-glance-api",
     "glance_registry_service" => "openstack-glance-registry",
     "glance_api_process_name" => "glance-api",
@@ -99,7 +99,7 @@ when "ubuntu"
   default["glance"]["platform"] = {
     "supporting_packages" => ["python-mysqldb", "python-keystone", "curl",
                               "python-glanceclient", "python-warlock"],
-    "glance_packages" => ["glance", "python-swift", "python-prettytable"],
+    "glance_packages" => ["glance", "python-swift", "python-prettytable", "python-lockfile"],
     "glance_api_service" => "glance-api",
     "glance_registry_service" => "glance-registry",
     "glance_registry_process_name" => "glance-registry",
