@@ -146,11 +146,15 @@ Attributes
 * `glance["services"]["api"]["scheme"]` - http or https
 * `glance["services"]["api"]["network"]` - Network name to place service on
 * `glance["services"]["api"]["port"]` - registry port
-* `glance["services"]["api"]["path"]` - URI to use when using glance api
+* `glance["services"]["api"]["path"]` - URI to use when using glance API
+* `glance["services"]["api"]["cert_override"]` - For SSL - Custom location for cert file
+* `glance["services"]["api"]["key_override"]` - For SSL - Custom location for key file
 * `glance["services"]["registry"]["scheme"]` - http or https
 * `glance["services"]["registry"]["network"]` - Network name to place service on
 * `glance["services"]["registry"]["port"]` - registry port
 * `glance["services"]["registry"]["path"]` - URI to use when using glance registry
+* `glance["services"]["registry"]["cert_override"]` - For SSL - Custom location for cert file
+* `glance["services"]["registry"]["key_override"]` - For SSL - Custom location for key file$
 * `glance["db"]["name"]` - Name of glance database
 * `glance["db"]["user"]` - Username for glance database access
 * `glance["service_tenant_name"]` - Tenant name used by glance when interacting with keystone - used in the API and registry paste.ini files
