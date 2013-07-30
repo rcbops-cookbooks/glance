@@ -75,6 +75,18 @@ end
 
 glance_registry_bind = get_bind_endpoint("glance", "registry")
 
+unless node["glance"]["services"]["registry"].attribute?"cert_override"
+  cert_location = "#{node["glance"]["ssl"]["dir"]}/certs/#{node["glance"]["services"]["registry"]["cert_file"]}"
+else
+  cert_location = node["glance"]["services"]["registry"]["cert_override"]
+end
+
+unless node["glance"]["services"]["registry"].attribute?"key_override"
+  key_location = "#{node["glance"]["ssl"]["dir"]}/private/#{node["glance"]["services"]["registry"]["key_file"]}"
+else
+  key_location = node["glance"]["services"]["registry"]["key_override"]
+end
+
 template value_for_platform(
   ["ubuntu", "debian", "fedora"] => {
     "default" => "#{node["apache"]["dir"]}/sites-available/openstack-glance-registry"
@@ -96,8 +108,8 @@ template value_for_platform(
   variables(
     :listen_ip => glance_registry_bind["host"],
     :service_port => glance_registry_bind["port"],
-    :cert_file => "#{node["glance"]["ssl"]["dir"]}/certs/#{node["glance"]["services"]["registry"]["cert_file"]}",
-    :key_file => "#{node["glance"]["ssl"]["dir"]}/private/#{node["glance"]["services"]["registry"]["key_file"]}",
+    :cert_file => cert_location,
+    :key_file => key_location,
     :wsgi_file  => "#{node["apache"]["dir"]}/wsgi/#{node["glance"]["services"]["registry"]["wsgi_file"]}",
     :proc_group => "glance-registry",
     :log_file => "/var/log/glance/registry-ssl.log"
