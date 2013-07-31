@@ -21,7 +21,15 @@
 # Toggles - These can be overridden at the environment level
 ########################################################################
 
-default["glance"]["rabbitmq"]["use_durable_queues"] = true
+# Define the ha policy for queues.  If you change this to true
+# after you have already deployed you will need to wipe the RabbitMQ
+# database by stopping rabbitmq, removing /var/lib/rabbitmq/mnesia
+# and starting rabbitmq back up.  Failure to do so will cause the
+# OpenStack services to fail to connect to RabbitMQ.
+default["glance"]["rabbitmq"]["use_ha_queues"] = false
+# ** NOTE: Unfortunately this isn't in glance yet and probably won't be
+# until the Icehouse release: https://review.openstack.org/#/c/37511/
+#
 
 default["glance"]["services"]["api"]["scheme"] = "http"
 default["glance"]["services"]["api"]["network"] = "public"
