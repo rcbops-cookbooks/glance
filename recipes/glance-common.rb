@@ -189,6 +189,7 @@ template "/etc/glance/glance-api.conf" do
     "registry_scheme" => registry_endpoint["scheme"],
     "rabbit_ipaddress" => rabbit_info["host"],
     "rabbit_port" => rabbit_info["port"],
+    "rabbit_durable_queues" => glance['rabbitmq']['use_durable_queues'] ? "True" : "False",
     "default_store" => glance["api"]["default_store"],
     "notifier_strategy" => glance["api"]["notifier_strategy"],
     "notification_topic" => glance["api"]["notification_topic"],

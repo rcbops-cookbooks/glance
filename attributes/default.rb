@@ -21,6 +21,8 @@
 # Toggles - These can be overridden at the environment level
 ########################################################################
 
+default["glance"]["rabbitmq"]["use_durable_queues"] = true
+
 default["glance"]["services"]["api"]["scheme"] = "http"
 default["glance"]["services"]["api"]["network"] = "public"
 default["glance"]["services"]["api"]["port"] = 9292
