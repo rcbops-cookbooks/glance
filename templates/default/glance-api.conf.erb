@@ -180,7 +180,7 @@ rabbit_password = guest
 rabbit_virtual_host = /
 rabbit_notification_exchange = glance
 rabbit_notification_topic = <%= @notification_topic %>
-rabbit_durable_queues = False
+rabbit_ha_queues = <%= @rabbit_ha_queues %>
 
 # Configuration options if sending notifications via Qpid (these are
 # the defaults)
