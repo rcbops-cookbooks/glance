@@ -27,7 +27,7 @@ if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_st
   # we cannot call this group "glance" as we previously had a "glance" dsh
   # group set up under root user and some installations may still have that
   # out there 
-  dsh_group "glance_image_sync" do
+  dsh_group "glance-image-sync" do
     user "glance"
     admin_user "glance"
     group "glance"
