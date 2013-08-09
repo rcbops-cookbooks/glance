@@ -48,9 +48,16 @@ if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_st
     variables(:api_nodes => api_nodes, :rsync_user => node['glance']['replicator']['rsync_user'])
   end
 
-  cron "glance-image-sync" do
-    minute "*/#{node['glance']['replicator']['interval']}"
+  cron "glance-image-sync-cronjob" do
+    minute  "*/#{node['glance']['replicator']['interval']}"
     command "/var/lib/glance/glance-image-sync.py both"
+    user    "glance"
+  end
+
+  directory "/var/lock/glance-image-sync" do
+    owner node['glance']['replicator']['rsync_user']
+    group node['glance']['replicator']['rsync_user']
+    mode  "0700"
   end
 
   # clean up previous replicator
@@ -62,7 +69,10 @@ if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_st
     action :delete
   end
 
-  cron "glance-replicator" do
-    action :delete
+  # glance-image-sync cronjob was installed under root, we've since moved to glance user
+  %w{glance-replicator glance-image-sync}.each do |name|
+    cron name do
+      action :delete
+    end
   end
 end
