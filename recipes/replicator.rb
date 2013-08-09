@@ -20,10 +20,17 @@
 if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_store"] == "file"
   api_nodes = get_nodes_by_recipe("glance::replicator").map { |n| n["hostname"] }.join(",")
 
-  dsh_group "glance" do
-    user "root"
-    admin_user "root"
-    group "root"
+  execute "enable glance login" do
+    command "usermod -s /bin/sh glance"
+  end
+ 
+  # we cannot call this group "glance" as we previously had a "glance" dsh
+  # group set up under root user and some installations may still have that
+  # out there 
+  dsh_group "glance_image_sync" do
+    user "glance"
+    admin_user "glance"
+    group "glance"
   end
 
   remote_file "/var/lib/glance/glance-image-sync.py" do
