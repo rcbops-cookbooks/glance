@@ -20,10 +20,17 @@
 if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_store"] == "file"
   api_nodes = get_nodes_by_recipe("glance::replicator").map { |n| n["hostname"] }.join(",")
 
-  dsh_group "glance" do
-    user "root"
-    admin_user "root"
-    group "root"
+  execute "enable glance login" do
+    command "usermod -s /bin/sh glance"
+  end
+ 
+  # we cannot call this group "glance" as we previously had a "glance" dsh
+  # group set up under root user and some installations may still have that
+  # out there 
+  dsh_group "glance-image-sync" do
+    user "glance"
+    admin_user "glance"
+    group "glance"
   end
 
   remote_file "/var/lib/glance/glance-image-sync.py" do
@@ -41,9 +48,21 @@ if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_st
     variables(:api_nodes => api_nodes, :rsync_user => node['glance']['replicator']['rsync_user'])
   end
 
-  cron "glance-image-sync" do
-    minute "*/#{node['glance']['replicator']['interval']}"
+  cron "glance-image-sync-cronjob" do
+    minute  "*/#{node['glance']['replicator']['interval']}"
     command "/var/lib/glance/glance-image-sync.py both"
+    user    "glance"
+  end
+
+  # required as we move from running as root to glance, can be removed eventually
+  image_sync_log = "/var/log/glance/glance-image-sync.log"
+
+  file image_sync_log do
+    user  "glance"
+    group "glance"
+    only_if do
+        File.exists?(image_sync_log) && File.stat(image_sync_log).gid == 0
+    end
   end
 
   # clean up previous replicator
@@ -55,7 +74,10 @@ if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_st
     action :delete
   end
 
-  cron "glance-replicator" do
-    action :delete
+  # glance-image-sync cronjob was installed under root, we've since moved to glance user
+  %w{glance-replicator glance-image-sync}.each do |name|
+    cron name do
+      action :delete
+    end
   end
 end
