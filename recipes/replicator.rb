@@ -54,10 +54,15 @@ if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_st
     user    "glance"
   end
 
-  directory "/var/lock/glance-image-sync" do
-    owner node['glance']['replicator']['rsync_user']
-    group node['glance']['replicator']['rsync_user']
-    mode  "0700"
+  # required as we move from running as root to glance, can be removed eventually
+  image_sync_log = "/var/log/glance/glance-image-sync.log"
+
+  file image_sync_log do
+    user  "glance"
+    group "glance"
+    only_if do
+        File.exists?(image_sync_log) && File.stat(image_sync_log).gid == 0
+    end
   end
 
   # clean up previous replicator
