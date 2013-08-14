@@ -24,7 +24,9 @@ http://glance.openstack.org/
 Usage
 =====
 
-The Glance cookbook currently supports file, swift, and Rackspace Cloud Files (swift API compliant) backing stores.  NOTE: changing the storage location from cloudfiles to swift (and vice versa) requires that you manually export and import your stored images.
+The Glance cookbook currently supports file, swift, and Rackspace Cloud Files (swift API compliant) backing stores.
+
+NOTE: changing the storage location from cloudfiles to swift (and vice versa) requires that you manually export and import your stored images.
 
 To enable these features set the following in the default attributes section in your environment:
 
