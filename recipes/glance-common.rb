@@ -64,6 +64,8 @@ end
 
 # Search for rabbit endpoint info
 rabbit_info = get_access_endpoint("rabbitmq-server", "rabbitmq", "queue")
+rabbit_settings = get_settings_by_role("rabbitmq-server", "rabbitmq")
+
 
 # Search for mysql endpoint info
 mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
@@ -189,7 +191,7 @@ template "/etc/glance/glance-api.conf" do
     "registry_scheme" => registry_endpoint["scheme"],
     "rabbit_ipaddress" => rabbit_info["host"],
     "rabbit_port" => rabbit_info["port"],
-    "rabbit_ha_queues" => glance['rabbitmq']['use_ha_queues'] ? "True" : "False",
+    "rabbit_ha_queues" => rabbit_settings["cluster"] ? "True" : "False",
     "default_store" => glance["api"]["default_store"],
     "notifier_strategy" => glance["api"]["notifier_strategy"],
     "notification_topic" => glance["api"]["notification_topic"],
