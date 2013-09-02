@@ -112,6 +112,7 @@ when "ubuntu"
                               "python-glanceclient", "python-warlock"],
     "glance_packages" => ["glance", "python-swift", "python-prettytable", "python-lockfile"],
     "glance_api_service" => "glance-api",
+    "glance_api_process_name" => "glance-api",
     "glance_registry_service" => "glance-registry",
     "glance_registry_process_name" => "glance-registry",
     "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'"
