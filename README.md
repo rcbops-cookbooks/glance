@@ -13,6 +13,7 @@ Please title the issue as follows:
 In the issue description, please include a longer description of the issue, along with any relevant log/command/error output.  
 If logfiles are extremely long, please place the relevant portion into the issue description, and link to a gist containing the entire logfile
 
+Please see the [contribution guidelines](CONTRIBUTING.md) for more information about contributing to this cookbook.
 
 Description
 ===========
@@ -24,7 +25,9 @@ http://glance.openstack.org/
 Usage
 =====
 
-The Glance cookbook currently supports file, swift, and Rackspace Cloud Files (swift API compliant) backing stores.  NOTE: changing the storage location from cloudfiles to swift (and vice versa) requires that you manually export and import your stored images.
+The Glance cookbook currently supports file, swift, and Rackspace Cloud Files (swift API compliant) backing stores.
+
+NOTE: changing the storage location from cloudfiles to swift (and vice versa) requires that you manually export and import your stored images.
 
 To enable these features set the following in the default attributes section in your environment:
 
@@ -74,6 +77,9 @@ To obtain your Cloud Files Tenant ID use the following:
 curl -s -X POST https://identity.api.rackspacecloud.com/v2.0/tokens -d '{"auth": {"passwordCredentials": {"username": "<Rackspace Cloud User Name>", "password": "<Rackspace Cloud Password"}}}' -H "Content-type: application/json" | python -mjson.tool | grep "tenantId.*Mosso" | head -1
 
 
+If you are hosted at Rackspace, you may also want to set
+node["glance"]["api"]["swift"]["enable_snet"] = "True"
+
 Requirements
 ============
 
@@ -93,7 +99,6 @@ The following cookbooks are dependencies:
 * database
 * dsh
 * keystone
-* monitoring
 * mysql
 * openssl
 * osops-utils
@@ -123,13 +128,14 @@ registry
 --------
 - Installs the glance-registry server  
 
-glance-rsyslog
---------------
-- rsyslog glance configuration, automatically included in `setup`, `api`, and `registry`
-
 replicator
 ----------
 - Drops in cron job to sync glance images when running 2 node HA setup w/ file storage
+
+glance-common
+-------------
+- Drops in all config files for api and registry. Gets included by other recipes
+- Installs common packages
 
 Data Bags
 =========
@@ -143,11 +149,15 @@ Attributes
 * `glance["services"]["api"]["scheme"]` - http or https
 * `glance["services"]["api"]["network"]` - Network name to place service on
 * `glance["services"]["api"]["port"]` - registry port
-* `glance["services"]["api"]["path"]` - URI to use when using glance api
+* `glance["services"]["api"]["path"]` - URI to use when using glance API
+* `glance["services"]["api"]["cert_override"]` - For SSL - Custom location for cert file
+* `glance["services"]["api"]["key_override"]` - For SSL - Custom location for key file
 * `glance["services"]["registry"]["scheme"]` - http or https
 * `glance["services"]["registry"]["network"]` - Network name to place service on
 * `glance["services"]["registry"]["port"]` - registry port
 * `glance["services"]["registry"]["path"]` - URI to use when using glance registry
+* `glance["services"]["registry"]["cert_override"]` - For SSL - Custom location for cert file
+* `glance["services"]["registry"]["key_override"]` - For SSL - Custom location for key file$
 * `glance["db"]["name"]` - Name of glance database
 * `glance["db"]["user"]` - Username for glance database access
 * `glance["service_tenant_name"]` - Tenant name used by glance when interacting with keystone - used in the API and registry paste.ini files
@@ -159,20 +169,20 @@ Attributes
 * `glance["api"]["swift"]["store_large_object_chunk_size"]` - Set the chunk size for glance.  Defaults to "200" MB
 * `glance["api"]["cache"]["image_cache_max_size"]` - Set the maximum size of image cache.  Defaults to "10" GB
 * `glance["api"]["notifier_strategy"]` - Toggles the notifier strategy.  Currently supported are "noop", "rabbit", "qpid", and "logging", defaults to "noop"
+* `glance["api"]["notification_topic"]` - Define the rabbitmq notification topic, defaults to "glance_notifications"
 * `glance["image_upload"]` - Toggles whether to automatically upload images in the `glance["images"]` array
 * `glance["images"]` - Default list of images to upload to the glance repository as part of the install
 * `glance["image]["<imagename>"]` - URL location of the <imagename> image. There can be multiple instances of this line to define multiple images (eg natty, maverick, fedora17 etc)
 --- example `glance["image]["natty"]` - "http://c250663.r63.cf1.rackcdn.com/ubuntu-11.04-server-uec-amd64-multinic.tar.gz"
-* `glance["syslog"]["use"]`
-* `glance["syslog"]["facility"]`
-* `glance["syslog"]["config_facility"]`
 * `glance["replicator"]["interval"]` - Define how frequently replicator cron job should run
+* `glance["replicator"]["checksum"]` - The git checksum to use when downloading the glance-image-sync.py tool
+* `glance["replicator"]["rsync_user"]` - System user to use when copying glance images with rsync
+* `glance["replicator"]["enabled"]` - Enable/disable the replicator script (boolean)
 * `glance["platform"]` - Hash of platform specific package/service names and options
 
 Templates
 =========
 
-* `22-glance.conf.erb` - rsyslog config file for glance
 * `glance-api-paste.ini.erb` - Paste config for glance-api middleware
 * `glance-api.conf.erb` - Config file for glance-api server
 * `glance-cache-paste.ini.erb` - Paste config for glance-cache middleware
@@ -197,8 +207,9 @@ Author:: William Kelly (<william.kelly@rackspace.com>)
 Author:: Darren Birkett (<darren.birkett@rackspace.co.uk>)  
 Author:: Evan Callicoat (<evan.callicoat@rackspace.com>)  
 Author:: Matt Thompson (<matt.thompson@rackspace.co.uk>)  
+Author:: Andy McCrae (<andrew.mccrae@rackspace.co.uk>)  
 
-Copyright 2012, Rackspace US, Inc.
+Copyright 2012-2013, Rackspace US, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

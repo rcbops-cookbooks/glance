@@ -2,7 +2,7 @@
 # Cookbook Name:: glance
 # Resource:: image
 #
-# Copyright 2012, Rackspace US, Inc.
+# Copyright 2012-2013, Rackspace US, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,9 +27,11 @@ def initialize(*args)
 end
 
 attribute :image_url, :kind_of => String
-attribute :image_type, :kind_of => String, :default => "unknown", :equal_to => ["unknown", "ami", "qcow"]
+attribute :image_type, :kind_of => String,
+  :default => "unknown", :equal_to => ["unknown", "ami", "qcow"]
 attribute :image_name, :kind_of => String, :default => "default"
 attribute :keystone_user, :kind_of => String
 attribute :keystone_pass, :kind_of => String
 attribute :keystone_tenant, :kind_of => String
 attribute :keystone_uri, :kind_of => String
+attribute :scheme, :kind_of => String, :default => "http"
