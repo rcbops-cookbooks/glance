@@ -204,6 +204,8 @@ template "/etc/glance/glance-api.conf" do
     "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
     "swift_store_container" => glance["api"]["swift"]["store_container"],
     "swift_enable_snet" => glance["api"]["swift"]["enable_snet"],
+    "rbd_store_user" => glance["api"]["rbd"]["rbd_store_user"],
+    "rbd_store_pool" => glance["api"]["rbd"]["rbd_store_pool"],
     "db_ip_address" => mysql_info["host"],
     "db_user" => settings["db"]["username"],
     "db_password" => settings["db"]["password"],
