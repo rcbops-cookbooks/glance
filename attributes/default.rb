@@ -78,7 +78,7 @@ default["glance"]["api"]["cache"]["image_cache_max_size"] = "10737418240"
 default["glance"]["api"]["notifier_strategy"] = "noop"
 default["glance"]["api"]["notification_topic"] = "glance_notifications"
 default["glance"]["api"]["workers"] = [8, node["cpu"]["total"].to_i].min
-
+default["glance"]["api"]["show_image_direct_url"] = "True"
 
 # Default Image Locations
 default["glance"]["image_upload"] = false

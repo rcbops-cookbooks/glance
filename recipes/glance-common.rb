@@ -208,6 +208,7 @@ template "/etc/glance/glance-api.conf" do
     "rbd_store_user" => glance["api"]["rbd"]["rbd_store_user"],
     "rbd_store_pool" => glance["api"]["rbd"]["rbd_store_pool"],
     "rbd_store_chunk_size" => glance["api"]["rbd"]["rbd_store_chunk_size"],
+    "show_image_direct_url" => glance["api"]["show_image_direct_url"],
     "db_ip_address" => mysql_info["host"],
     "db_user" => settings["db"]["username"],
     "db_password" => settings["db"]["password"],
