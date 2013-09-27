@@ -31,7 +31,6 @@ else
   if node.recipe?"apache2"
     apache_site "openstack-glance-registry" do
       enable false
-      notifies :run, "execute[restore-selinux-context]", :immediately
       notifies :restart, "service[apache2]", :immediately
     end
   end
