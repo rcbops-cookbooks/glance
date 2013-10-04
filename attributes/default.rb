@@ -48,6 +48,7 @@ default["glance"]["services"]["internal-api"]["path"] = "/v1"
 
 default["glance"]["services"]["api"]["cert_file"] = "glance.pem"
 default["glance"]["services"]["api"]["key_file"] = "glance.key"
+default["glance"]["services"]["api"]["chain_file"] = ""
 default["glance"]["services"]["api"]["wsgi_file"] = "glance-api"
 
 default["glance"]["services"]["registry"]["scheme"] = "http"
