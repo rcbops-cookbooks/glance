@@ -29,8 +29,8 @@ if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_st
     admin_user "glance"
   end
 
-  remote_file "/var/lib/glance/glance-image-sync.py" do
-    source "https://raw.github.com/rcbops/glance-image-sync/#{node['glance']['replicator']['checksum']}/glance-image-sync.py"
+  cookbook_file "/var/lib/glance/glance-image-sync.py" do
+    source "glance-image-sync.py"
     owner "glance"
     group "glance"
     mode "0755"
