@@ -57,6 +57,7 @@ default["glance"]["services"]["registry"]["port"] = 9191
 default["glance"]["services"]["registry"]["path"] = "/v1"
 default["glance"]["services"]["registry"]["cert_file"] = "glance.pem"
 default["glance"]["services"]["registry"]["key_file"] = "glance.key"
+default["glance"]["services"]["registry"]["chain_file"] = ""
 default["glance"]["services"]["registry"]["wsgi_file"] = "glance-registry"
 
 default["glance"]["db"]["name"] = "glance"
