@@ -70,11 +70,15 @@ default["glance"]["api"]["swift"]["store_container"] = "glance"
 default["glance"]["api"]["swift"]["store_large_object_size"] = "200"
 default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"
 default["glance"]["api"]["swift"]["enable_snet"] = "False"
+default["glance"]["api"]["rbd"]["rbd_store_ceph_conf"] = "/etc/ceph/ceph.conf"
+default["glance"]["api"]["rbd"]["rbd_store_user"] = "glance"
+default["glance"]["api"]["rbd"]["rbd_store_pool"] = "images"
+default["glance"]["api"]["rbd"]["rbd_store_chunk_size"] = "8"
 default["glance"]["api"]["cache"]["image_cache_max_size"] = "10737418240"
 default["glance"]["api"]["notifier_strategy"] = "noop"
 default["glance"]["api"]["notification_topic"] = "glance_notifications"
 default["glance"]["api"]["workers"] = [8, node["cpu"]["total"].to_i].min
-
+default["glance"]["api"]["show_image_direct_url"] = "True"
 
 # Default Image Locations
 default["glance"]["image_upload"] = false

@@ -46,7 +46,6 @@ cookbook_file "#{node["glance"]["ssl"]["dir"]}/certs/#{node["glance"]["services"
   mode 0644
   owner "root"
   group "root"
-  notifies :run, "execute[restore-selinux-context]", :immediately
 end
 
 cookbook_file "#{node["glance"]["ssl"]["dir"]}/private/#{node["glance"]["services"]["registry"]["key_file"]}" do
@@ -54,7 +53,6 @@ cookbook_file "#{node["glance"]["ssl"]["dir"]}/private/#{node["glance"]["service
   mode 0644
   owner "root"
   group grp
-  notifies :run, "execute[restore-selinux-context]", :immediately
 end
 
 # setup wsgi file
@@ -114,12 +112,10 @@ template value_for_platform(
     :proc_group => "glance-registry",
     :log_file => "/var/log/glance/registry-ssl.log"
   )
-  notifies :run, "execute[restore-selinux-context]", :immediately
   notifies :reload, "service[apache2]", :delayed
 end
 
 apache_site "openstack-glance-registry" do
   enable true
-  notifies :run, "execute[restore-selinux-context]", :immediately
   notifies :restart, "service[apache2]", :immediately
 end
