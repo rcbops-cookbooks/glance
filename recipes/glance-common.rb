@@ -114,7 +114,7 @@ end
 #           to connect to the swift compatible API service running elsewhere
 #           (possibly Rackspace Cloud Files).
 #
-if glance["api"]["swift_store_auth_address"].nil?
+if glance["api"]["swift_store_auth_address"].nil? && glance["api"]["default_store"] == "swift"
 
   swift_store_auth_address =
     "http://#{ks_admin_endpoint['host']}:" +
