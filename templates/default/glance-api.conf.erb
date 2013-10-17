@@ -207,6 +207,7 @@ qpid_tcp_nodelay = True
 # writes image data to
 filesystem_store_datadir = /var/lib/glance/images/
 
+# <% if @default_store == "swift" %>
 # ============ Swift Store Options =============================
 
 # Version of the authentication service to use
@@ -274,6 +275,7 @@ swift_enable_snet = <%= @swift_enable_snet %>
 # The region of the swift endpoint to be used for single tenant. This setting
 # is only necessary if the tenant has multiple swift endpoints.
 #swift_store_region =
+<% end %>
 
 # ============ S3 Store Options =============================
 
