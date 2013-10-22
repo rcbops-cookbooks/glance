@@ -107,7 +107,7 @@ when "fedora", "redhat", "centos"
     "glance_api_service" => "openstack-glance-api",
     "glance_registry_service" => "openstack-glance-registry",
     "glance_api_process_name" => "glance-api",
-    "package_overrides" => ""
+    "package_options" => ""
   }
   default["glance"]["ssl"]["dir"] = "/etc/pki/tls"
 when "ubuntu"
@@ -119,7 +119,7 @@ when "ubuntu"
     "glance_api_process_name" => "glance-api",
     "glance_registry_service" => "glance-registry",
     "glance_registry_process_name" => "glance-registry",
-    "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'"
+    "package_options" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'"
   }
   default["glance"]["ssl"]["dir"] = "/etc/ssl"
 end
