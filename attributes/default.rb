@@ -97,6 +97,10 @@ default["glance"]["replicator"]["checksum"] = "971b7cec95105747e77088e3e0853a636
 default["glance"]["replicator"]["rsync_user"] = "glance"
 default["glance"]["replicator"]["enabled"] = true
 
+# Generic regex for process pattern matching (to be used as a base pattern).
+# Works for both Grizzly and Havana packages on Ubuntu and CentOS.
+procmatch_base = '^((/usr/bin/)?python\d? )?(/usr/bin/)?'
+
 # platform-specific settings
 case platform
 when "fedora", "redhat", "centos"
@@ -107,8 +111,9 @@ when "fedora", "redhat", "centos"
                           "python-prettytable", "python-kombu",
                           "python-anyjson", "python-amqplib", "python-lockfile"],
     "glance_api_service" => "openstack-glance-api",
+    "glance_api_procmatch" => procmatch_base + 'glance-api\b',
     "glance_registry_service" => "openstack-glance-registry",
-    "glance_api_process_name" => "glance-api",
+    "glance_registry_procmatch" => procmatch_base + 'glance-registry\b',
     "package_overrides" => ""
   }
   default["glance"]["ssl"]["dir"] = "/etc/pki/tls"
@@ -118,9 +123,9 @@ when "ubuntu"
                               "python-glanceclient", "python-warlock"],
     "glance_packages" => ["glance", "python-swift", "python-prettytable", "python-lockfile"],
     "glance_api_service" => "glance-api",
-    "glance_api_process_name" => "glance-api",
+    "glance_api_procmatch" => procmatch_base + 'glance-api\b',
     "glance_registry_service" => "glance-registry",
-    "glance_registry_process_name" => "glance-registry",
+    "glance_registry_procmatch" => procmatch_base + 'glance-registry\b',
     "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'"
   }
   default["glance"]["ssl"]["dir"] = "/etc/ssl"
