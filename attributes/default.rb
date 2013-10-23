@@ -100,7 +100,8 @@ case platform
 when "fedora", "redhat", "centos"
   default["glance"]["platform"] = {
     "supporting_packages" => ["MySQL-python", "python-keystone", "curl",
-                              "python-glanceclient", "python-warlock"],
+                              "python-glanceclient", "python-warlock",
+                              "python-migrate"],
     "glance_packages" => ["openstack-glance", "python-swiftclient", "cronie",
                           "python-prettytable", "python-kombu",
                           "python-anyjson", "python-amqplib", "python-lockfile"],
