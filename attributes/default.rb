@@ -106,7 +106,8 @@ case platform
 when "fedora", "redhat", "centos"
   default["glance"]["platform"] = {
     "supporting_packages" => ["MySQL-python", "python-keystone", "curl",
-                              "python-glanceclient", "python-warlock"],
+                              "python-glanceclient", "python-warlock",
+                              "python-migrate"],
     "glance_packages" => ["openstack-glance", "python-swiftclient", "cronie",
                           "python-prettytable", "python-kombu",
                           "python-anyjson", "python-amqplib", "python-lockfile"],
@@ -114,7 +115,7 @@ when "fedora", "redhat", "centos"
     "glance_api_procmatch" => procmatch_base + 'glance-api\b',
     "glance_registry_service" => "openstack-glance-registry",
     "glance_registry_procmatch" => procmatch_base + 'glance-registry\b',
-    "package_overrides" => ""
+    "package_options" => ""
   }
   default["glance"]["ssl"]["dir"] = "/etc/pki/tls"
 when "ubuntu"
@@ -126,7 +127,7 @@ when "ubuntu"
     "glance_api_procmatch" => procmatch_base + 'glance-api\b',
     "glance_registry_service" => "glance-registry",
     "glance_registry_procmatch" => procmatch_base + 'glance-registry\b',
-    "package_overrides" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'"
+    "package_options" => "-o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-confdef'"
   }
   default["glance"]["ssl"]["dir"] = "/etc/ssl"
 end
