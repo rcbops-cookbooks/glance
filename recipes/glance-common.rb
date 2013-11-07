@@ -189,7 +189,7 @@ template "/etc/glance/glance-registry.conf" do
     "service_tenant_name" => node["glance"]["service_tenant_name"],
     "service_user" => node["glance"]["service_user"],
     "service_pass" => settings["service_pass"],
-    "glance_flavor" => glance_flavor,
+    "glance_flavor" => glance_flavor
   )
   if registry_bind["scheme"] == "https"
     notifies :restart, "service[apache2]", :immediately
