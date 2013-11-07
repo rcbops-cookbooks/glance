@@ -5,14 +5,24 @@
 <% end %>
 
 [DEFAULT]
+##### LOGGING #####
 verbose = True
 debug = <%= @use_debug %>
 log_file = /var/log/glance/scrubber.log
 use_syslog = False
+
+
+##### DEFAULT OPTIONS #####
 daemon = False
 wakeup_time = 300
+
+
+##### SCRUBBER OPTIONS #####
 scrubber_datadir = /var/lib/glance/scrubber
 cleanup_scrubber = False
 cleanup_scrubber_time = 86400
+
+
+##### REGISTRY OPTIONS #####
 registry_host = <%= @registry_ip_address %>
 registry_port = <%= @registry_port %>
