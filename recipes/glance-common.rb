@@ -133,6 +133,20 @@ else
   swift_store_user = settings["api"]["swift_store_user"]
 end
 
+
+template "/etc/glance/glance-scrubber.conf" do
+  source "glance-scrubber.conf.erb"
+  owner "glance"
+  group "glance"
+  mode "0600"
+  variables(
+    "use_debug" => glance["use_debug"],
+    "registry_bind_address" => registry_bind["host"],
+    "registry_port" => registry_bind["port"],
+  )
+end
+
+
 template "/etc/glance/glance-registry.conf" do
   source "glance-registry.conf.erb"
   owner "glance"
