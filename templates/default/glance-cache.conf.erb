@@ -7,7 +7,7 @@
 [DEFAULT]
 ##### LOGGING #####
 verbose = True
-debug = False
+debug = <%= @use_debug %>
 log_file = /var/log/glance/image-cache.log
 
 
@@ -25,12 +25,10 @@ registry_port = <%= @registry_port %>
 
 
 ##### SWIFT STORE BACKEND #####
-swift_store_auth_version = <%= @swift_store_auth_version %>
-swift_store_auth_address = <%= @swift_store_auth_address %>
 swift_store_user = <%= @swift_store_user %>
 swift_store_key = <%= @swift_store_key %>
-swift_store_container = <%= @swift_store_container %>
-swift_store_create_container_on_put = True
+swift_store_auth_address = <%= @swift_store_auth_address %>
+swift_store_auth_version = <%= @swift_store_auth_version %>
 swift_store_large_object_size = <%= @swift_large_object_size %>
 swift_store_large_object_chunk_size = <%= @swift_large_object_chunk_size %>
 swift_enable_snet = <%= @swift_enable_snet %>
