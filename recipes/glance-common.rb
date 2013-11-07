@@ -134,6 +134,28 @@ else
 end
 
 
+template "/etc/glance/glance-cache.conf" do
+  source "glance-cache.conf.erb"
+  owner "glance"
+  group "glance"
+  mode "0600"
+  variables(
+    "use_debug" => glance["use_debug"],
+    "image_cache_max_size" => glance["api"]["cache"]["image_cache_max_size"],
+    "registry_ip_address" => registry_endpoint["host"],
+    "registry_port" => registry_endpoint["port"],
+    "swift_store_key" => swift_store_key,
+    "swift_store_user" => swift_store_user,
+    "swift_store_auth_address" => swift_store_auth_address,
+    "swift_store_auth_version" => swift_store_auth_version,
+    "swift_large_object_size" => glance["api"]["swift"]["store_large_object_size"],
+    "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
+    "swift_store_container" => glance["api"]["swift"]["store_container"],
+    "swift_enable_snet" => glance["api"]["swift"]["enable_snet"]
+  )
+end
+
+
 template "/etc/glance/glance-scrubber.conf" do
   source "glance-scrubber.conf.erb"
   owner "glance"
@@ -142,7 +164,7 @@ template "/etc/glance/glance-scrubber.conf" do
   variables(
     "use_debug" => glance["use_debug"],
     "registry_bind_address" => registry_bind["host"],
-    "registry_port" => registry_bind["port"],
+    "registry_port" => registry_bind["port"]
   )
 end
 
