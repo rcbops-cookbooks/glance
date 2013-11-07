@@ -90,7 +90,7 @@ default["glance"]["image_upload"] = false
 default["glance"]["images"] = []
 default["glance"]["image"]["ubuntu"] = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img"
 default["glance"]["image"]["cirros"] = "http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-disk.img"
-default["glance"]["image"]["fedora"] = "http://cloud.fedoraproject.org/fedora-latest.x86_64.qcow2"
+default["glance"]["image"]["fedora"] = "http://download.fedoraproject.org/pub/fedora/linux/releases/19/Images/x86_64/Fedora-x86_64-19-20130627-sda.qcow2"
 
 # replicator attributes
 default["glance"]["replicator"]["interval"] = 5
