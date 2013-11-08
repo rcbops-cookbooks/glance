@@ -133,12 +133,49 @@ else
   swift_store_user = settings["api"]["swift_store_user"]
 end
 
+
+template "/etc/glance/glance-cache.conf" do
+  source "glance-cache.conf.erb"
+  owner "glance"
+  group "glance"
+  mode "0600"
+  variables(
+    "use_debug" => glance["use_debug"],
+    "image_cache_max_size" => glance["api"]["cache"]["image_cache_max_size"],
+    "registry_ip_address" => registry_endpoint["host"],
+    "registry_port" => registry_endpoint["port"],
+    "swift_store_key" => swift_store_key,
+    "swift_store_user" => swift_store_user,
+    "swift_store_auth_address" => swift_store_auth_address,
+    "swift_store_auth_version" => swift_store_auth_version,
+    "swift_large_object_size" => glance["api"]["swift"]["store_large_object_size"],
+    "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
+    "swift_store_container" => glance["api"]["swift"]["store_container"],
+    "swift_enable_snet" => glance["api"]["swift"]["enable_snet"]
+  )
+end
+
+
+template "/etc/glance/glance-scrubber.conf" do
+  source "glance-scrubber.conf.erb"
+  owner "glance"
+  group "glance"
+  mode "0600"
+  variables(
+    "use_debug" => glance["use_debug"],
+    "registry_bind_address" => registry_bind["host"],
+    "registry_port" => registry_bind["port"]
+  )
+end
+
+
 template "/etc/glance/glance-registry.conf" do
   source "glance-registry.conf.erb"
   owner "glance"
   group "glance"
   mode "0600"
   variables(
+    "use_debug" => glance["use_debug"],
     "registry_bind_address" => registry_bind["host"],
     "registry_port" => registry_bind["port"],
     "db_ip_address" => mysql_info["host"],
@@ -151,28 +188,19 @@ template "/etc/glance/glance-registry.conf" do
     "keystone_admin_port" => ks_admin_endpoint["port"],
     "service_tenant_name" => node["glance"]["service_tenant_name"],
     "service_user" => node["glance"]["service_user"],
-    "service_pass" => settings["service_pass"]
+    "service_pass" => settings["service_pass"],
+    "glance_flavor" => glance_flavor
   )
   if registry_bind["scheme"] == "https"
     notifies :restart, "service[apache2]", :immediately
   end
 end
 
-template "/etc/glance/glance-registry-paste.ini" do
-  source "glance-registry-paste.ini.erb"
+cookbook_file "/etc/glance/glance-registry-paste.ini" do
+  source "glance-registry-paste.ini"
   owner "glance"
   group "glance"
   mode "0600"
-  variables(
-    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
-    "keystone_service_port" => ks_service_endpoint["port"],
-    "keystone_service_protocol" => ks_service_endpoint["scheme"],
-    "keystone_admin_port" => ks_admin_endpoint["port"],
-    "keystone_admin_protocol" => ks_admin_endpoint["scheme"],
-    "service_tenant_name" => node["glance"]["service_tenant_name"],
-    "service_user" => node["glance"]["service_user"],
-    "service_pass" => settings["service_pass"]
-  )
   if registry_bind["scheme"] == "https"
     notifies :restart, "service[apache2]", :immediately
   end
@@ -184,18 +212,26 @@ template "/etc/glance/glance-api.conf" do
   group "glance"
   mode "0600"
   variables(
+
+    "use_debug" => glance["use_debug"],
+
     "api_bind_address" => api_bind["host"],
     "api_bind_port" => api_bind["port"],
+    "glance_workers" => glance["api"]["workers"],
+
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
     "registry_scheme" => registry_endpoint["scheme"],
+
     "rabbit_ipaddress" => rabbit_info["host"],
     "rabbit_port" => rabbit_info["port"],
     "rabbit_ha_queues" => rabbit_settings["cluster"] ? "True" : "False",
+
     "default_store" => glance["api"]["default_store"],
     "notifier_strategy" => glance["api"]["notifier_strategy"],
     "notification_topic" => glance["api"]["notification_topic"],
     "glance_flavor" => glance_flavor,
+
     "swift_store_key" => swift_store_key,
     "swift_store_user" => swift_store_user,
     "swift_store_auth_address" => swift_store_auth_address,
@@ -204,46 +240,38 @@ template "/etc/glance/glance-api.conf" do
     "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
     "swift_store_container" => glance["api"]["swift"]["store_container"],
     "swift_enable_snet" => glance["api"]["swift"]["enable_snet"],
+
     "rbd_store_ceph_conf" => glance["api"]["rbd"]["rbd_store_ceph_conf"],
     "rbd_store_user" => glance["api"]["rbd"]["rbd_store_user"],
     "rbd_store_pool" => glance["api"]["rbd"]["rbd_store_pool"],
     "rbd_store_chunk_size" => glance["api"]["rbd"]["rbd_store_chunk_size"],
     "show_image_direct_url" => glance["api"]["show_image_direct_url"],
+
     "db_ip_address" => mysql_info["host"],
     "db_user" => settings["db"]["username"],
     "db_password" => settings["db"]["password"],
     "db_name" => settings["db"]["name"],
+
     "keystone_api_ipaddress" => ks_admin_endpoint["host"],
     "keystone_service_port" => ks_service_endpoint["port"],
     "keystone_service_protocol" => ks_service_endpoint["scheme"],
     "keystone_admin_port" => ks_admin_endpoint["port"],
     "keystone_admin_token" => keystone["admin_token"],
+
     "service_tenant_name" => settings["service_tenant_name"],
     "service_user" => settings["service_user"],
-    "service_pass" => settings["service_pass"],
-    "glance_workers" => glance["api"]["workers"]
+    "service_pass" => settings["service_pass"]
   )
   if api_bind["scheme"] == "https"
     notifies :restart, "service[apache2]", :immediately
   end
 end
 
-template "/etc/glance/glance-api-paste.ini" do
-  source "glance-api-paste.ini.erb"
+cookbook_file "/etc/glance/glance-api-paste.ini" do
+  source "glance-api-paste.ini"
   owner "glance"
   group "glance"
   mode "0600"
-  variables(
-    "keystone_api_ipaddress" => ks_admin_endpoint["host"],
-    "keystone_service_port" => ks_service_endpoint["port"],
-    "keystone_service_protocol" => ks_service_endpoint["scheme"],
-    "keystone_admin_port" => ks_admin_endpoint["port"],
-    "keystone_admin_protocol" => ks_admin_endpoint["scheme"],
-    "keystone_admin_token" => keystone["admin_token"],
-    "service_tenant_name" => settings["service_tenant_name"],
-    "service_user" => settings["service_user"],
-    "service_pass" => settings["service_pass"]
-  )
   if api_bind["scheme"] == "https"
     notifies :restart, "service[apache2]", :immediately
   end
