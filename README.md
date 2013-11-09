@@ -146,7 +146,6 @@ None
 Attributes 
 ==========
 
-* `glance["use_debug"] = "False"
 * `glance["services"]["api"]["scheme"]` - http or https
 * `glance["services"]["api"]["network"]` - Network name to place service on
 * `glance["services"]["api"]["port"]` - registry port
@@ -161,9 +160,9 @@ Attributes
 * `glance["services"]["registry"]["key_override"]` - For SSL - Custom location for key file$
 * `glance["db"]["name"]` - Name of glance database
 * `glance["db"]["user"]` - Username for glance database access
-* `glance["service_tenant_name"]` - Tenant name used by glance when interacting with keystone - used in the API
-* `glance["service_user"]` - User name used by glance when interacting with keystone - used in the API
-* `glance["service_role"]` - User role used by glance when interacting with keystone - used in the API
+* `glance["service_tenant_name"]` - Tenant name used by glance when interacting with keystone - used in the API and registry paste.ini files
+* `glance["service_user"]` - User name used by glance when interacting with keystone - used in the API and registry paste.ini files
+* `glance["service_role"]` - User role used by glance when interacting with keystone - used in the API and registry paste.ini files
 * `glance["api"]["default_store"]` - Toggles the backend storage type.  Currently supported is "file" and "swift", defaults to "file"
 * `glance["api"]["swift"]["store_container"]` - Set the container used by glance to store images and snapshots.  Defaults to "glance"
 * `glance["api"]["swift"]["store_large_object_size"]` - Set the size at which glance starts to chunnk files.  Defaults to "200" MB
@@ -186,11 +185,13 @@ Templates
 
 * `glance-api-paste.ini.erb` - Paste config for glance-api middleware
 * `glance-api.conf.erb` - Config file for glance-api server
-* `glance-registry.conf.erb` - Config file for glance-registry server
-* `glance-registry-paste.ini.erb` - Paste config for glance-registry middleware
+* `glance-cache-paste.ini.erb` - Paste config for glance-cache middleware
 * `glance-cache.conf.erb` - Config file for glance image cache service
 * `glance-image-sync.conf.erb` - Config for glance-image-sync cron
 * `glance-logging.conf.erb` - Logging config for glance services
+* `glance-registry-paste.ini.erb` - Paste config for glance-registry middleware
+* `glance-registry.conf.erb` - Config file for glance-registry server
+* `glance-scrubber-paste.ini.erb` - Paste config for glance-scrubber middleware
 * `glance-scrubber.conf.erb` - Config file for glance image scrubber service
 * `policy.json.erb` - Configuration of ACLs for glance API server
 
@@ -206,8 +207,7 @@ Author:: William Kelly (<william.kelly@rackspace.com>)
 Author:: Darren Birkett (<darren.birkett@rackspace.co.uk>)  
 Author:: Evan Callicoat (<evan.callicoat@rackspace.com>)  
 Author:: Matt Thompson (<matt.thompson@rackspace.co.uk>)  
-Author:: Andy McCrae (<andrew.mccrae@rackspace.co.uk>)
-Author:: Kevin Carter (<kevin.carter@rackspace.com>)
+Author:: Andy McCrae (<andrew.mccrae@rackspace.co.uk>)  
 
 Copyright 2012-2013, Rackspace US, Inc.
 

@@ -66,9 +66,13 @@ end
 ks_api_role = "keystone-api"
 ks_ns = "keystone"
 ks_admin_endpoint = get_access_endpoint(ks_api_role, ks_ns, "admin-api")
-
+ks_service_endpoint = get_access_endpoint(ks_api_role, ks_ns, "service-api")
 # Get settings from role[keystone-setup]
 keystone = get_settings_by_role("keystone-setup", "keystone")
+# Get settings from role[glance-api]
+glance = get_settings_by_role("glance-api", "glance")
+# Get settings from role[glance-setup]
+settings = get_settings_by_role("glance-setup", "glance")
 
 # Configure glance-cache-pruner to run every 30 minutes
 cron "glance-cache-pruner" do
@@ -81,6 +85,13 @@ cron "glance-cache-cleaner" do
   minute "01"
   hour "00"
   command "/usr/bin/glance-cache-cleaner"
+end
+
+template "/etc/glance/glance-scrubber-paste.ini" do
+  source "glance-scrubber-paste.ini.erb"
+  owner "glance"
+  group "glance"
+  mode "0600"
 end
 
 # Register Image Service
