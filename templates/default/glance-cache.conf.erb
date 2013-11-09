@@ -24,6 +24,7 @@ registry_host = <%= @registry_ip_address %>
 registry_port = <%= @registry_port %>
 
 
+<% if @default_store == "swift" %>
 ##### SWIFT STORE BACKEND #####
 swift_store_user = <%= @swift_store_user %>
 swift_store_key = <%= @swift_store_key %>
@@ -32,3 +33,4 @@ swift_store_auth_version = <%= @swift_store_auth_version %>
 swift_store_large_object_size = <%= @swift_large_object_size %>
 swift_store_large_object_chunk_size = <%= @swift_large_object_chunk_size %>
 swift_enable_snet = <%= @swift_enable_snet %>
+<% end %>

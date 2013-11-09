@@ -56,7 +56,7 @@ rabbit_notification_topic = <%= @notification_topic %>
 rabbit_ha_queues = <%= @rabbit_ha_queues %>
 
 
-# <% if @default_store == "swift" %>
+<% if @default_store == "swift" %>
 ##### SWIFT STORE BACKEND #####
 swift_store_auth_version = <%= @swift_store_auth_version %>
 swift_store_auth_address = <%= @swift_store_auth_address %>
@@ -67,6 +67,7 @@ swift_store_create_container_on_put = True
 swift_store_large_object_size = <%= @swift_large_object_size %>
 swift_store_large_object_chunk_size = <%= @swift_large_object_chunk_size %>
 swift_enable_snet = <%= @swift_enable_snet %>
+swift_store_region = <%= @swift_store_region %>
 <% end %>
 
 
