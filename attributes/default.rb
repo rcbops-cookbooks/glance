@@ -88,7 +88,7 @@ default["glance"]["api"]["show_image_direct_url"] = "True"
 # Default Image Locations
 default["glance"]["image_upload"] = false
 default["glance"]["images"] = []
-default["glance"]["image"]["precise"] = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img"
+default["glance"]["image"]["ubuntu"] = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img"
 default["glance"]["image"]["cirros"] = "http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-disk.img"
 default["glance"]["image"]["fedora"] = "http://download.fedoraproject.org/pub/fedora/linux/releases/19/Images/x86_64/Fedora-x86_64-19-20130627-sda.qcow2"
 
