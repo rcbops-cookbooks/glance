@@ -75,6 +75,7 @@ default["glance"]["api"]["swift"]["store_container"] = "glance"
 default["glance"]["api"]["swift"]["store_large_object_size"] = "200"
 default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"
 default["glance"]["api"]["swift"]["enable_snet"] = "False"
+default["glance"]["api"]["swift"]["store_region"] = nil
 default["glance"]["api"]["rbd"]["rbd_store_ceph_conf"] = "/etc/ceph/ceph.conf"
 default["glance"]["api"]["rbd"]["rbd_store_user"] = "glance"
 default["glance"]["api"]["rbd"]["rbd_store_pool"] = "images"
