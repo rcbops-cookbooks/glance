@@ -55,6 +55,15 @@ cookbook_file "#{node["glance"]["ssl"]["dir"]}/private/#{node["glance"]["service
   group grp
 end
 
+unless node["glance"]["services"]["api"]["chain_file"].nil?
+  cookbook_file "#{node["glance"]["ssl"]["dir"]}/certs/#{node["glance"]["services"]["api"]["chain_file"]}" do
+    source node["glance"]["services"]["api"]["chain_file"]
+    mode 0644
+    owner "root"
+    group "root"
+  end
+end
+
 # setup wsgi file
 
 directory "#{node["apache"]["dir"]}/wsgi" do
@@ -85,6 +94,12 @@ else
   key_location = node["glance"]["services"]["api"]["key_override"]
 end
 
+unless node["glance"]["services"]["api"]["chain_file"].nil?
+  chain_location = "#{node["glance"]["ssl"]["dir"]}/certs/#{node["glance"]["services"]["api"]["chain_file"]}"
+else
+  chain_location = "donotset"
+end
+
 template value_for_platform(
   ["ubuntu", "debian", "fedora"] => {
     "default" => "#{node["apache"]["dir"]}/sites-available/openstack-glance-api"
@@ -108,6 +123,7 @@ template value_for_platform(
     :service_port => glance_api_bind["port"],
     :cert_file => cert_location,
     :key_file => key_location,
+    :chain_file => chain_location,
     :wsgi_file  => "#{node["apache"]["dir"]}/wsgi/#{node["glance"]["services"]["api"]["wsgi_file"]}",
     :proc_group => "glance-api",
     :log_file => "/var/log/glance/glance-api.log"

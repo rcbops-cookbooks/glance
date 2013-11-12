@@ -28,8 +28,6 @@ end
 include_recipe "mysql::client"
 include_recipe "mysql::ruby"
 
-platform_options = node["glance"]["platform"]
-
 unless node["glance"]["db"]["password"]
   Chef::Log.info("Running glance setup - setting glance passwords")
 end
@@ -46,18 +44,17 @@ node.save
 ks_api_role = "keystone-api"
 ks_ns = "keystone"
 ks_admin_endpoint = get_access_endpoint(ks_api_role, ks_ns, "admin-api")
+
 # Get settings from role[keystone-setup]
 keystone = get_settings_by_role("keystone-setup", "keystone")
 
 # creates db and user and returns connection info
-mysql_info = create_db_and_user(
+create_db_and_user(
   "mysql",
   node["glance"]["db"]["name"],
   node["glance"]["db"]["username"],
   node["glance"]["db"]["password"]
 )
-
-mysql_connect_ip = get_access_endpoint('mysql-master', 'mysql', 'db')["host"]
 
 include_recipe "glance::glance-common"
 
