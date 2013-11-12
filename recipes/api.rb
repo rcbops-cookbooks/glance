@@ -83,6 +83,64 @@ cron "glance-cache-cleaner" do
   command "/usr/bin/glance-cache-cleaner"
 end
 
+# are we using rbd to store our images?
+if node['glance']['api']['default_store'] == "rbd" && node['ceph']['install_method'] == "chef"
+
+  include_recipe "ceph::repo"
+  include_recipe "ceph"
+  include_recipe "ceph::conf"
+
+  rbd_store_user = node['glance']['api']['rbd']['rbd_store_user']
+  rbd_store_pool = node['glance']['api']['rbd']['rbd_store_pool']
+  rbd_store_pool_pg_num = node['glance']['api']['rbd']['rbd_store_pool_pg_num']
+
+  # ruby block needed to prevent this failing at compile time.
+  ruby_block 'configure rbd for glance' do
+    block do
+
+      admin_client_keyring_file="/etc/ceph/ceph.client.admin.keyring"
+      mon_keyring_file = "#{Chef::Config[:file_cache_path]}/#{node['hostname']}.mon.keyring"
+
+      # create the admin client keyring
+      unless File.exist?(admin_client_keyring_file)
+
+        monitor_secret = if node['ceph']['encrypted_data_bags']
+          secret = Chef::EncryptedDataBagItem.load_secret(node["ceph"]["mon"]["secret_file"])
+          Chef::EncryptedDataBagItem.load("ceph", "mon", secret)["secret"]
+        else
+          node["ceph"]["monitor-secret"]
+        end
+
+        # create the mon keyring temporarily
+        Mixlib::ShellOut.new("ceph-authtool '#{mon_keyring_file}' --create-keyring --name='mon.' --add-key='#{monitor_secret}' --cap mon 'allow *'").run_command
+
+        # write out the client admin keyring
+        admin_client_keyring = Mixlib::ShellOut.new("ceph auth get-or-create client.admin --name='mon.' --keyring='#{mon_keyring_file}'").run_command.stdout
+        f = File.open(admin_client_keyring_file, 'w')
+        f.write(admin_client_keyring)
+        f.close
+
+        # remove the temporary mon keyring
+        File.delete(mon_keyring_file)
+      end
+
+      # get (or create) the glance rbd user in cephx
+      Mixlib::ShellOut.new("ceph auth get-or-create client.#{rbd_store_user}").run_command
+      Mixlib::ShellOut.new("ceph auth caps client.#{rbd_store_user} mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=#{rbd_store_pool}'").run_command
+
+      # get the full client, with caps, and write it out to file
+      # TODO(mancdaz): discover ceph config dir rather than hardcode
+      rbd_user_keyring = Mixlib::ShellOut.new("ceph auth get client.#{rbd_store_user}").run_command.stdout
+      f = File.open("/etc/ceph/ceph.client.#{rbd_store_user}.keyring", 'w')
+      f.write(rbd_user_keyring)
+      f.close
+
+      # create the pool with provided pg_num
+      Mixlib::ShellOut.new("ceph osd pool create #{rbd_store_pool} #{rbd_store_pool_pg_num} #{rbd_store_pool_pg_num}").run_command
+    end
+  end
+end
+
 # Register Image Service
 keystone_service "Register Image Service" do
   auth_host ks_admin_endpoint["host"]
