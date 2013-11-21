@@ -84,7 +84,7 @@ cron "glance-cache-cleaner" do
 end
 
 # are we using rbd to store our images?
-if node['glance']['api']['default_store'] == "rbd" && node['ceph']['install_method'] == "chef"
+if node['glance']['api']['default_store'] == "rbd" && rcb_safe_deref(node, "ceph.config.fsid")
 
   include_recipe "ceph::repo"
   include_recipe "ceph"
