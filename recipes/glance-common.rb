@@ -68,7 +68,7 @@ rabbit_settings = get_settings_by_role("rabbitmq-server", "rabbitmq")
 
 
 # Search for mysql endpoint info
-mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
+mysql_info = get_mysql_endpoint
 
 # Search for keystone endpoint info
 ks_api_role = "keystone-api"
