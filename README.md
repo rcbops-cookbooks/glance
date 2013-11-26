@@ -25,7 +25,7 @@ http://glance.openstack.org/
 Usage
 =====
 
-The Glance cookbook currently supports file, swift, and Rackspace Cloud Files (swift API compliant) backing stores.
+The Glance cookbook currently supports file, swift, rbd (ceph) and Rackspace Cloud Files (swift API compliant) backing stores.
 
 NOTE: changing the storage location from cloudfiles to swift (and vice versa) requires that you manually export and import your stored images.
 
@@ -66,6 +66,18 @@ Cloud Files
         "swift_store_key": "<Rackspace Cloud Password>",
         "swift_store_auth_version": "2",
         "swift_store_auth_address": "https://identity.api.rackspacecloud.com/v2.0"
+      },
+      "images": [
+        "cirros"
+      ],
+      "image_upload": true
+    }
+    
+rbd
+---
+    "glance": {
+      "api": {
+        "default_store": "rbd"
       },
       "images": [
         "cirros"
@@ -168,7 +180,12 @@ Attributes
 * `glance["api"]["swift"]["store_container"]` - Set the container used by glance to store images and snapshots.  Defaults to "glance"
 * `glance["api"]["swift"]["store_large_object_size"]` - Set the size at which glance starts to chunnk files.  Defaults to "200" MB
 * `glance["api"]["swift"]["store_large_object_chunk_size"]` - Set the chunk size for glance.  Defaults to "200" MB
-* `glance["api"]["cache"]["image_cache_max_size"]` - Set the maximum size of image cache.  Defaults to "10" GB
+* `glance["api"]["rbd"]["rbd_store_ceph_conf"]` - The location of ceph.conf [/etc/ceph/ceph.conf]
+* `glance["api"]["rbd"]["rbd_store_user"]` - the name of the rbd user [glance]
+* `glance["api"]["rbd"]["rbd_store_pool"]` - the name of the rbd pool [images]
+* `glance["api"]["rbd"]["rbd_store_chunk_size"]` - the chunk size to use with the rbd client [8]
+* `glance["api"]["rbd"]["rbd_store_pool_pg_num"]` - the number of pgs to use when creating the pool [1000]
+* `glance["api"]["cache"]["image_cache_max_size"]`` - Set the maximum size of image cache.  Defaults to "10" GB
 * `glance["api"]["notifier_strategy"]` - Toggles the notifier strategy.  Currently supported are "noop", "rabbit", "qpid", and "logging", defaults to "noop"
 * `glance["api"]["notification_topic"]` - Define the rabbitmq notification topic, defaults to "glance_notifications"
 * `glance["image_upload"]` - Toggles whether to automatically upload images in the `glance["images"]` array
