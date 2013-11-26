@@ -104,7 +104,7 @@ keystone_endpoint "Register Image Endpoint" do
   api_ver ks_admin_endpoint["path"]
   auth_token keystone["admin_token"]
   service_type "image"
-  endpoint_region "RegionOne"
+  endpoint_region node["osops"]["region"]
   endpoint_adminurl admin_api_endpoint["uri"]
   endpoint_internalurl internal_api_endpoint["uri"]
   endpoint_publicurl api_endpoint["uri"]
