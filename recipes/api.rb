@@ -160,7 +160,7 @@ keystone_endpoint "Register Image Endpoint" do
   endpoint_adminurl admin_api_endpoint["uri"]
   endpoint_internalurl internal_api_endpoint["uri"]
   endpoint_publicurl api_endpoint["uri"]
-  action :create
+  action :recreate
 end
 
 if node["glance"]["image_upload"]
