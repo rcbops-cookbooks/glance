@@ -46,7 +46,6 @@ cookbook_file "#{node["glance"]["ssl"]["dir"]}/certs/#{node["glance"]["services"
   mode 0644
   owner "root"
   group "root"
-  notifies :run, "execute[restore-selinux-context]", :immediately
 end
 
 cookbook_file "#{node["glance"]["ssl"]["dir"]}/private/#{node["glance"]["services"]["registry"]["key_file"]}" do
@@ -54,7 +53,15 @@ cookbook_file "#{node["glance"]["ssl"]["dir"]}/private/#{node["glance"]["service
   mode 0644
   owner "root"
   group grp
-  notifies :run, "execute[restore-selinux-context]", :immediately
+end
+
+unless node["glance"]["services"]["registry"]["chain_file"].nil?
+  cookbook_file "#{node["glance"]["ssl"]["dir"]}/certs/#{node["glance"]["services"]["registry"]["chain_file"]}" do
+    source node["glance"]["services"]["registry"]["chain_file"]
+    mode 0644
+    owner "root"
+    group "root"
+  end
 end
 
 # setup wsgi file
@@ -87,6 +94,12 @@ else
   key_location = node["glance"]["services"]["registry"]["key_override"]
 end
 
+unless node["glance"]["services"]["registry"]["chain_file"].nil?
+  chain_location = "#{node["glance"]["ssl"]["dir"]}/certs/#{node["glance"]["services"]["registry"]["chain_file"]}"
+else
+  chain_location = "donotset"
+end
+
 template value_for_platform(
   ["ubuntu", "debian", "fedora"] => {
     "default" => "#{node["apache"]["dir"]}/sites-available/openstack-glance-registry"
@@ -110,16 +123,15 @@ template value_for_platform(
     :service_port => glance_registry_bind["port"],
     :cert_file => cert_location,
     :key_file => key_location,
+    :chain_file => chain_location,
     :wsgi_file  => "#{node["apache"]["dir"]}/wsgi/#{node["glance"]["services"]["registry"]["wsgi_file"]}",
     :proc_group => "glance-registry",
     :log_file => "/var/log/glance/registry-ssl.log"
   )
-  notifies :run, "execute[restore-selinux-context]", :immediately
   notifies :reload, "service[apache2]", :delayed
 end
 
 apache_site "openstack-glance-registry" do
   enable true
-  notifies :run, "execute[restore-selinux-context]", :immediately
   notifies :restart, "service[apache2]", :immediately
 end

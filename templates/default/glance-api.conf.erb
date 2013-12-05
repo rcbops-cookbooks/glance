@@ -88,7 +88,7 @@ workers = <%= @glance_workers %>
 # file system store a URL of 'file:///path/to/image' will
 # be returned to the user in the 'direct_url' meta-data field.
 # The default value is false.
-#show_image_direct_url = False
+show_image_direct_url = <%= @show_image_direct_url %>
 
 # ================= Syslog Options ============================
 
@@ -207,6 +207,7 @@ qpid_tcp_nodelay = True
 # writes image data to
 filesystem_store_datadir = /var/lib/glance/images/
 
+# <% if @default_store == "swift" %>
 # ============ Swift Store Options =============================
 
 # Version of the authentication service to use
@@ -274,6 +275,7 @@ swift_enable_snet = <%= @swift_enable_snet %>
 # The region of the swift endpoint to be used for single tenant. This setting
 # is only necessary if the tenant has multiple swift endpoints.
 #swift_store_region =
+<% end %>
 
 # ============ S3 Store Options =============================
 
@@ -317,17 +319,17 @@ s3_store_create_bucket_on_put = False
 # If using cephx authentication, this file should
 # include a reference to the right keyring
 # in a client.<USER> section
-rbd_store_ceph_conf = /etc/ceph/ceph.conf
+rbd_store_ceph_conf = <%= @rbd_store_ceph_conf %>
 
 # RADOS user to authenticate as (only applicable if using cephx)
-rbd_store_user = glance
+rbd_store_user = <%= @rbd_store_user %>
 
 # RADOS pool in which images are stored
-rbd_store_pool = images
+rbd_store_pool = <%= @rbd_store_pool %>
 
 # Images will be chunked into objects of this size (in megabytes).
 # For best performance, this should be a power of two
-rbd_store_chunk_size = 8
+rbd_store_chunk_size = <%= @rbd_store_chunk_size %>
 
 # ============ Delayed Delete Options =============================
 

@@ -114,7 +114,7 @@ end
 #           to connect to the swift compatible API service running elsewhere
 #           (possibly Rackspace Cloud Files).
 #
-if glance["api"]["swift_store_auth_address"].nil?
+if glance["api"]["swift_store_auth_address"].nil? and glance["api"]["default_store"] == "swift"
 
   swift_store_auth_address =
     "http://#{ks_admin_endpoint['host']}:" +
@@ -204,6 +204,11 @@ template "/etc/glance/glance-api.conf" do
     "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
     "swift_store_container" => glance["api"]["swift"]["store_container"],
     "swift_enable_snet" => glance["api"]["swift"]["enable_snet"],
+    "rbd_store_ceph_conf" => glance["api"]["rbd"]["rbd_store_ceph_conf"],
+    "rbd_store_user" => glance["api"]["rbd"]["rbd_store_user"],
+    "rbd_store_pool" => glance["api"]["rbd"]["rbd_store_pool"],
+    "rbd_store_chunk_size" => glance["api"]["rbd"]["rbd_store_chunk_size"],
+    "show_image_direct_url" => glance["api"]["show_image_direct_url"],
     "db_ip_address" => mysql_info["host"],
     "db_user" => settings["db"]["username"],
     "db_password" => settings["db"]["password"],
