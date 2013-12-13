@@ -34,17 +34,17 @@ default["glance"]["rabbitmq"]["use_ha_queues"] = false
 default["glance"]["services"]["api"]["scheme"] = "http"
 default["glance"]["services"]["api"]["network"] = "public"
 default["glance"]["services"]["api"]["port"] = 9292
-default["glance"]["services"]["api"]["path"] = ""
+default["glance"]["services"]["api"]["path"] = "/v1"
 
 default["glance"]["services"]["admin-api"]["scheme"] = "http"
 default["glance"]["services"]["admin-api"]["network"] = "management"
 default["glance"]["services"]["admin-api"]["port"] = 9292
-default["glance"]["services"]["admin-api"]["path"] = ""
+default["glance"]["services"]["admin-api"]["path"] = "/v1"
 
 default["glance"]["services"]["internal-api"]["scheme"] = "http"
 default["glance"]["services"]["internal-api"]["network"] = "management"
 default["glance"]["services"]["internal-api"]["port"] = 9292
-default["glance"]["services"]["internal-api"]["path"] = ""
+default["glance"]["services"]["internal-api"]["path"] = "/v1"
 
 default["glance"]["services"]["api"]["cert_file"] = "glance.pem"
 default["glance"]["services"]["api"]["key_file"] = "glance.key"
@@ -54,7 +54,7 @@ default["glance"]["services"]["api"]["wsgi_file"] = "glance-api"
 default["glance"]["services"]["registry"]["scheme"] = "http"
 default["glance"]["services"]["registry"]["network"] = "public"
 default["glance"]["services"]["registry"]["port"] = 9191
-default["glance"]["services"]["registry"]["path"] = ""
+default["glance"]["services"]["registry"]["path"] = "/v1"
 default["glance"]["services"]["registry"]["cert_file"] = "glance.pem"
 default["glance"]["services"]["registry"]["key_file"] = "glance.key"
 default["glance"]["services"]["registry"]["chain_file"] = ""
