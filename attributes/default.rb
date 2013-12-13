@@ -75,6 +75,7 @@ default["glance"]["api"]["swift"]["store_container"] = "glance"
 default["glance"]["api"]["swift"]["store_large_object_size"] = "200"
 default["glance"]["api"]["swift"]["store_large_object_chunk_size"] = "200"
 default["glance"]["api"]["swift"]["enable_snet"] = "False"
+default["glance"]["api"]["swift"]["store_region"] = nil
 default["glance"]["api"]["rbd"]["rbd_store_ceph_conf"] = "/etc/ceph/ceph.conf"
 default["glance"]["api"]["rbd"]["rbd_store_user"] = "glance"
 default["glance"]["api"]["rbd"]["rbd_store_pool"] = "images"
@@ -88,7 +89,7 @@ default["glance"]["api"]["show_image_direct_url"] = "True"
 # Default Image Locations
 default["glance"]["image_upload"] = false
 default["glance"]["images"] = []
-default["glance"]["image"]["ubuntu"] = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img"
+default["glance"]["image"]["precise"] = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64-disk1.img"
 default["glance"]["image"]["cirros"] = "http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-disk.img"
 default["glance"]["image"]["fedora"] = "http://download.fedoraproject.org/pub/fedora/linux/releases/19/Images/x86_64/Fedora-x86_64-19-20130627-sda.qcow2"
 

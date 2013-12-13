@@ -68,7 +68,7 @@ rabbit_settings = get_settings_by_role("rabbitmq-server", "rabbitmq")
 
 
 # Search for mysql endpoint info
-mysql_info = get_access_endpoint("mysql-master", "mysql", "db")
+mysql_info = get_mysql_endpoint
 
 # Search for keystone endpoint info
 ks_api_role = "keystone-api"
@@ -96,11 +96,7 @@ registry_bind = get_bind_endpoint("glance", "registry")
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 
 # Only use glance image cacher if we aren't using file for our backing store.
-if glance["api"]["default_store"]=="file"
-  glance_flavor = "keystone"
-else
-  glance_flavor = "keystone+cachemanagement"
-end
+glance_flavor = "keystone"
 
 # Possible combinations of options here
 # - default_store=file
@@ -144,6 +140,7 @@ template "/etc/glance/glance-cache.conf" do
     "image_cache_max_size" => glance["api"]["cache"]["image_cache_max_size"],
     "registry_ip_address" => registry_endpoint["host"],
     "registry_port" => registry_endpoint["port"],
+    "default_store" => glance["api"]["default_store"],
     "swift_store_key" => swift_store_key,
     "swift_store_user" => swift_store_user,
     "swift_store_auth_address" => swift_store_auth_address,
@@ -240,6 +237,7 @@ template "/etc/glance/glance-api.conf" do
     "swift_large_object_chunk_size" => glance["api"]["swift"]["store_large_object_chunk_size"],
     "swift_store_container" => glance["api"]["swift"]["store_container"],
     "swift_enable_snet" => glance["api"]["swift"]["enable_snet"],
+    "swift_store_region" => glance["api"]["swift"]["store_region"],
 
     "rbd_store_ceph_conf" => glance["api"]["rbd"]["rbd_store_ceph_conf"],
     "rbd_store_user" => glance["api"]["rbd"]["rbd_store_user"],
