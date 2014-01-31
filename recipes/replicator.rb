@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+platform_options = node["glance"]["platform"]
+
 if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_store"] == "file"
   api_nodes = get_nodes_by_recipe("glance::replicator").map { |n| n["hostname"] }.join(",")
 
@@ -29,11 +31,15 @@ if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_st
     admin_user "glance"
   end
 
-  cookbook_file "/var/lib/glance/glance-image-sync.py" do
-    source "glance-image-sync.py"
-    owner "glance"
-    group "glance"
-    mode "0755"
+  package "glance-image-sync" do
+    action node["osops"]["do_package_upgrades"] == true ? :upgrade : :install
+    options platform_options["package_options"]
+  end
+
+  # TODO(breu): remove this stanza sometime in the future
+  file "/var/lib/glance/glance-image-sync.py" do
+    action :delete
+    only_if { ::File.exists?("/var/lib/glance/glance-image-sync.py") }
   end
 
   template "/etc/glance/glance-image-sync.conf" do
@@ -46,7 +52,7 @@ if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_st
 
   cron "glance-image-sync-cronjob" do
     minute  "*/#{node['glance']['replicator']['interval']}"
-    command "/var/lib/glance/glance-image-sync.py both"
+    command "/usr/bin/glance-image-sync both"
     user    "glance"
   end
 
@@ -62,15 +68,20 @@ if node["glance"]["replicator"]["enabled"] and node["glance"]["api"]["default_st
   end
 
   # clean up previous replicator
+  # TODO(breu): remove this stanza sometime in the future
   file "/var/lib/glance/glance-replicator.sh" do
     action :delete
+    only_if { ::File.exists?("/var/lib/glance/glance-replicator.sh") }
   end
 
+  # TODO(breu): remove this stanza sometime in the future
   cookbook_file "/var/lib/glance/glance-replicator.py" do
     action :delete
+    only_if { ::File.exists?("/var/lib/glance/glance-replicator.py") }
   end
 
   # glance-image-sync cronjob was installed under root, we've since moved to glance user
+  # TODO(breu): remove this stanza sometime in the future
   %w{glance-replicator glance-image-sync}.each do |name|
     cron name do
       action :delete
