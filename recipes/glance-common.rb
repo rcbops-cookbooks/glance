@@ -203,6 +203,13 @@ cookbook_file "/etc/glance/glance-registry-paste.ini" do
   end
 end
 
+# Set the notifications topic
+if glance["api"]["notification_topic"] == "file"
+  glance_notifications = "glance_notifications"
+else
+  glance_notifications = glance["api"]["notification_topic"]
+end
+
 template "/etc/glance/glance-api.conf" do
   source "glance-api.conf.erb"
   owner "glance"
@@ -226,7 +233,7 @@ template "/etc/glance/glance-api.conf" do
 
     "default_store" => glance["api"]["default_store"],
     "notifier_strategy" => glance["api"]["notifier_strategy"],
-    "notification_topic" => glance["api"]["notification_topic"],
+    "notification_topic" => glance_notifications,
     "glance_flavor" => glance_flavor,
 
     "swift_store_key" => swift_store_key,
