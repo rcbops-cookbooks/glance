@@ -204,7 +204,7 @@ cookbook_file "/etc/glance/glance-registry-paste.ini" do
 end
 
 # Set the notifications topic
-if glance["api"]["default_store"] == "file"
+if glance["api"]["default_store"] == "file" and get_role_count('single-controller', false) < 1
   glance_notifications = "glance_notifications"
 else
   glance_notifications = glance["api"]["notification_topic"]
