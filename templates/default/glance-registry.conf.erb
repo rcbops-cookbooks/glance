@@ -41,4 +41,6 @@ admin_password = <%= @service_pass %>
 
 ##### PASTE #####
 [paste_deploy]
+<% unless @glance_flavor.nil? %>
 flavor = <%= @glance_flavor %>
+<% end %>
