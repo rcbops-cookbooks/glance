@@ -86,6 +86,9 @@ default["glance"]["api"]["notification_topic"] = "notifications"
 default["glance"]["api"]["workers"] = [8, node["cpu"]["total"].to_i].min
 default["glance"]["api"]["show_image_direct_url"] = "True"
 
+# Partial name of a pipeline in your paste configuration file with the service name removed.
+default["glance"]["api"]["flavor"] = "keystone"
+
 # Default Image Locations
 default["glance"]["image_upload"] = false
 default["glance"]["images"] = []
