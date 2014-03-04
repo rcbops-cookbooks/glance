@@ -96,7 +96,7 @@ registry_bind = get_bind_endpoint("glance", "registry")
 registry_endpoint = get_access_endpoint("glance-registry", "glance", "registry")
 
 # Only use glance image cacher if we aren't using file for our backing store.
-glance_flavor = "keystone"
+glance_flavor = settings["api"]["flavor"]
 
 # Possible combinations of options here
 # - default_store=file
